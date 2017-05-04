@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<functions>
+  <namespace>
+    <define>
+      <action type="output" code="namespace #name {\n"/>
+      <action type="foreach" node="namespace" fun="define" join="\n" code="#result"/>
+      <action type="foreach" node="enum" fun="define" join="\n" code="#result"/>
+      <action type="foreach" node="class" fun="define" join="\n" code="#result"/>
+      <action type="output" code="}\n"/>
+    </define>    
+  </namespace>
+  
+  <enum>
+    <define>
+      <action type="output" require="name" code="enum class #name {"/>
+      <action type="foreach" node="val" fun="define" join=", " code="#result"/>
+      <action type="output" require="name" code="};"/>
+      <action type="output" require="name,qual" code="\nZENITH_ENUM2STR_START(#qual::#name)\n"/>
+      <action type="foreach" node="val" fun="enum2str" join="" code="#result"/>
+      <action type="output" code="ZENITH_ENUM2STR_END\n\n"/>
+    </define>    
+  </enum>
+  
+  <val>
+    <define>
+      <action type="output" require="name,value" code="#name=#value"/>
+      <action type="output" require="name" restrict="value" code="#name"/>
+    </define>
+    <enum2str>
+      <action type="output" require="name" code="ZENITH_ENUM2STR_ELEM(#name)\n"/>
+    </enum2str>
+  </val>
+
+  <class>
+    <define>
+      <action type="output" require="name,classType" chk_genDef="1" code="#classType #name {\n"/>
+      <action type="foreach" node="any" chk_genDef="1" fun="define" join="" code="#result"/>
+      <action type="output" require="name" chk_genDef="1" code="};\n"/>
+
+      <action type="output" require="name" chk_genToObjMap="1" code="inline void to_objmap(const #name &amp;obj, zenith::util::ObjectMap&lt;char, char&gt; &amp;om){\nchar buff[128];\n"/>
+      <action type="output" require="name" chk_genToObjMap="1" code="om.addValue(&quot;type&quot;, &quot;#name&quot;, zenith::util::ObjectMapValueHint::ATTR);\n\n" />
+      <action type="foreach" node="any" fun="toObjMap" chk_genToObjMap="1" join="" code="#result"/>
+      <action type="output" require="name" chk_genToObjMap="1" code="}\n"/>
+
+      <action type="output" require="name" chk_genFromObjMap="1" code="inline void from_objmap(#name &amp;obj, const zenith::util::ObjectMap&lt;char, char&gt; &amp;om){\n"/>      
+      <action type="foreach" node="any" fun="fromObjMap" chk_genFromObjMap="1" join="" code="#result"/>
+      <action type="output" require="name" chk_genFromObjMap="1" code="}\n"/>
+      
+      <action type="output" require="name" code="\n"/>
+    </define>
+  </class>
+
+  <var>
+    <define>
+      <action type="output" require="name,type" code="#type #name;\n"/>
+    </define>
+    
+    
+    <toObjMap chk_grp-in="str" restrict="grp-out">
+      <action type="output" require="name,hint" code="om.addValue(&quot;#name&quot;, obj.#name.c_str(), zenith::util::ObjectMapValueHint::#hint);\n"/>
+      <action type="output" require="name" restrict="hint" code="om.addValue(&quot;#name&quot;, obj.#name.c_str());\n"/>
+    </toObjMap>
+    <toObjMap chk_grp-in="cstr" restrict="grp-out">
+      <action type="output" require="name,hint" code="om.addValue(&quot;#name&quot;, obj.#name, zenith::util::ObjectMapValueHint::#hint);\n"/>
+      <action type="output" require="name" restrict="hint" code="om.addValue(&quot;#name&quot;, obj.#name);\n"/>
+    </toObjMap>
+    <toObjMap chk_grp-in="str" chk_grp-out="seq">
+      <action type="output" require="name" code="for (auto x : obj.#name)\n"/>      
+      <action type="output" require="name" code="om.addValue(&quot;#name&quot;, x.c_str());\n"/>
+    </toObjMap>
+    <toObjMap chk_grp-in="complex" chk_grp-out="seq">
+      <action type="output" code="for (auto x : obj.#name)\n"/>
+      <action type="output" code="to_objmap(x, om.addObject(&quot;#name&quot;));\n"/>
+    </toObjMap>
+    <toObjMap chk_grp-in="complex" restrict="grp-out">
+      <action type="output" require="name" code="to_objmap(obj.#name, om.addObject(&quot;#name&quot;));\n"/>
+    </toObjMap>
+    <toObjMap chk_grp-in="simple" restrict="grp-out">
+      <action type="output" restrict="cast_to" code=" zenith::util::str_cast(obj.#name, buff, 128);\n"/>
+      <action type="output" require="cast_to" code=" zenith::util::str_cast(static_cast&lt;#cast_to&gt;(obj.#name), buff, 128);\n"/>
+      <action type="output" restrict="hint" code="om.addValue(&quot;#name&quot;, buff);\n"/>
+      <action type="output" require="hint" code="om.addValue(&quot;#name&quot;, buff, zenith::util::ObjectMapValueHint::#hint);\n"/>
+    </toObjMap>
+    <toObjMap chk_grp-in="simple" chk_grp-out="seq">
+      <action type="output" require="name" code="for (auto x : obj.#name){\n"/>
+      <action type="output" restrict="cast_to" code=" zenith::util::str_cast(x, buff, 128);\n"/>
+      <action type="output" require="name" code="om.addValue(&quot;#name&quot;, buff);}\n"/>
+    </toObjMap>
+    <toObjMap chk_grp-in="version" restrict="grp-out">
+      <action type="output" code="{auto &amp;r=om.addObject(&quot;#name&quot;);\n"/>
+      <action type="output" code="r.addValue(&quot;type&quot;, &quot;version&quot;, zenith::util::ObjectMapValueHint::ATTR);\n"/>
+      <action type="output" code="zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.#name), buff, 128);\n"/>
+      <action type="output" code="r.addValue(&quot;major&quot;, buff, zenith::util::ObjectMapValueHint::ATTR);\n"/>
+      <action type="output" code="zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.#name), buff, 128);\n"/>
+      <action type="output" code="r.addValue(&quot;minor&quot;, buff, zenith::util::ObjectMapValueHint::ATTR);\n"/>
+      <action type="output" code="zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.#name), buff, 128);\n"/>
+      <action type="output" code="r.addValue(&quot;patch&quot;, buff, zenith::util::ObjectMapValueHint::ATTR);\n}"/>
+    </toObjMap>
+
+
+
+    <fromObjMap chk_grp-in="str" restrict="grp-out,default">
+      <action type="output" require="name" code="OBJMAP_GET_ONE_VALUE(om, obj.#name, &quot;#name&quot;);\n"/>
+    </fromObjMap>
+    <fromObjMap chk_grp-in="str" chk_grp-out="seq">
+      <action type="output" require="name" code="{\nauto v = om.getValues(&quot;#name&quot;);\n"/>
+      <action type="output" code="for (auto it = v.first; it != v.second; it++)\n"/>
+      <action type="output" require="name" code="obj.#name.emplace_back(it->second.first.c_str());\n}\n"/>
+    </fromObjMap>
+    <fromObjMap chk_grp-in="simple" chk_grp-out="seq">
+      <action type="output" require="name" code="{\nauto v = om.getValues(&quot;#name&quot;);\n"/>
+      <action type="output" code="for (auto it = v.first; it != v.second; it++){\nobj.#name.resize(obj.#name.size()+1);\n"/>
+      <action type="output" require="name" code="om.setValue(obj.#name.back(), it);\n}}\n"/>
+    </fromObjMap>
+    <fromObjMap chk_grp-in="complex" chk_grp-out="seq" require="name">
+      <action type="output" code="{\nauto v = om.getObjects(&quot;#name&quot;);\n"/>
+      <action type="output" code="for (auto it = v.first; it != v.second; it++){\nobj.#name.resize(obj.#name.size()+1);\n"/>
+      <action type="output" code="from_objmap(obj.#name.back(), it->second);}}"/>
+    </fromObjMap>
+    <fromObjMap chk_grp-in="complex" restrict="grp-out,default">
+      <action type="output" require="name" code="from_objmap(obj.#name, om.getObjects(&quot;#name&quot;, zenith::util::ObjectMapPresence::ONE).first->second);\n"/>
+    </fromObjMap>
+    <fromObjMap chk_grp-in="simple" restrict="chk_grp-out,default">
+      <action type="output" require="name" code="OBJMAP_GET_ONE_VALUE(om, obj.#name, &quot;#name&quot;);\n"/>
+    </fromObjMap>
+    <fromObjMap chk_grp-in="version" restrict="chk_grp-out,default">
+      <action type="output" require="name" code="{auto &amp;r = om.getObjects(&quot;#name&quot;, zenith::util::ObjectMapPresence::ONE).first->second;\n"/>
+      <action type="output" require="name,type" code="#type major,minor,patch;\n"/>
+      <action type="output" code="OBJMAP_GET_ONE_VALUE(r, major, &quot;major&quot;);\n"/>
+      <action type="output" code="OBJMAP_GET_ONE_VALUE(r, minor, &quot;minor&quot;);\n"/>
+      <action type="output" code="OBJMAP_GET_ONE_VALUE(r, patch, &quot;patch&quot;);\n"/>
+      <action type="output" code="obj.#name = ZENITH_MAKE_VERSION(major, minor, patch);\n}\n"/>
+    </fromObjMap>
+    <fromObjMap chk_grp-in="simple" restrict="chk_grp-out" require="default">
+      <action type="output" require="name" code="OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.#name, &quot;#name&quot;, #default);\n"/>
+    </fromObjMap>
+    <fromObjMap chk_grp-in="str" restrict="chk_grp-out" require="default">
+      <action type="output" require="name" code="OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.#name, &quot;#name&quot;, #default);\n"/>
+    </fromObjMap>
+  </var>
+</functions>

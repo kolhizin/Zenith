@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root astyle_options="--style=allman -t -N">
+  <file name="../../Source/Graphics/Vulkan/vUtil_Enums.h">
+    <prefix>
+      #pragma once      
+      #include &lt;Utils\object_map.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;Utils\nameid.h&gt;
+      #include &lt;Graphics\Vulkan\vulkan_config.h&gt;
+      #include &lt;vector&gt;
+      #include &lt;list&gt;
+      
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+    </prefix>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>    
+    <namespace name="zenith">
+      <namespace name="vulkan">
+        <enum name="vSwapchainResult" qual="zenith::vulkan">
+          <val name="SUCCESS" value="0"/>
+          <val name="TIMEOUT" value="VK_TIMEOUT"/>
+          <val name="NOT_READY" value="VK_NOT_READY"/>
+          <val name="SUBOPTIMAL" value="VK_SUBOPTIMAL_KHR"/>
+        </enum>
+
+        <enum name="vSamplerAddress" qual="zenith::vulkan">
+          <val name="REPEAT" value="VK_SAMPLER_ADDRESS_MODE_REPEAT"/>
+          <val name="REPEAT_MIRROR" value="VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT"/>
+          <val name="CLAMP" value="VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE"/>
+          <val name="CLAMP_BORDER" value="VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER"/>
+        </enum>
+        
+        <enum name="vSamplerBorderColor" qual="zenith::vulkan">
+          <val name="UNDEF" value="0"/>
+          <val name="TRANSPARENT_BLACK" />
+          <val name="OPAQUE_BLACK" />
+          <val name="OPAQUE_WHITE" />
+        </enum>
+        <enum name="vSamplerBorderType" qual="zenith::vulkan">
+          <val name="UNDEF" value="0"/>
+          <val name="INT" />
+          <val name="FLOAT" />
+        </enum>
+
+        <enum name="vSamplerFilter" qual="zenith::vulkan">
+          <val name="NEAREST" value="0"/>
+          <val name="LINEAR" value="1"/>
+        </enum>
+
+        <enum name="vPhysicalDeviceType" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="INTEGRATED_GPU" value="VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU"/>
+          <val name="DISCRETE_GPU" value="VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU"/>
+          <val name="VIRTUAL_GPU" value="VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU"/>
+          <val name="CPU" value="VK_PHYSICAL_DEVICE_TYPE_CPU"/>
+        </enum>
+        <enum name="vImageFormat" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="R8G8B8A8_UNORM" value="VK_FORMAT_R8G8B8A8_UNORM"/>
+          <val name="B8G8R8A8_UNORM" value="VK_FORMAT_B8G8R8A8_UNORM"/>
+          <val name="B8G8R8A8_SRGB" value="VK_FORMAT_B8G8R8A8_SRGB"/>
+        </enum>
+
+        <enum name="vImageUsageBit" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="TRANSFER_SRC" value="VK_IMAGE_USAGE_TRANSFER_SRC_BIT"/>
+          <val name="TRANSFER_DST" value="VK_IMAGE_USAGE_TRANSFER_DST_BIT"/>
+          <val name="SAMPLED" value="VK_IMAGE_USAGE_SAMPLED_BIT"/>
+          <val name="STORAGE" value="VK_IMAGE_USAGE_STORAGE_BIT"/>
+          <val name="ATTACHMENT_COLOR" value="VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT"/>
+          <val name="ATTACHMENT_DEPTHSTENCIL" value="VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT"/>
+          <val name="ATTACHMENT_TRANSIENT" value="VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT"/>
+          <val name="ATTACHMENT_INPUT" value="VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT"/>
+        </enum>
+
+        <enum name="vMemoryUsage" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="GPU_STATIC"/>
+          <val name="STAGING"/>
+          <val name="MAX"/>
+        </enum>
+
+        <enum name="vMemoryLayout" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="LINEAR" value="1"/>
+          <val name="OPTIMAL" value="2"/>
+        </enum>
+
+        <enum name="vMemoryPropertyBit" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="DEVICE_LOCAL" value="VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT"/>
+          <val name="HOST_VISIBLE" value="VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT"/>
+          <val name="HOST_COHERENT" value="VK_MEMORY_PROPERTY_HOST_COHERENT_BIT"/>
+          <val name="HOST_CACHED" value="VK_MEMORY_PROPERTY_HOST_CACHED_BIT"/>
+          <val name="LAZY" value="VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT"/>
+        </enum>
+        
+
+        <enum name="vPresentMode" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="IMMEDIATE" value="VK_PRESENT_MODE_IMMEDIATE_KHR"/>
+          <val name="FIFO" value="VK_PRESENT_MODE_FIFO_KHR"/>
+          <val name="FIFO_RELAXED" value="VK_PRESENT_MODE_FIFO_RELAXED_KHR"/>
+          <val name="MAILBOX" value="VK_PRESENT_MODE_MAILBOX_KHR"/>
+        </enum>
+        <enum name="vSharingMode" qual="zenith::vulkan">
+          <val name="EXCLUSIVE" value="VK_SHARING_MODE_EXCLUSIVE" />
+          <val name="CONCURRENT" value="VK_SHARING_MODE_CONCURRENT"/>
+        </enum>
+      </namespace>
+    </namespace>
+  </file>
+  <file name="../../Source/Graphics/Vulkan/vUtil.h">
+    <prefix>
+      #pragma once
+      #include &lt;Utils\object_map.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;Utils\nameid.h&gt;
+      #include &lt;Graphics\Vulkan\vulkan_config.h&gt;
+      #include &lt;vector&gt;
+      #include &lt;list&gt;
+      #include "vUtil_Enums.h"
+
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+    </prefix>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>
+    <namespace name="zenith">
+      <namespace name="vulkan">
+        <class name="vLayerConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="name" type="std::string" hint="ATTR" grp-in="str"/>
+          <var name="requiredExtensions" type="std::vector&lt;std::string&gt;" grp-in="str" grp-out="seq"/>
+        </class>
+        <class name="vInstanceConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="enabledLayers" type="std::vector&lt;vLayerConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="requiredExtensions" type="std::vector&lt;std::string&gt;" grp-in="str" grp-out="seq"/>
+          <var name="appName" type="std::string" grp-in="str"/>
+          <var name="engineName" type="std::string" grp-in="str"/>
+          <var name="debug" type="bool" grp-in="simple"/>
+          <var name="appVersion" type="uint32_t" grp-in="version"/>
+          <var name="engineVersion" type="uint32_t" grp-in="version"/>
+          <var name="apiVersion" type="uint32_t" grp-in="version"/>
+        </class>
+
+        <class name="vSamplerFilteringConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="minFilter" type="vSamplerFilter" grp-in="simple" default="zenith::vulkan::vSamplerFilter::LINEAR"/>
+          <var name="magFilter" type="vSamplerFilter" grp-in="simple" default="zenith::vulkan::vSamplerFilter::LINEAR"/>
+          <var name="mipFilter" type="vSamplerFilter" grp-in="simple" default="zenith::vulkan::vSamplerFilter::LINEAR"/>
+          <var name="maxAnisotropy" type="float" grp-in="simple" default="0.0f"/>
+        </class>
+        <class name="vSamplerAddressingConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="u" type="vSamplerAddress" grp-in="simple" default="zenith::vulkan::vSamplerAddress::CLAMP"/>
+          <var name="v" type="vSamplerAddress" grp-in="simple" default="zenith::vulkan::vSamplerAddress::CLAMP"/>
+          <var name="w" type="vSamplerAddress" grp-in="simple" default="zenith::vulkan::vSamplerAddress::CLAMP"/>
+          <var name="borderColor" type="vSamplerBorderColor" grp-in="simple" default="zenith::vulkan::vSamplerBorderColor::OPAQUE_BLACK"/>
+          <var name="borderType" type="vSamplerBorderType" grp-in="simple" default="zenith::vulkan::vSamplerBorderType::FLOAT"/>
+          <var name="normalizedCoord" type="bool" grp-in="simple" default="true"/>
+        </class>
+        <class name="vSamplerLODConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="minLOD" type="float" grp-in="simple" default="0.0f"/>
+          <var name="maxLOD" type="float" grp-in="simple" default="1024.0f"/>
+          <var name="biasLOD" type="float" grp-in="simple" default="0.0f"/>
+        </class>
+
+        <class name="VkLayerProperties" genToObjMap="1">
+          <var name="layerName" grp-in="cstr"/>
+          <var name="specVersion" grp-in="version"/>
+          <var name="implementationVersion" grp-in="version"/>
+          <var name="description" grp-in="cstr"/>
+        </class>
+        <class name="VkExtensionProperties" genToObjMap="1">
+          <var name="extensionName" grp-in="cstr"/>
+          <var name="specVersion" grp-in="version"/>
+        </class>
+        <class name="VkPhysicalDeviceLimits" genToObjMap="1">
+          <var name="maxImageDimension1D" grp-in="simple"/>
+          <var name="maxImageDimension2D" grp-in="simple"/>
+          <var name="maxImageDimension3D" grp-in="simple"/>
+          <var name="maxImageDimensionCube" grp-in="simple"/>
+          <var name="maxImageArrayLayers" grp-in="simple"/>
+          <var name="maxTexelBufferElements" grp-in="simple"/>
+          <var name="maxUniformBufferRange" grp-in="simple"/>
+          <var name="maxStorageBufferRange" grp-in="simple"/>
+          <var name="maxPushConstantsSize" grp-in="simple"/>
+          <var name="maxMemoryAllocationCount" grp-in="simple"/>
+          <var name="maxSamplerAllocationCount" grp-in="simple"/>
+          <var name="bufferImageGranularity" grp-in="simple"/>
+          <var name="sparseAddressSpaceSize" grp-in="simple"/>
+
+          <var name="maxBoundDescriptorSets" grp-in="simple"/>
+
+          <var name="maxPerStageDescriptorSamplers" grp-in="simple"/>
+          <var name="maxPerStageDescriptorUniformBuffers" grp-in="simple"/>
+          <var name="maxPerStageDescriptorStorageBuffers" grp-in="simple"/>
+          <var name="maxPerStageDescriptorSampledImages" grp-in="simple"/>
+          <var name="maxPerStageDescriptorStorageImages" grp-in="simple"/>
+          <var name="maxPerStageDescriptorInputAttachments" grp-in="simple"/>
+          <var name="maxPerStageResources" grp-in="simple"/>
+
+          <var name="maxDescriptorSetSamplers" grp-in="simple"/>
+          <var name="maxDescriptorSetUniformBuffers" grp-in="simple"/>
+          <var name="maxDescriptorSetUniformBuffersDynamic" grp-in="simple"/>
+          <var name="maxDescriptorSetStorageBuffers" grp-in="simple"/>
+          <var name="maxDescriptorSetStorageBuffersDynamic" grp-in="simple"/>
+          <var name="maxDescriptorSetSampledImages" grp-in="simple"/>
+          <var name="maxDescriptorSetStorageImages" grp-in="simple"/>
+          <var name="maxDescriptorSetInputAttachments" grp-in="simple"/>
+
+          <var name="maxVertexInputAttributes" grp-in="simple"/>
+          <var name="maxVertexInputBindings" grp-in="simple"/>
+          <var name="maxVertexInputAttributeOffset" grp-in="simple"/>
+          <var name="maxVertexInputBindingStride" grp-in="simple"/>
+          <var name="maxVertexOutputComponents" grp-in="simple"/>
+
+          <var name="maxTessellationGenerationLevel" grp-in="simple"/>
+          <var name="maxTessellationPatchSize" grp-in="simple"/>
+          <var name="maxTessellationControlPerVertexInputComponents" grp-in="simple"/>
+          <var name="maxTessellationControlPerVertexOutputComponents" grp-in="simple"/>
+          <var name="maxTessellationControlPerPatchOutputComponents" grp-in="simple"/>
+          <var name="maxTessellationControlTotalOutputComponents" grp-in="simple"/>
+          <var name="maxTessellationEvaluationInputComponents" grp-in="simple"/>
+          <var name="maxTessellationEvaluationOutputComponents" grp-in="simple"/>
+
+          <var name="maxGeometryShaderInvocations" grp-in="simple"/>
+          <var name="maxGeometryInputComponents" grp-in="simple"/>
+          <var name="maxGeometryOutputComponents" grp-in="simple"/>
+          <var name="maxGeometryOutputVertices" grp-in="simple"/>
+          <var name="maxGeometryTotalOutputComponents" grp-in="simple"/>
+
+          <var name="maxFragmentInputComponents" grp-in="simple"/>
+          <var name="maxFragmentOutputAttachments" grp-in="simple"/>
+          <var name="maxFragmentDualSrcAttachments" grp-in="simple"/>
+          <var name="maxFragmentCombinedOutputResources" grp-in="simple"/>
+
+          <var name="maxComputeSharedMemorySize" grp-in="simple"/>
+          <var name="maxComputeWorkGroupInvocations" grp-in="simple"/>
+
+          <var name="maxComputeWorkGroupCount[0]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupSize[0]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupCount[1]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupSize[1]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupCount[2]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupSize[2]" grp-in="simple"/>
+
+          <var name="subPixelPrecisionBits" grp-in="simple"/>
+          <var name="subTexelPrecisionBits" grp-in="simple"/>
+          <var name="mipmapPrecisionBits" grp-in="simple"/>
+
+          <var name="maxDrawIndexedIndexValue" grp-in="simple"/>
+          <var name="maxDrawIndirectCount" grp-in="simple"/>
+
+          <var name="maxSamplerLodBias" grp-in="simple"/>
+          <var name="maxSamplerAnisotropy" grp-in="simple"/>
+          <var name="maxViewports" grp-in="simple"/>
+          <var name="maxViewportDimensions[0]" grp-in="simple"/>
+          <var name="maxViewportDimensions[1]" grp-in="simple"/>
+          <var name="viewportBoundsRange[0]" grp-in="simple"/>
+          <var name="viewportBoundsRange[1]" grp-in="simple"/>
+          <var name="viewportSubPixelBits" grp-in="simple"/>
+
+
+          <var name="minMemoryMapAlignment" grp-in="simple"/>
+          <var name="minTexelBufferOffsetAlignment" grp-in="simple"/>
+          <var name="minUniformBufferOffsetAlignment" grp-in="simple"/>
+          <var name="minStorageBufferOffsetAlignment" grp-in="simple"/>
+
+          <var name="minTexelOffset" grp-in="simple"/>
+          <var name="maxTexelOffset" grp-in="simple"/>
+          <var name="minTexelGatherOffset" grp-in="simple"/>
+          <var name="maxTexelGatherOffset" grp-in="simple"/>
+          <var name="minInterpolationOffset" grp-in="simple"/>
+          <var name="maxInterpolationOffset" grp-in="simple"/>
+          <var name="subPixelInterpolationOffsetBits" grp-in="simple"/>
+
+          <var name="maxFramebufferWidth" grp-in="simple"/>
+          <var name="maxFramebufferHeight" grp-in="simple"/>
+          <var name="maxFramebufferLayers" grp-in="simple"/>
+          <var name="maxColorAttachments" grp-in="simple"/>
+
+          <var name="maxSampleMaskWords" grp-in="simple"/>
+          <var name="timestampComputeAndGraphics" grp-in="simple"/>
+          <var name="timestampPeriod" grp-in="simple"/>
+          <var name="maxClipDistances" grp-in="simple"/>
+          <var name="maxCullDistances" grp-in="simple"/>
+          <var name="maxCombinedClipAndCullDistances" grp-in="simple"/>
+          <var name="discreteQueuePriorities" grp-in="simple"/>
+
+          <var name="strictLines" grp-in="simple"/>
+          <var name="standardSampleLocations" grp-in="simple"/>
+          <var name="optimalBufferCopyOffsetAlignment" grp-in="simple"/>
+          <var name="optimalBufferCopyRowPitchAlignment" grp-in="simple"/>
+          <var name="nonCoherentAtomSize" grp-in="simple"/>
+
+
+          <var name="pointSizeGranularity" grp-in="simple"/>
+          <var name="lineWidthGranularity" grp-in="simple"/>
+          <var name="pointSizeRange[0]" grp-in="simple"/>
+          <var name="pointSizeRange[1]" grp-in="simple"/>
+          <var name="lineWidthRange[0]" grp-in="simple"/>
+          <var name="lineWidthRange[1]" grp-in="simple"/>
+
+          <var name="framebufferColorSampleCounts" grp-in="simple"/>
+          <var name="framebufferDepthSampleCounts" grp-in="simple"/>
+          <var name="framebufferStencilSampleCounts" grp-in="simple"/>
+          <var name="framebufferNoAttachmentsSampleCounts" grp-in="simple"/>
+          <var name="sampledImageColorSampleCounts" grp-in="simple"/>
+          <var name="sampledImageIntegerSampleCounts" grp-in="simple"/>
+          <var name="sampledImageDepthSampleCounts" grp-in="simple"/>
+          <var name="sampledImageStencilSampleCounts" grp-in="simple"/>
+          <var name="storageImageSampleCounts" grp-in="simple"/>
+        </class>
+        <class name="VkPhysicalDeviceProperties" genToObjMap="1">
+          <var name="deviceName" grp-in="cstr"/>
+          <var name="vendorID" grp-in="simple"/>
+          <var name="deviceID" grp-in="simple"/>
+          <var name="driverVersion" grp-in="version"/>
+          <var name="apiVersion" grp-in="version"/>
+          <var name="deviceType" grp-in="simple" cast_to="vPhysicalDeviceType"/>
+          <var name="limits" type="VkPhysicalDeviceLimits" grp-in="complex"/>
+        </class>
+        <!--
+        <class name="vPhysicalDeviceCaps" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="physicalType" type="vPhysicalDeviceType" grp-in="simple" default="vPhysicalDeviceType::DISCRETE_GPU"/>
+          <var name="memorySize" type="uint64_t" grp-in="simple" default="536870912"/>
+          <var name="maxImageDimension2D" type="uint32_t" grp-in="simple" default="2048"/>
+          <var name="dualSrcBlend" type="uint32_t" grp-in="simple" default="1"/>
+          <var name="supportPresent" type="bool" grp-in="simple" default="true"/>
+        </class>
+        <class name="vPhysicalDeviceInfo" genToObjMap="1" genDef="1" classType="struct">
+          <var name="name" type="std::string" grp-in="str"/>
+          <var name="caps" type="vPhysicalDeviceCaps" grp-in="complex"/>
+        </class>
+        <class name="vPhysicalDeviceCollection" genToObjMap="1" genDef="1" classType="struct">
+          <var name="devices" type="std::list&lt;vPhysicalDeviceInfo&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+        -->
+        <class name="vDeviceQueueReqs" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="surfaceUID" type="zenith::util::nameid" grp-in="str" default="&quot;UNDEF&quot;"/>
+          <var name="fGraphics" type="bool" grp-in="simple" default="false"/>
+          <var name="fCompute" type="bool" grp-in="simple" default="false"/>
+          <var name="fTransfer" type="bool" grp-in="simple" default="false"/>
+          <var name="fSparse" type="bool" grp-in="simple" default="false"/>
+          <var name="fPresent" type="bool" grp-in="simple" default="false"/>
+          <var name="priority" type="float" grp-in="simple" default="1.0f"/>
+        </class>
+        <class name="vDeviceReqs" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="physicalType" type="vPhysicalDeviceType" grp-in="simple"/>
+          <var name="memorySize" type="uint64_t" grp-in="simple" default="536870912"/>
+          <var name="queues" type="std::vector&lt;vDeviceQueueReqs&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="enabledLayers" type="std::vector&lt;vLayerConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="requiredExtensions" type="std::vector&lt;std::string&gt;" grp-in="str" grp-out="seq"/>
+        </class>
+        <class name="vDeviceConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="deviceReqs" type="std::vector&lt;vDeviceReqs&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="deviceReqOrder" type="std::vector&lt;std::string&gt;" grp-in="str" grp-out="seq"/>
+        </class>
+        <class name="vQueueFamilyProperties" genDef="1" classType="struct">
+          <var name="generalProperties" type="VkQueueFamilyProperties"/>
+          <var name="supportedSurfaces" type="zenith::util::nameid_seq"/>
+        </class>
+
+        <class name="vSharingInfo" genDef="1" genToObjMap="1" genFromObjMap="1" classType="struct">
+          <var name="mode" type="vSharingMode" grp-in="simple"/>
+          <var name="queues" type="std::vector&lt;std::string&gt;" grp-in="str" grp-out="seq"/>
+        </class>
+
+        <class name="vSwapchainReqs" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="sharingInfo" type="vSharingInfo" grp-in="complex"/>
+          <var name="presentMode" type="vPresentMode" grp-in="simple"/>
+          <var name="imageCount" type="uint32_t" grp-in="simple"/>
+          <var name="imageFormat" type="vImageFormat" grp-in="simple"/>
+          <var name="imageUsage" type="std::vector&lt;vImageUsageBit&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vSwapchainConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="surfaceUID" type="zenith::util::nameid" grp-in="str"/>
+          <var name="deviceUID" type="zenith::util::nameid" grp-in="str"/>
+          <var name="swapchainReqs" type="std::vector&lt;vSwapchainReqs&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="swapchainReqOrder" type="std::vector&lt;std::string&gt;" grp-in="str" grp-out="seq"/>
+        </class>
+        <class name="vSurfaceConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="windowUID" type="zenith::util::nameid" grp-in="str"/>
+        </class>
+
+        <class name="vMemoryPhysicalChunkConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="minAllocSize" type="size_t" grp-in="simple"/>
+          <var name="maxChunkSize" type="size_t" grp-in="simple"/>
+          <var name="minChunkSize" type="size_t" grp-in="simple"/>
+          <var name="align" type="size_t" grp-in="simple"/>
+        </class>
+        <class name="vMemoryLogicalChunkConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="maxAllocSize" type="size_t" grp-in="simple"/>
+          <var name="chunkSize" type="size_t" grp-in="simple"/>
+          <var name="blockSize" type="size_t" grp-in="simple"/>
+          <var name="align" type="size_t" grp-in="simple"/>
+          <var name="subTypeMask" type="uint32_t" grp-in="simple"/>
+        </class>
+        <class name="vMemoryPoolConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="physicalChunk" type="vMemoryPhysicalChunkConfig" grp-in="complex"/>
+          <var name="logicalChunk" type="std::vector&lt;vMemoryLogicalChunkConfig&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+        <class name="vMemoryTypeConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="typeID" type="int8_t" grp-in="simple" default="-1"/>
+          <var name="isDeviceLocal" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="isHostVisible" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="isHostCoherent" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="isHostCached" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="isLazy" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="poolUID" type="zenith::util::nameid" grp-in="str"/>
+        </class>
+
+        <class name="vMemoryUsageOption" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="memoryPropertyBit" type="std::vector&lt;vMemoryPropertyBit&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vMemoryUsageConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="usage" type="vMemoryUsage" grp-in="simple"/>
+          <var name="memoryUsageOption" type="std::vector&lt;vMemoryUsageOption&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+
+
+        <class name="vMemoryManagerConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="memoryType" type="std::vector&lt;vMemoryTypeConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="memoryUsage" type="std::vector&lt;vMemoryUsageConfig&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+        <class name="vMemoryConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="str"/>
+          <var name="deviceUID" type="zenith::util::nameid" grp-in="str"/>
+          <var name="memoryPool" type="std::vector&lt;vMemoryPoolConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="memoryManager" type="std::vector&lt;vMemoryManagerConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="memoryManagerReqOrder" type="std::vector&lt;std::string&gt;" grp-in="str" grp-out="seq"/>
+        </class>
+
+        <class name="vSystemConfig" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="instance" type="vInstanceConfig" grp-in="complex"/>
+          <var name="device" type="std::vector&lt;vDeviceConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="memory" type="std::vector&lt;vMemoryConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="surface" type="std::vector&lt;vSurfaceConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="swapchain" type="std::vector&lt;vSwapchainConfig&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+      </namespace>
+    </namespace>
+  </file>
+</root>
+
