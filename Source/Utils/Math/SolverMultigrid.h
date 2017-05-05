@@ -56,6 +56,7 @@ namespace zenith
 				return true;
 			}
 
+			//need to implement gradient constraint
 			template<class Elem>
 			bool multigrid_jrelax(GridAccessor2D<Elem> &gDst, const GridAccessor2D<Elem> &gSrc, const GridAccessor2D<Elem> *gVal, const GridAccessor2D<Elem> *gMask, const GridAccessor2D<Elem> *gRHS, Elem * error = nullptr)
 			{
