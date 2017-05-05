@@ -51,6 +51,10 @@ namespace zenith
 		using zstdAllocatorWrapper = memory::MemAllocWrapper_LOG<memory::MemAllocWrapper_STD<
 											memory::MemAllocWrapper_Stats<T, zstdAllocStatInfo, zstdAllocatorStaticAux>
 										>>;
+		//template<class T>
+		//using zstdAllocatorWrapper = memory::MemAllocWrapper_STD<
+		//	memory::MemAllocWrapper_Stats<T, zstdAllocStatInfo, zstdAllocatorStaticAux>
+		//	>;
 
 
 		using zstdAllocatorGlobalImpl =

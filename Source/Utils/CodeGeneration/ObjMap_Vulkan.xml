@@ -347,6 +347,7 @@
           <var name="fSparse" type="bool" grp-in="simple" default="false"/>
           <var name="fPresent" type="bool" grp-in="simple" default="false"/>
           <var name="priority" type="float" grp-in="simple" default="1.0f"/>
+          <var name="aliases" type="std::vector&lt;zenith::util::nameid&gt;" grp-in="str" grp-out="seq"/>
         </class>
         <class name="vDeviceReqs" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
           <var name="uid" type="zenith::util::nameid" grp-in="str"/>

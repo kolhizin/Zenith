@@ -54,6 +54,20 @@ namespace zenith
 			std::vector<const char *> rawLayers_;
 
 			zenith::util::nameid_map<vQueueData_> queues_;
+			zenith::util::nameid_map<zenith::util::nameid> qAliases_;
+
+			inline vQueueData_ &getQueue_(const util::nameid &quid)
+			{
+				if (queues_.exist(quid))
+					return queues_.at(quid);
+				return queues_.at(qAliases_.at(quid));
+			}
+			inline const vQueueData_ &getQueue_(const util::nameid &quid) const
+			{
+				if (queues_.exist(quid))
+					return queues_.at(quid);
+				return queues_.at(qAliases_.at(quid));
+			}
 
 			void fillExtsAndLayers_();
 			void fillQueueDistribution_(const vDeviceQueueReqs &req, const std::vector<vQueueFamilyProperties> &props, std::vector < std::vector<zenith::util::nameid> > &used) const;
@@ -63,8 +77,8 @@ namespace zenith
 			~vDeviceImpl_();
 			inline VkPhysicalDevice getPhysicalDevice() const { return physDevice_; }
 			inline VkDevice getDevice() const { return device_; }
-			inline uint32_t getQueueFamilyIndex(const util::nameid &quid) const { return queues_.at(quid).qFamily; }
-			inline VkQueue getQueue(const util::nameid &quid) const { return queues_.at(quid).queue; }
+			inline uint32_t getQueueFamilyIndex(const util::nameid &quid) const { return getQueue_(quid).qFamily; }
+			inline VkQueue getQueue(const util::nameid &quid) const { return getQueue_(quid).queue; }
 			inline const util::nameid &getUID() const { return req_.uid; }
 
 			inline void attachMemoryManager(vMemoryManagerImpl_ * impl)

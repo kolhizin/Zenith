@@ -152,8 +152,19 @@ zenith::vulkan::vDeviceImpl_::vDeviceImpl_(const vInstanceImpl_ * inst, const vD
 			q.supportTransfer = (props[i].generalProperties.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) > 0;
 			q.supportSparse = (props[i].generalProperties.queueFlags & VK_QUEUE_TRANSFER_BIT) > 0;
 			q.supportPresent = (!props[i].supportedSurfaces.empty());
-
+			
 			queues_.insert(qDistribution[i][j], q);
+
+			vDeviceQueueReqs * r = nullptr;
+			for (size_t k = 0; k < req_.queues.size(); k++)
+				if (req_.queues[k].uid == qDistribution[i][j])
+				{
+					r = &req_.queues[k];
+					break;
+				}
+
+			for (size_t k = 0; k < r->aliases.size(); k++)
+				qAliases_.insert(r->aliases[k], qDistribution[i][j]);
 		}
 	}
 	zenith::util::zLOG::log(zenith::util::LogType::REGULAR, "vDeviceImpl_: Queues enumerated.");
