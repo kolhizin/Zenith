@@ -4,7 +4,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_PropertySheetDisplayName>ZenithDevelopmentSettings</_PropertySheetDisplayName>
-    <IncludePath>C:\VulkanSDK\1.0.42.1\Include;D:\Programming\3rdParty\Include;D:\Programming\Zenith\Source;$(IncludePath)</IncludePath>
+    <IncludePath>$(VULKAN_SDK)\Include;D:\Programming\3rdParty\Include;D:\Programming\Zenith\Source;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup />
