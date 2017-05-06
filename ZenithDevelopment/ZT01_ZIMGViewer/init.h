@@ -14,9 +14,10 @@
 #include <Utils/FileFormat/ff_img.h>
 #include <chrono>
 #include <thread>
-
+#include <string>
 #include "SimpleCamera.h"
 
+extern std::string fnameVShader, fnameFShader;
 
 extern std::unique_ptr<zenith::util::Window> wnd;
 extern zenith::vulkan::vSystem * vSys;

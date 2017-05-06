@@ -3,50 +3,93 @@
 #include <sstream>
 #include "Graphics\Vulkan\vMemoryManager.h"
 
+std::string texFilename, moduleDir;
 
 void init()
 {
-	const char * windowConf = "../../Resource/Window/WindowConfig.xml";
+	//const char * windowConf = "../../Resource/Window/WindowConfig.xml";
 	//const char * vulkanConf = "../../Resource/Vulkan/VulkanConfig.xml";
-	const char * vulkanConf = "ZIMGViewer_Config.xml";
-	const char * texFilename = "../../Resource/Texture/heightmap.zimg";
+	const char * appConf = "ZIMGViewer_Config.xml";
+	std::string appConfFilename = moduleDir + appConf;
 	//const char * texFilename = "../Test12e_TerrainGen1/initialGrid.zimg";
 	const size_t BUFF_SIZE_XML = 16384;
 	char buff1[BUFF_SIZE_XML], buff2[BUFF_SIZE_XML];
-
-	zenith::util::zLOG::resetOutput("main.log");
 
 	ZLOG_REGULAR("init: creating FileSystem.");
 	fs = new zenith::util::io::FileSystem(3);
 	ZLOG_REGULAR("init: FileSystem created.");
 
+	pugi::xml_document docA;
+	auto resXML = readFile(appConfFilename.c_str(), (uint8_t *)buff1, BUFF_SIZE_XML);
+	auto resIMG0 = readFile(texFilename.c_str());
 
-	pugi::xml_document docV, docW;
-	auto resXML_v = readFile(vulkanConf, (uint8_t *)buff1, BUFF_SIZE_XML);
-	auto resXML_w = readFile(windowConf, (uint8_t *)buff2, BUFF_SIZE_XML);
-	auto resIMG0 = readFile(texFilename);
+	zenith::util::io::FileResult resXMLd;
+	try {
+		resXMLd = resXML.get();
+	}
+	catch (...)
+	{
+		ZLOG_FATAL("Application config not found.");
+		terminate();
+	}
+	
+	
+	docA.load_buffer_inplace(resXMLd.data, resXMLd.size);
+	
+	auto xSettings = docA.root().child("ZIMGViewer").child("Settings");
+	auto xWindow = docA.root().child("ZIMGViewer").child("Window");
+	auto xVulkan = docA.root().child("ZIMGViewer").child("VulkanSystem");
 
-	auto resXMLd_w = resXML_w.get();
-	docW.load_buffer_inplace(resXMLd_w.data, resXMLd_w.size);
+	auto xSettingsLog = xSettings.child("log");
+	auto xSettingsShaders = xSettings.child("shaders");
+
+	if (!xSettingsLog.empty())
+	{
+		if (!xSettingsLog.attribute("enable").empty() && !xSettingsLog.attribute("enable").as_bool())
+			zenith::util::zLOG::close();
+		else
+		{
+			if (!xSettingsLog.attribute("filename").empty())
+			{
+				std::string fname = xSettingsLog.attribute("filename").as_string();
+				if (fname.find('\\') == std::string::npos)
+					fname = moduleDir + fname;
+				zenith::util::zLOG::resetOutput(fname.c_str());
+			}
+		}
+	}
+	if (xSettingsShaders.empty() || xSettingsShaders.attribute("fragment").empty() || xSettingsShaders.attribute("vertex").empty())
+	{
+		ZLOG_FATAL("Shader location not present in config file!");
+		throw std::runtime_error("Failed to find shader location in config file!");
+	}
+	else
+	{
+		fnameVShader = xSettingsShaders.attribute("vertex").as_string();
+		fnameFShader = xSettingsShaders.attribute("fragment").as_string();
+		if (fnameVShader.find('\\') == std::string::npos)
+			fnameVShader = moduleDir + fnameVShader;
+		if (fnameFShader.find('\\') == std::string::npos)
+			fnameFShader = moduleDir + fnameFShader;
+	}
+		
+
 
 	zenith::util::WndConfig wndConf;
 
 	{
 		zenith::util::ObjectMap<char, char> omW;
-		zenith::util::xml::xml2objmap(docW.root().child("Window"), omW);
+		zenith::util::xml::xml2objmap(xWindow, omW);
 		zenith::util::from_objmap(wndConf, omW);
 	}
 
-
-	auto resXMLd_v = resXML_v.get();
-	docV.load_buffer_inplace(resXMLd_v.data, resXMLd_v.size);
 
 	zenith::vulkan::vSystemConfig vConf;
 
 	{
 		zenith::util::ObjectMap<char, char> omV;
 
-		zenith::util::xml::xml2objmap(docV.root().child("VulkanSystem"), omV);
+		zenith::util::xml::xml2objmap(xVulkan, omV);
 		zenith::vulkan::from_objmap(vConf, omV);
 	}
 
@@ -129,50 +172,31 @@ void mainLoop()
 
 	vSys->getDevice("vdevice-main").getSwapchain("vswapchain-main").queuePresent(vSys->getDevice("vdevice-main").getQueue("vqueue-present"), imgInd, renderFinishedSemaphore);
 }
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+
+void init_args(LPSTR lpCmdLine)
+{
+	texFilename = lpCmdLine;
+	if (texFilename.size() > 0)
+	{
+		if (texFilename.front() == '\"')
+			texFilename.erase(0, 1);
+		if (texFilename.back() == '\"')
+			texFilename.erase(texFilename.size() - 1, 1);
+	}
+
+
+	char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	moduleDir = buffer;
+	moduleDir.erase(moduleDir.find_last_of('\\')+1, moduleDir.size());
+}
+
+int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
-	_In_ LPWSTR    lpCmdLine,
+	_In_ LPSTR    lpCmdLine,
 	_In_ int       nCmdShow)
 {
-	/*
-	zenith::util::memory::MemAllocInfo highLevel;
-	zenith::util::memory::MemAllocInfo lowLevelSmall, lowLevelLarge;
-
-	highLevel.allocMinSize = highLevel.allocMaxSize = 128;
-	highLevel.left = &lowLevelSmall;
-	highLevel.right = &lowLevelLarge;
-
-	lowLevelSmall.allocNumBlock = 1024;
-	lowLevelSmall.allocMinSize = 16;
-	lowLevelSmall.poolAlign = 16;
-	lowLevelSmall.poolSize = 1024 * 16;
-	lowLevelSmall.poolOffset = nullptr;
-
-	lowLevelLarge.allocNumBlock = 1024;
-	lowLevelLarge.allocMinSize = 256;
-	lowLevelLarge.poolAlign = 256;
-	lowLevelLarge.poolSize = 1024 * 256;
-	lowLevelLarge.poolOffset = reinterpret_cast<void *>(lowLevelSmall.poolSize);
-
-	zenith::vulkan::MainAllocator alloc(&highLevel);
-	*/
-
-	/*
-	zenith::util::memory::MemAllocInfo listMAI;
-	listMAI.allocMinSize = 128; listMAI.allocMaxSize = 16384;
-	listMAI.poolAlign = 16; listMAI.poolSize = 1024 * 1024; listMAI.poolOffset = nullptr;
-	zenith::vulkan::MainAllocator alloc(&listMAI);
-
-	auto blk1 = alloc.allocate(986);
-	auto blk2 = alloc.allocate(986);
-	auto blk3 = alloc.allocate(57);
-	alloc.deallocate(blk2);
-	auto blk4 = alloc.allocate(854);
-	alloc.deallocate(blk3);
-	*/
-
-
-
+	init_args(lpCmdLine);
 	init();
 
 	wnd->loop([]() {mainLoop();});

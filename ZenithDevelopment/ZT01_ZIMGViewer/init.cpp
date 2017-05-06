@@ -6,6 +6,8 @@ std::unique_ptr<zenith::util::Window> wnd;
 zenith::vulkan::vSystem * vSys = nullptr;
 zenith::util::io::FileSystem * fs = nullptr;
 
+std::string fnameVShader, fnameFShader;
+
 VkShaderModule vertShader, fragShader;
 VkPipelineShaderStageCreateInfo shaderStages[2];
 VkPipelineLayout pipelineLayout;
@@ -556,96 +558,20 @@ void initTexture(const zenith::util::zfile_format::zImgDescription &img)
 	sampler = new zenith::vulkan::vSamplerImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
 		zenith::vulkan::vSamplerFiltering(), zenith::vulkan::vSamplerAddressing(), zenith::vulkan::vSamplerLOD());
 }
-/*
-void initTexture(void * data, uint32_t w, uint32_t h, size_t chnls)
-{
-VkFormat format = VK_FORMAT_UNDEFINED;
-size_t actNumChan = 0;
-if (chnls == 3 || chnls == 4)
-{
-format = VK_FORMAT_R8G8B8A8_UNORM;
-actNumChan = 4;
-}
-else if (chnls == 2)
-{
-format = VK_FORMAT_R8G8_UNORM;
-actNumChan = 2;
-}
-else if (chnls == 1)
-{
-format = VK_FORMAT_R8_UNORM;
-actNumChan = 1;
-}
-else throw std::runtime_error("initTexture: unsupported number of textures!");
-
-zenith::vulkan::vBufferAutoImpl_ stagingBuff(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
-w * h * actNumChan, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, zenith::vulkan::vMemoryUsage::STAGING, zenith::vulkan::vObjectSharingInfo());
-
-uint8_t * dst = static_cast<uint8_t *>(stagingBuff.memoryBlock().map());
-if(actNumChan == chnls)
-memcpy(dst, data, w * h * actNumChan);
-else
-{
-uint8_t * pDst = dst, * pSrc = static_cast<uint8_t*>(data);
-for (unsigned i = 0; i < w*h; i++)
-{
-*(pDst++) = *(pSrc++);
-*(pDst++) = *(pSrc++);
-*(pDst++) = *(pSrc++);
-*(pDst++) = 1;
-}
-}
-stagingBuff.memoryBlock().unmap();
-
-texture = new zenith::vulkan::vTextureAutoImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
-zenith::vulkan::vTextureDimensions::SingleTextureWithoutMip(w, h), format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-zenith::vulkan::vMemoryUsage::GPU_STATIC, zenith::vulkan::vObjectSharingInfo(),
-VK_IMAGE_LAYOUT_UNDEFINED, true);
-
-
-VkBufferImageCopy copyRegion;
-copyRegion.imageOffset.x = 0;
-copyRegion.imageOffset.y = 0;
-copyRegion.imageOffset.z = 0;
-copyRegion.imageExtent.width = texture->getDimensions().width();
-copyRegion.imageExtent.height = texture->getDimensions().height();
-copyRegion.imageExtent.depth = texture->getDimensions().depth();
-copyRegion.imageSubresource = zenith::vulkan::vTextureSubresource::Full(texture->getDimensions()).vkImageSubresourceLayers(VK_IMAGE_ASPECT_COLOR_BIT);
-copyRegion.bufferOffset = 0;
-copyRegion.bufferRowLength = w;
-copyRegion.bufferImageHeight = h;
-
-
-VkCommandBuffer cmdBuff = beginOneTimeCmdBuffer(vSys->getDevice("vdevice-main").getDevice(), comPool);
-cmdTransitionImageLayout(cmdBuff, texture->handle(), format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, VK_ACCESS_TRANSFER_WRITE_BIT);
-
-vkCmdCopyBufferToImage(cmdBuff, stagingBuff.handle(), texture->handle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
-
-cmdTransitionImageLayout(cmdBuff, texture->handle(), format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT);
-endOneTimeCmdBuffer(cmdBuff);
-submitOneTimeCmdBuffer(vSys->getDevice("vdevice-main").getDevice(), vSys->getDevice("vdevice-main").getQueue("vqueue-graphics"), comPool, cmdBuff);
-
-vkDeviceWaitIdle(vSys->getDevice("vdevice-main").getDevice());
-
-sampler = new zenith::vulkan::vSamplerImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
-zenith::vulkan::vSamplerFiltering(), zenith::vulkan::vSamplerAddressing(), zenith::vulkan::vSamplerLOD());
-
-}*/
-
 
 void init_vulkan()
 {
 
-	const char * shdrVert = "../../Resource/Shaders/Test12a/vert.spv";
-	const char * shdrFrag = "../../Resource/Shaders/Test12a/frag.spv";
+	//const char * shdrVert = "../../Resource/Shaders/Test12a/vert.spv";
+	//const char * shdrFrag = "../../Resource/Shaders/Test12a/frag.spv";
 
 	const size_t BUFF_SIZE_XML = 16384;
 	const size_t BUFF_SIZE_SHDR = 4096;
 
 	char buff1[BUFF_SIZE_XML], buff2[BUFF_SIZE_XML], buff3[BUFF_SIZE_SHDR], buff4[BUFF_SIZE_SHDR];
 
-	auto resSHDR_v = readFile(shdrVert, (uint8_t *)buff3, BUFF_SIZE_SHDR);
-	auto resSHDR_f = readFile(shdrFrag, (uint8_t *)buff4, BUFF_SIZE_SHDR);
+	auto resSHDR_v = readFile(fnameVShader.c_str(), (uint8_t *)buff3, BUFF_SIZE_SHDR);
+	auto resSHDR_f = readFile(fnameFShader.c_str(), (uint8_t *)buff4, BUFF_SIZE_SHDR);
 
 	auto shdr_code_v = resSHDR_v.get();
 	auto shdr_code_f = resSHDR_f.get();
