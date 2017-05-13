@@ -8,6 +8,7 @@ namespace zenith
 	namespace terragen
 	{
 		typedef util::nameid (*PFN_TerraGenMetaGenerator)(void * ptr, const GeneratorArguments * arg);
+		typedef void(*PFN_TerraGenMetaSetSeed)(void * ptr, uint32_t seed);
 
 		class TerraGenFactoryException : public TerraGenException
 		{
@@ -37,13 +38,20 @@ namespace zenith
 		template<size_t BuffSize>
 		class NodeFactory
 		{
-			util::nameid_map<const BaseNodeGenerator *> generators_;
+			struct NodeMeta
+			{
+				uint32_t level = 0;
+				NodeMeta(uint32_t level = 0) : level(level) {}
+			};
+			util::nameid_map<BaseNodeGenerator *> generators_;
 			std::vector<const BaseNode *> nodes_;
+			std::vector<NodeMeta> nodeMeta_;
 			uint8_t buffer_[BuffSize];
 			size_t bufferTop_ = 0;
 
 			void * metaGeneratorUserData_ = nullptr;
 			PFN_TerraGenMetaGenerator metaGenerator_ = nullptr;
+			PFN_TerraGenMetaSetSeed metaSetSeed_ = nullptr;
 
 			inline void freeLastNNodes_(uint32_t numNodes)
 			{
@@ -51,14 +59,15 @@ namespace zenith
 				{
 					delete nodes_.back();
 					nodes_.pop_back();
+					nodeMeta_.pop_back();
 				}
 			}
 
-			inline void generateNodes_(BaseNode * p, uint32_t seedNumber, uint32_t * nodeNumber = nullptr, uint32_t * nodeIndex = nullptr)
+			inline void generateNodes_(const BaseNode * p, uint32_t seedNumber, uint32_t * nodeNumber = nullptr, uint32_t * nodeIndex = nullptr)
 			{
 				GeneratorArguments arg;
 				arg.previousNode = p;
-				arg.allNodesNum = nodes_.size();
+				arg.allNodesNum = static_cast<uint32_t>(nodes_.size());
 				if (arg.allNodesNum > 0)
 					arg.allNodesPtr = &nodes_[0];
 				else
@@ -66,16 +75,29 @@ namespace zenith
 
 				arg.seedNumber = seedNumber;
 
+				uint32_t newLevel = 0;
+				if (p)
+				{
+					for(uint32_t i = 0; i < nodes_.size(); i++)
+						if (nodes_[i] == p)
+						{
+							newLevel = nodeMeta_[i].level + 1;
+							break;
+						}
+					if(newLevel == 0)
+						throw TerraGenFactoryException("generateNodes_(): unable to find parent node!");
+				}
+
 				if(!metaGenerator_)
 					throw TerraGenFactoryException("generateNodes_(): meta-generator is not specified!");
 
-				auto metaGen = metaGenerator_(metaGeneratorUserData_, arg);
+				auto metaGen = metaGenerator_(metaGeneratorUserData_, &arg);
 				if (!generators_.exist(metaGen))
 				{
 					if (nodeNumber)
 						*nodeNumber = 0;
 				}
-				BaseNodeGenerator * generator = generators_[metaGen];
+				BaseNodeGenerator * generator = generators_.at(metaGen);
 
 				uint32_t numNewNodes = generator->generate(&arg);
 				if (numNewNodes == 0)
@@ -84,7 +106,7 @@ namespace zenith
 						*nodeNumber = 0;
 					return;
 				}
-				uint32_t lastIndex = nodes_.size();
+				size_t lastIndex = nodes_.size();
 				size_t currentTop = bufferTop_;
 				for (uint32_t i = 0; i < numNewNodes; i++)
 				{
@@ -103,14 +125,19 @@ namespace zenith
 						throw TerraGenFactoryOutOfMemException();
 					}
 					nodes_.push_back(reinterpret_cast<const BaseNode *>(buffer_ + currentTop));
+					nodeMeta_.push_back(NodeMeta(newLevel));
 					currentTop += usedSpace;
 				}
 				bufferTop_ = currentTop;
+				if (nodeNumber)
+					*nodeNumber = numNewNodes;
+				if (nodeIndex)
+					*nodeIndex = static_cast<uint32_t>(lastIndex);
 			}
 		public:
 			static const size_t BufferSize = BuffSize;
 
-			inline void registerGenerator(const util::nameid &name, const BaseNodeGenerator * generator)
+			inline void registerGenerator(const util::nameid &name, BaseNodeGenerator * generator)
 			{
 				if (generators_.exist(name))
 					throw TerraGenFactoryException("registerGenerator(): specified generator already exists!");
@@ -129,11 +156,44 @@ namespace zenith
 				return generators_.exist(name);
 			}
 
-			inline void registerMetaGenerator(PFN_TerraGenMetaGenerator metaGenerator, void * userData = nullptr)
+			inline void registerMetaGenerator(PFN_TerraGenMetaGenerator metaGenerator, PFN_TerraGenMetaSetSeed metaSetSeed, void * userData = nullptr)
 			{
 				metaGenerator_ = metaGenerator;
+				metaSetSeed_ = metaSetSeed;
 				metaGeneratorUserData_ = userData;
 			}
+			inline void setSeed(uint32_t seedNumber)
+			{
+				metaSetSeed_(metaGeneratorUserData_, seedNumber);
+				auto gNames = generators_.names();
+				for (auto &name : gNames)
+					generators_.at(name)->setSeed(seedNumber);
+			}
+			inline uint32_t generateNewWave(uint32_t seedNumber = 0) //returns number of generated nodes
+			{
+				uint32_t waveLevel = 0;
+				for (uint32_t i = 0; i < nodes_.size(); i++)
+					if (nodeMeta_[i].level > waveLevel)
+						waveLevel = nodeMeta_[i].level;
+				size_t nodesNum = nodes_.size();
+				uint32_t numGenerated = 0;
+				if (nodesNum == 0)
+					generateNodes_(nullptr, seedNumber, &numGenerated);
+				else
+				{
+					for (uint32_t i = 0; i < nodesNum; i++)
+						if (nodeMeta_[i].level == waveLevel)
+						{
+							uint32_t numGen = 0;
+							generateNodes_(nodes_[i], seedNumber, &numGen);
+							numGenerated += numGen;
+						}
+				}
+				return numGenerated;
+			}
+
+			inline size_t numNodes() const { return nodes_.size(); }
+			inline const BaseNode * getNode(size_t i) const { return nodes_.at(i); }
 		};
 	}
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseTerraGen.h"
+#include <random>
 
 namespace zenith
 {
@@ -33,13 +34,14 @@ namespace zenith
 			inline virtual ~BaseNode() {}
 
 			inline const BaseNode * getParent() const { return parentNode_; }
-			inline bool hasParent() const { return parentNode_; }
+			inline bool hasParent() const { return (parentNode_ != nullptr); }
 
 			inline virtual const char * nodeClass() const { return ClassName; }
 			inline virtual const char * distanceDispatchGroup() const { return DistanceDispatchGroup; }
 
 			inline const BaseNodeGenerator * getGenerator() const { return generator_; }
 		};
+
 
 		class RootNode : public BaseNode
 		{
@@ -59,7 +61,7 @@ namespace zenith
 			const BaseNode * previousNode;
 
 			uint32_t allNodesNum;
-			const BaseNode * allNodesPtr;
+			const BaseNode ** allNodesPtr;
 
 			uint32_t seedNumber;
 		};
@@ -82,7 +84,8 @@ namespace zenith
 			}
 			inline void setSeed_(uint32_t seed)
 			{
-				randomEngine_.seed(seed);
+				if(seed)
+					randomEngine_.seed(seed);
 			}
 			template<class T>
 			inline size_t checkSize_(size_t buffSize) const
@@ -98,6 +101,10 @@ namespace zenith
 
 			virtual uint32_t generate(const GeneratorArguments * arg) = 0;
 			virtual size_t get(uint32_t nodeId, void * buffPtr, size_t buffSize) const = 0; /*returns used up space*/
+			inline virtual void setSeed(uint32_t seed)
+			{
+				randomEngine_.seed(seed);
+			}
 		};
 	}
 }

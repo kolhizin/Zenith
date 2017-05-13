@@ -6,14 +6,14 @@ using namespace zenith::terragen;
 double getPointSegmentDistance(const GVec2 &p, const GVec2 &s0, const GVec2 &s1)
 {
 	auto ds = s1 - s0;
-	typename GVec2::value_type sl = ds.length();
+	typename GVec2::value_type sl = glm::length(ds);
 	auto dsn = ds / sl;
 	auto dp = p - s0;
 
 	double alpha = glm::dot(dp, dsn);
 	double alpha_clamp = glm::max(0.0, glm::min(sl, alpha));
 	auto d = s0 + alpha_clamp * dsn - p;
-	return d.length();
+	return glm::length(d);
 }
 
 bool getLineIntersection(const GVec2 &p0, const GVec2 &dp, const GVec2 &q0, const GVec2 &dq, GVec2 &g)
@@ -73,24 +73,24 @@ double getSegmentSegmentDistance(const GVec2 &p0, const GVec2 &p1, const GVec2 &
 
 double getFastLowPointSegmentDistance(const GVec2 &p, const GVec2 &s0, const GVec2 &s1)
 {
-	double d1 = (p - s0).length();
-	double d2 = (p - s1).length();
-	double d = (s1 - s0).length();
+	double d1 = glm::length(p - s0);
+	double d2 = glm::length(p - s1);
+	double d = glm::length(s1 - s0);
 	return glm::min(d1, d2) - d;
 }
 double getFastLowSegmentSegmentDistance(const GVec2 &p0, const GVec2 &p1, const GVec2 &s0, const GVec2 &s1)
 {
-	double d1 = (p0 - s0).length();
-	double d2 = (p0 - s1).length();
-	double d3 = (p1 - s0).length();
-	double d4 = (p1 - s1).length();
-	double d = (s1 - s0).length() + (p1-p0).length();
+	double d1 = glm::length(p0 - s0);
+	double d2 = glm::length(p0 - s1);
+	double d3 = glm::length(p1 - s0);
+	double d4 = glm::length(p1 - s1);
+	double d = glm::length(s1 - s0) + glm::length(p1-p0);
 	return glm::min(glm::min(d1, d2), glm::min(d3, d4)) - d;
 }
 
 double zenith::terragen::getNodeDistance(const PointNode * n1, const PointNode * n2)
 {
-	return (GVec2(n1->point()) - GVec2(n2->point())).length();
+	return glm::length(GVec2(n1->point()) - GVec2(n2->point()));
 }
 
 double zenith::terragen::getNodeDistance(const SegmentNode * n1, const PointNode * n2)
@@ -110,7 +110,7 @@ double zenith::terragen::getNodeDistance(const SegmentNode * n1, const SegmentNo
 
 double zenith::terragen::getNodeFastLowerDistance(const PointNode * n1, const PointNode * n2)
 {
-	return (GVec2(n1->point()) - GVec2(n2->point())).length();
+	return glm::length(GVec2(n1->point()) - GVec2(n2->point()));
 }
 
 double zenith::terragen::getNodeFastLowerDistance(const SegmentNode * n1, const PointNode * n2)
