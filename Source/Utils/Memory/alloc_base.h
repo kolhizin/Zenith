@@ -119,7 +119,7 @@ namespace zenith
 				}
 				static void updateCounters()
 				{
-					std::cout << freeCounters().size() << "\n";
+					//std::cout << freeCounters().size() << "\n";
 					while(!freeCounters().empty() && (freeCounters().top() + 1 == counter()))
 					{
 						freeCounters().pop();

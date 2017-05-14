@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window name="mainWnd">
+  <size width="640" height="480"/>
+  <pos x="100" y="100"/>
+  <title>Test</title>
+  <fullscreen>false</fullscreen>
+  <showCursor>false</showCursor>
+</Window>

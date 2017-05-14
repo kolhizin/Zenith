@@ -46,6 +46,10 @@ namespace zenith
 			{
 				return getLog_().isOpen();
 			}
+			static inline void close()
+			{
+				return getLog_().close();
+			}
 
 			template<class A>
 			static inline void log(LogType type, const std::basic_string<char, std::char_traits<char>, A> &str)
@@ -89,6 +93,7 @@ namespace zenith
 #define ZLOG_DEBUG(x) zenith::util::zLOG::log(zenith::util::LogType::DEBUG, x)
 #define ZLOG_REGULAR(x) zenith::util::zLOG::log(zenith::util::LogType::REGULAR, x)
 #define ZLOG_WARNING(x) zenith::util::zLOG::log(zenith::util::LogType::WARNING, x)
+#define ZLOG_FATAL(x) zenith::util::zLOG::log(zenith::util::LogType::FATAL, x)
 
 	}
 }

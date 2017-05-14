@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VulkanSystem type="vSystemConfig" uid="system-vulkan">
+  <instance type="vInstanceConfig">
+    <appName>ZenithEngine Tester</appName>
+    <appVersion major="0" minor="0" patch="5" />
+    <engineName>ZenithEngine</engineName>
+    <engineVersion major="0" minor="0" patch="5" />
+    <apiVersion major="1" minor="0" patch="0"/>
+    <debug>TRUE</debug>
+    <enabledLayers name="VK_LAYER_LUNARG_standard_validation" type="vLayerConfig" >
+      <requiredExtensions>VK_EXT_debug_report</requiredExtensions>
+    </enabledLayers>
+    <requiredExtensions>VK_KHR_surface</requiredExtensions>
+    <requiredExtensions>VK_KHR_win32_surface</requiredExtensions>  
+  </instance>
+  <device type="vDeviceConfig" uid="vdevice-main">
+    <deviceReqs type="vDeviceReqs" uid="vdevreq-nvidia-ai1">
+      <physicalType>DISCRETE_GPU</physicalType>      
+      <queues uid="vqueue-all-in-one" fGraphics="true" fCompute="true" fTransfer="true" fPresent="true" surfaceUID="vsurface-main"/>
+      <requiredExtensions>VK_KHR_swapchain</requiredExtensions>
+    </deviceReqs>
+    <deviceReqs type="vDeviceReqs" uid="vdevreq-nvidia-3dif">
+      <physicalType>DISCRETE_GPU</physicalType>
+      <queues uid="vqueue-graphics" fGraphics="true"/>
+      <queues uid="vqueue-present" fPresent="true" surfaceUID="vsurface-main"/>
+      <queues uid="vqueue-compute" fCompute="true"/>
+      <requiredExtensions>VK_KHR_swapchain</requiredExtensions>
+    </deviceReqs>
+    <deviceReqOrder>vdevreq-nvidia-3dif</deviceReqOrder>
+    <deviceReqOrder>vdevreq-nvidia-ai1</deviceReqOrder>
+  </device>
+  <swapchain type="vSwapchainConfig" uid="vswapchain-main" deviceUID="vdevice-main" surfaceUID="vsurface-main">
+    <swapchainReqs type="vSwapchainReqs" uid="vswapreq-1q" presentMode="MAILBOX" imageCount="3" imageFormat="B8G8R8A8_UNORM">
+      <sharingInfo type="vSharingInfo" mode="EXCLUSIVE">
+        <queues>vqueue-graphics</queues>
+        <queues>vqueue-present</queues>
+      </sharingInfo>
+      <imageUsage>ATTACHMENT_COLOR</imageUsage>
+    </swapchainReqs>
+    <swapchainReqOrder>vswapreq-1q</swapchainReqOrder>
+  </swapchain>
+  <surface type="vSurfaceConfig" uid="vsurface-main" windowUID="wnd-main"/>
+  <memory type="vMemoryConfig" uid="vmem-main" deviceUID="vdevice-main">
+    <memoryPool type="vMemoryPoolConfig" uid="vmempool-main">
+      <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" maxChunkSize="268435456" minChunkSize="33554432" align="131072"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="63"     blockSize="8"     chunkSize="131072"  align="8" subTypeMask="1"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="63"     blockSize="8"     chunkSize="131072"  align="8" subTypeMask="2"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="511"    blockSize="64"    chunkSize="131072"  align="64" subTypeMask="1"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="511"    blockSize="64"    chunkSize="131072"  align="64" subTypeMask="2"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="4095"   blockSize="512"   chunkSize="131072"  align="512" subTypeMask="1"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="4095"   blockSize="512"   chunkSize="131072"  align="512" subTypeMask="2"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="32767"  blockSize="4096"  chunkSize="1048576" align="4096" subTypeMask="1"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="32767"  blockSize="4096"  chunkSize="1048576" align="4096" subTypeMask="2"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="262143" blockSize="32768" chunkSize="2097152" align="32768" subTypeMask="1"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="262143" blockSize="32768" chunkSize="2097152" align="32768" subTypeMask="2"/>
+    </memoryPool>
+    <memoryPool type="vMemoryPoolConfig" uid="vmempool-staging">
+      <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" maxChunkSize="16777216" minChunkSize="2097152" align="131072"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="1"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="2"/>
+    </memoryPool>
+    <memoryPool type="vMemoryPoolConfig" uid="vmempool-backup">
+      <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" maxChunkSize="8388608" minChunkSize="2097152" align="131072"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="4095"   blockSize="512"   chunkSize="131072"  align="512" subTypeMask="1"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="4095"   blockSize="512"   chunkSize="131072"  align="512" subTypeMask="2"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="1"/>
+      <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="2"/>
+    </memoryPool>
+    <memoryManager type="vMemoryManagerConfig" uid="vmmconf-nvidia">
+      <memoryType type="vMemoryTypeConfig" typeID="0" poolUID="vmempool-backup"/>
+      <memoryType type="vMemoryTypeConfig" typeID="1" poolUID="vmempool-backup"/>
+      <memoryType type="vMemoryTypeConfig" typeID="2" poolUID="vmempool-backup"/>
+      <memoryType type="vMemoryTypeConfig" typeID="3" poolUID="vmempool-backup"/>
+      <memoryType type="vMemoryTypeConfig" typeID="4" poolUID="vmempool-backup"/>
+      <memoryType type="vMemoryTypeConfig" typeID="5" poolUID="vmempool-backup"/>
+      <memoryType type="vMemoryTypeConfig" typeID="6" poolUID="vmempool-backup"/>
+      <memoryType type="vMemoryTypeConfig" typeID="7" isDeviceLocal="YES" poolUID="vmempool-main"/>
+      <memoryType type="vMemoryTypeConfig" typeID="8" isDeviceLocal="YES" poolUID="vmempool-main"/>
+      <memoryType type="vMemoryTypeConfig" typeID="9" isHostVisible="YES" isHostCoherent="YES" isHostCached="ANY" poolUID="vmempool-staging"/>
+      <memoryType type="vMemoryTypeConfig" typeID="10" isHostVisible="YES" isHostCoherent="YES" isHostCached="YES" poolUID="vmempool-backup"/>
+      <memoryUsage usage="GPU_STATIC" type="vMemoryUsageConfig">
+        <memoryUsageOption type="vMemoryUsageOption">
+          <memoryPropertyBit>DEVICE_LOCAL</memoryPropertyBit>
+        </memoryUsageOption>
+      </memoryUsage>
+      <memoryUsage usage="STAGING" type="vMemoryUsageConfig">
+        <memoryUsageOption type="vMemoryUsageOption">
+          <memoryPropertyBit>HOST_VISIBLE</memoryPropertyBit>
+          <memoryPropertyBit>HOST_COHERENT</memoryPropertyBit>
+        </memoryUsageOption>
+      </memoryUsage>
+    </memoryManager>
+    <memoryManager type="vMemoryManagerConfig" uid="vmmconf-universal">
+      <memoryType type="vMemoryTypeConfig" isDeviceLocal="YES" isHostVisible="NO" poolUID="vmempool-main"/>
+      <memoryType type="vMemoryTypeConfig" isHostVisible="YES" poolUID="vmempool-staging"/>
+      <memoryType type="vMemoryTypeConfig" poolUID="vmempool-backup"/>
+    </memoryManager>
+    <memoryManagerReqOrder>vmmconf-nvidia</memoryManagerReqOrder>
+    <memoryManagerReqOrder>vmmconf-universal</memoryManagerReqOrder>
+  </memory>
+</VulkanSystem>
+

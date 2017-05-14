@@ -33,6 +33,11 @@ namespace zenith
 			{
 				return f_.is_open();
 			}
+			inline void close()
+			{
+				f_.flush();
+				f_.close();				
+			}
 			inline void setOutput(const char * fname)
 			{
 				if (f_.is_open())
@@ -67,6 +72,7 @@ namespace zenith
 				BaseImpl::setOutput(fname);
 			}
 			inline bool isOpen() const { return BaseImpl::isOpen(); }
+			inline void close() { BaseImpl::close(); }
 			inline void flush() { BaseImpl::flush(); }
 			template<class A>
 			inline void log(LogType type, const std::basic_string<char, std::char_traits<char>, A> &str)

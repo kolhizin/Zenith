@@ -8,7 +8,7 @@ namespace zenith
 	namespace util
 	{
 		namespace zfile_format
-		{
+		{			
 			enum class ImageFormat : uint8_t { UNDEF = 0,
 				R8, R16, R32, R32F,
 				R8G8, R16G16, R32G32, R32G32F,
@@ -16,6 +16,7 @@ namespace zenith
 				R8G8B8A8, R16G16B16A16, R32G32B32A32, R32G32B32A32F,
 			};
 
+			//returns size of pixel in bytes
 			inline uint8_t getPixelSize(ImageFormat f)
 			{
 				switch (f)

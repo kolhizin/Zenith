@@ -32,9 +32,9 @@ namespace zenith
 		class ObjectMap
 		{
 			using ObjectMapLocalPool = zstdLocalPool3<zstdAllocatorMainStatic,
-				4, 128, /*128 4-byte chunks*/
-				32, 512, /*128 32-byte chunks*/
-				128, 128>; /*128 128-byte chunks*/
+				8, 128, /*128 4-byte chunks*/
+				64, 512, /*128 32-byte chunks*/
+				256, 128>; /*128 128-byte chunks*/
 		public:
 			using ObjectMapType = ObjectMap<CharKey, CharValue>;
 			using ObjectMapStrKey = std::basic_string<CharKey, std::char_traits<CharKey>, typename ObjectMapLocalPool::STLAllocatorType<CharKey>>;

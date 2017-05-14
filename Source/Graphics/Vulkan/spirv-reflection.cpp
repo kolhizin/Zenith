@@ -296,7 +296,7 @@ void zenith::spirv::Module::handleName_(uint16_t opLen, uint16_t opCode, uint32_
 	size_t slen = strlen(reinterpret_cast<const char *>(opArgs));
 	nb.name = newName_(slen);
 
-	strcpy(reinterpret_cast<char *>(&rawDataBuff_[nb.name]), reinterpret_cast<const char *>(opArgs));
+	strcpy_s(reinterpret_cast<char *>(&rawDataBuff_[nb.name]), slen+1, reinterpret_cast<const char *>(opArgs));
 }
 
 void zenith::spirv::Module::handleOpCode_(uint16_t opLen, uint16_t opCode, uint32_t * opArgs)

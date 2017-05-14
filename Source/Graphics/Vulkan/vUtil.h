@@ -565,6 +565,7 @@ namespace zenith
 			bool fSparse;
 			bool fPresent;
 			float priority;
+			std::vector<zenith::util::nameid> aliases;
 		};
 		inline void to_objmap(const vDeviceQueueReqs &obj, zenith::util::ObjectMap<char, char> &om)
 		{
@@ -585,6 +586,8 @@ namespace zenith
 			om.addValue("fPresent", buff);
 			zenith::util::str_cast(obj.priority, buff, 128);
 			om.addValue("priority", buff);
+			for (auto x : obj.aliases)
+				om.addValue("aliases", x.c_str());
 		}
 		inline void from_objmap(vDeviceQueueReqs &obj, const zenith::util::ObjectMap<char, char> &om)
 		{
@@ -596,6 +599,11 @@ namespace zenith
 			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fSparse, "fSparse", false);
 			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fPresent, "fPresent", false);
 			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.priority, "priority", 1.0f);
+			{
+				auto v = om.getValues("aliases");
+				for (auto it = v.first; it != v.second; it++)
+					obj.aliases.emplace_back(it->second.first.c_str());
+			}
 		}
 
 
