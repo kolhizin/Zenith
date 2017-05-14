@@ -15,7 +15,7 @@ zenith::vulkan::vBufferRawImpl_::vBufferRawImpl_(vDeviceImpl_ * dev, size_t size
 	if (bci.sharingMode == VK_SHARING_MODE_CONCURRENT)
 	{
 		qfs = std::move(sharingInfo_.supportedQueueFamilies());
-		bci.queueFamilyIndexCount = qfs.size();
+		bci.queueFamilyIndexCount = static_cast<uint32_t>(qfs.size());
 		bci.pQueueFamilyIndices = qfs.data();
 	}
 	

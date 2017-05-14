@@ -121,7 +121,7 @@ void zenith::spirv::Module::handleType_(uint16_t opLen, uint16_t opCode, uint32_
 				else if (opCode == 21)
 				{
 					uint32_t w = *(opArgs++);
-					bool sign = *(opArgs++);
+					bool sign = (*(opArgs++) > 0);
 					switch (w)
 					{
 					case 8: ts.base = (sign ? TypeBase::INT8 : TypeBase::UINT8); break;
@@ -294,7 +294,7 @@ void zenith::spirv::Module::handleName_(uint16_t opLen, uint16_t opCode, uint32_
 	else nb.idx = 0xFFFF;
 
 	size_t slen = strlen(reinterpret_cast<const char *>(opArgs));
-	nb.name = newName_(slen);
+	nb.name = newName_(static_cast<uint32_t>(slen));
 
 	strcpy_s(reinterpret_cast<char *>(&rawDataBuff_[nb.name]), slen+1, reinterpret_cast<const char *>(opArgs));
 }
@@ -459,7 +459,7 @@ void zenith::spirv::Module::createDescriptorLayout_(SDataHandle begin, SDataHand
 	SDataHandle h = begin;
 	SDataHandle sBegin = begin;
 	
-	auto tmpTop = sAlloc_.top();
+	SDataHandle tmpTop = static_cast<SDataHandle>(sAlloc_.top());
 
 	uint16_t prevSet = sDataBuff_[sDataBuff_[h].userBindingInfo.fkDescriptor].descInfo.dscSet;
 	h++;
@@ -476,12 +476,12 @@ void zenith::spirv::Module::createDescriptorLayout_(SDataHandle begin, SDataHand
 	createDescriptorSet_(sBegin, end);
 
 	userDscSetInfoBegin_ = tmpTop;
-	userDscSetInfoEnd_ = sAlloc_.top();
+	userDscSetInfoEnd_ = static_cast<SDataHandle>(sAlloc_.top());
 }
 
 void zenith::spirv::Module::compileBindingInfo()
 {
-	auto maxSData = sAlloc_.top();
+	SDataHandle maxSData = static_cast<SDataHandle>(sAlloc_.top());
 	auto cleanup = zenith::util::doOnScopeExit([&]() {sAlloc_.freeUntil(maxSData);}); /*in case of exception free all done allocations.*/
 	for(SDataHandle h = 0; h < maxSData; h++)
 		if (sDataBuff_[h].type == InfoType::DESCRIPTOR_INFO)
@@ -553,12 +553,12 @@ void zenith::spirv::Module::compileBindingInfo()
 			deduceBindingType_(hNew);
 		}
 
-	sortBindings_(maxSData, sAlloc_.top());
-	checkBindings_(maxSData, sAlloc_.top());
+	sortBindings_(maxSData, static_cast<SDataHandle>(sAlloc_.top()));
+	checkBindings_(maxSData, static_cast<SDataHandle>(sAlloc_.top()));
 
-	auto userBindingInfoEnd = sAlloc_.top();
+	SDataHandle userBindingInfoEnd = static_cast<SDataHandle>(sAlloc_.top());
 
-	createDescriptorLayout_(maxSData, sAlloc_.top());
+	createDescriptorLayout_(maxSData, static_cast<SDataHandle>(sAlloc_.top()));
 
 	cleanup.deactivate();
 	userDscBindingInfoBegin_ = maxSData;

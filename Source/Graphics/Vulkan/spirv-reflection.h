@@ -395,18 +395,18 @@ namespace zenith
 			{
 				size_t reqSize = num * sizeof(SPIRVHandle);
 				if(reqSize == 0)
-					return std::make_pair<RawDataHandle, RawDataHandle>(rawAlloc_.top(), rawAlloc_.top());
-				auto h1 = rawAlloc_.top();
+					return std::make_pair<RawDataHandle, RawDataHandle>(static_cast<RawDataHandle>(rawAlloc_.top()), static_cast<RawDataHandle>(rawAlloc_.top()));
+				RawDataHandle h1 = static_cast<RawDataHandle>(rawAlloc_.top());
 				auto res = rawAlloc_.allocate(reqSize);
 				if(res.size < reqSize)
 					throw SPIRVResourceException("Module::newSubTypes_: could not allocate new buffer -- out of memory for raw-data.");
-				auto h2 = h1 + reqSize;
+				RawDataHandle h2 = static_cast<RawDataHandle>(h1 + reqSize);
 				return std::make_pair(h1, h2);
 			}
 			inline RawDataHandle newName_(uint32_t len)
 			{
 				size_t reqSize = (len+1) * sizeof(char);
-				auto h = rawAlloc_.top();
+				RawDataHandle h = static_cast<uint32_t>(rawAlloc_.top());
 				auto res = rawAlloc_.allocate(reqSize);
 				if (res.size < reqSize)
 					throw SPIRVResourceException("Module::newName_: could not allocate new buffer -- out of memory for raw-data.");

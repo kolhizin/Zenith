@@ -7,6 +7,10 @@
     <IncludePath>$(VULKAN_SDK)\Include;D:\Programming\3rdParty\Include;D:\Programming\Zenith\Source;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <DisableSpecificWarnings>4503;</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

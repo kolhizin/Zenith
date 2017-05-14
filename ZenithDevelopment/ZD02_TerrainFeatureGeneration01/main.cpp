@@ -17,7 +17,7 @@ public:
 		double rnd = uDistr_(randomEngine_);
 		if(rnd < 0.01)
 			return zenith::util::nameid("ridge-top");
-		if (rnd > 0.90)
+		if (rnd > 0.8)
 		{
 			std::cout << "fork\n";
 			return zenith::util::nameid("ridge-fork");
@@ -43,8 +43,8 @@ int main()
 {
 	zenith::terragen::MountainTopGenerator1 genTop;
 	zenith::terragen::MountainTopRidgeGenerator1 genTopRidge;
-	zenith::terragen::MountainContGenerator1 genContRidge(5);
-	zenith::terragen::MountainForkGenerator1 genForkRidge(5);
+	zenith::terragen::MountainContGenerator1 genContRidge(15);
+	zenith::terragen::MountainForkGenerator1 genForkRidge(15);
 	MetaGenerator1 metaGen;
 
 	zenith::terragen::NodeFactory<1024 * 32> nodeFactory;
@@ -55,7 +55,7 @@ int main()
 	nodeFactory.registerGenerator("ridge-fork", &genForkRidge);
 	nodeFactory.registerMetaGenerator(MetaGenerator1::generate, MetaGenerator1::setSeed, &metaGen);
 
-	nodeFactory.setSeed(12);
+	nodeFactory.setSeed(1);
 
 	uint32_t numWaves = 20;
 	for (uint32_t i = 0; i < numWaves; i++)
@@ -65,13 +65,13 @@ int main()
 	}
 
 	std::ofstream ridges("ridges.txt");
-	ridges << "plot_lines([";
+	ridges << "plot_lines3d([";
 	for (uint32_t i = 0; i < nodeFactory.numNodes(); i++)
 	{
 		const zenith::terragen::SegmentNode * sNode = dynamic_cast<const zenith::terragen::SegmentNode *>(nodeFactory.getNode(i));
 		if (!sNode)
 			continue;
-		ridges << "[ [ " << sNode->point0().x << ", " << sNode->point0().y << " ], [ " << sNode->point1().x << ", " << sNode->point1().y << "] ],\n";
+		ridges << "[ [ " << sNode->point0().x << ", " << sNode->point0().y << ", " << sNode->point0().z << " ], [ " << sNode->point1().x << ", " << sNode->point1().y << ", " << sNode->point1().z << "] ],\n";
 	}
 	ridges << "])";
 	ridges.close();
