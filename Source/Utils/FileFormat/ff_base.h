@@ -9,7 +9,10 @@ namespace zenith
 	{
 		namespace zfile_format
 		{
-			enum class ChunkType : uint8_t {UNDEF = 0, HEADER, IMAGE_HEADER, IMAGE_DATA_HEADER, DATA=255};
+			enum class ChunkType : uint8_t {UNDEF = 0,
+					HEADER=1, IMAGE_HEADER, FONT_HEADER,
+					IMAGE_DATA_HEADER=128, FONT_INFO, FONT_GLYPH,
+					DATA08=253, DATA16=254, DATA40=255};
 
 			class ZFileException : public zenith::util::LoggedException
 			{
@@ -125,6 +128,57 @@ namespace zenith
 				uint8_t chunkType;
 				uint8_t chunkData[15];
 			};
+			struct Chunk64B
+			{
+				uint8_t chunkType;
+				uint8_t chunkData[63];
+			};
+			struct ChunkD08H
+			{
+				uint8_t chunkType;
+				uint8_t chunkSize;//including these 2 bytes
+			};
+			struct ChunkD16H
+			{
+				uint8_t chunkType;
+				zf_size16_t chunkSize;//including these 3 bytes
+			};
+			struct ChunkD40H
+			{
+				uint8_t chunkType;
+				zf_size40_t chunkSize;//including these 6 bytes
+			};
+
+			
+			inline uint64_t zChunkSize(uint8_t chunkByte)
+			{
+				if (chunkByte == 0)
+					return 0;
+				if (chunkByte < 128)
+					return 16;
+				if (chunkByte < 253)
+					return 64;
+				return 0xFFFFFFFFFFFFFFFF;
+			}
+			inline uint64_t zChunkSize(ChunkType chunkType)
+			{
+				return zChunkSize(static_cast<uint8_t>(chunkType));
+			}
+			inline uint64_t zChunkSize(uint8_t *chunkBytes)
+			{
+				uint64_t r = zChunkSize(chunkBytes);
+				if (r == 0xFFFFFFFFFFFFFFFF)
+				{
+					if (*chunkBytes == 253)
+						return reinterpret_cast<ChunkD08H *>(chunkBytes)->chunkSize;
+					if (*chunkBytes == 254)
+						return reinterpret_cast<ChunkD16H *>(chunkBytes)->chunkSize.get();
+					if (*chunkBytes == 255)
+						return reinterpret_cast<ChunkD40H *>(chunkBytes)->chunkSize.get();
+					return r;
+				}
+				else return r;
+			}
 
 			class ZChunk16B_Header
 			{

@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZT02_ObjMapCodeGen", "ZT02_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZD03_SystemFont", "ZD03_SystemFont\ZD03_SystemFont.vcxproj", "{379FBD24-A226-475E-B47B-D2911F4056BE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZT03_ZFontEdit", "ZT03_ZFontEdit\ZT03_ZFontEdit.vcxproj", "{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -61,6 +63,14 @@ Global
 		{379FBD24-A226-475E-B47B-D2911F4056BE}.Release|x64.Build.0 = Release|x64
 		{379FBD24-A226-475E-B47B-D2911F4056BE}.Release|x86.ActiveCfg = Release|Win32
 		{379FBD24-A226-475E-B47B-D2911F4056BE}.Release|x86.Build.0 = Release|Win32
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Debug|x64.ActiveCfg = Debug|x64
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Debug|x64.Build.0 = Debug|x64
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Debug|x86.ActiveCfg = Debug|Win32
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Debug|x86.Build.0 = Debug|Win32
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Release|x64.ActiveCfg = Release|x64
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Release|x64.Build.0 = Release|x64
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Release|x86.ActiveCfg = Release|Win32
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

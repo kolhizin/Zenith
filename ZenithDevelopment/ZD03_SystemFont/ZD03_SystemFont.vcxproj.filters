@@ -69,6 +69,15 @@
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vUtil_Enums.h">
       <Filter>ZSource</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utils\FileFormat\ff_font.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utils\FileFormat\ff_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utils\FileFormat\ff_img.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
