@@ -4,6 +4,30 @@
 
 using namespace zenith::terragen;
 
+
+MountainTopGenerator1::MountainTopGenerator1(const MountainTopGenerator1_Params & p)
+	: hDistr_(p.heightLambda), numTries_(p.numTries), minDstNode_(p.minNodeDistance), minDstTop_(p.minMountainTopDistance),
+	xParam_(p.boundingBox.x0, p.boundingBox.x1), yParam_(p.boundingBox.y0, p.boundingBox.y1)
+{
+	//p.numTops;
+}
+
+MountainTopRidgeGenerator1::MountainTopRidgeGenerator1(const MountainTopRidgeGenerator1_Params & p)
+	: aDistr_(p.alpha.mu, p.alpha.sigma), bDistr_(p.beta.mu, p.beta.sigma), b0_(p.betaBox.x0), b1_(p.betaBox.x1),
+	lenDistr_(p.len.mu, p.len.sigma), len0_(p.lenBox.x0), len1_(p.lenBox.x1), numTries_(p.numTries), minDst_(p.minNodeDistance)
+{
+	//p.numRidges	
+}
+
+
+MountainContGenerator1::MountainContGenerator1(const MountainContGenerator1_Params & p)
+	: aDistr_(p.alpha.mu, p.alpha.sigma), a0_(p.alphaBox.x0), a1_(p.alphaBox.x1),
+	mixDistr_(p.mix.mu, p.mix.sigma), mix0_(p.mixBox.x0), mix1_(p.mixBox.x1),
+	lenDistr_(p.len.mu, p.len.sigma), len0_(p.lenBox.x0), len1_(p.lenBox.x1), numTries_(p.numTries), minDst_(p.minNodeDistance)
+{
+}
+
+/*
 uint32_t zenith::terragen::MountainTopGenerator1::generate(const GeneratorArguments * arg)
 {
 	setSeed_(arg->seedNumber);
@@ -275,3 +299,5 @@ size_t zenith::terragen::MountainForkGenerator1::get(uint32_t nodeId, void * buf
 	new (buffPtr) MountainRidgeNode(p0_, p1_[nodeId], curParent_, this);
 	return szReq;
 }
+*/
+

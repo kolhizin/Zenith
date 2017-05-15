@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\Source\TerrainGeneration\GeometryNodes.cpp" />
     <ClCompile Include="..\..\Source\TerrainGeneration\MountainNode.cpp" />
+    <ClCompile Include="..\..\Source\TerrainGeneration\NodeFactory.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -161,6 +162,9 @@
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeDispatcher.h" />
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeFactory.h" />
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeGenerator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="TerraGenConfig.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

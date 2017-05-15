@@ -1,7 +1,8 @@
 #include <iostream>
-#include <fstream>
 #include <TerrainGeneration\MountainNode.h>
 #include <TerrainGeneration\NodeFactory.h>
+#include <TerrainGeneration\Params\Config.h>
+#include <Utils\xml_tools.h>
 
 class MetaGenerator1
 {
@@ -38,9 +39,19 @@ public:
 		reinterpret_cast<MetaGenerator1 *>(ptr)->setSeed(seed);
 	}
 };
-
 int main()
-{
+{	
+	pugi::xml_document xmlGenParams;
+	xmlGenParams.load_file("TerraGenConfig.xml");
+
+	auto xmlGeneratorSection = xmlGenParams.child("TerraGenConfig").child("Generators");
+	for (const auto &ch : xmlGeneratorSection.children("Generator"))
+	{
+		zenith::util::ObjectMap<char, char> genParams;
+		zenith::util::xml::xml2objmap(ch, genParams);
+		std::cout << ch.attribute("uid").as_string() << " of type " << ch.attribute("type").as_string() << "\n";
+	}	
+	/*
 	zenith::terragen::MountainTopGenerator1 genTop;
 	zenith::terragen::MountainTopRidgeGenerator1 genTopRidge;
 	zenith::terragen::MountainContGenerator1 genContRidge(5);
@@ -77,5 +88,6 @@ int main()
 	ridges.close();
 
 	std::cout << "\nTest 2";
+	*/
 	return 0;
 }

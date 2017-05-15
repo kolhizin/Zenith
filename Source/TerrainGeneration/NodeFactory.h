@@ -1,7 +1,9 @@
 #pragma once
 #include "NodeGenerator.h"
 #include <Utils\nameid.h>
+#include <Utils\object_map.h>
 #include <vector>
+
 
 namespace zenith
 {
@@ -34,6 +36,35 @@ namespace zenith
 			}
 			virtual ~TerraGenFactoryOutOfMemException() {}
 		};
+		class TerraGenFactoryUnkGenException : public TerraGenFactoryException
+		{
+		public:
+			TerraGenFactoryUnkGenException() : TerraGenFactoryException() {}
+			TerraGenFactoryUnkGenException(const char * p, zenith::util::LogType type = zenith::util::LogType::ERROR) : TerraGenFactoryException(p, type)
+			{
+			}
+			TerraGenFactoryUnkGenException(const std::string &str, zenith::util::LogType type = zenith::util::LogType::ERROR) : TerraGenFactoryException(str, type)
+			{
+			}
+			virtual ~TerraGenFactoryUnkGenException() {}
+		};
+
+		template<class Gen, class GenParam>
+		inline Gen * constructGenerator(const GenParam &gp)
+		{
+			return new Gen(gp);
+		}
+		template<class Gen, class GenParam>
+		inline size_t constructGenerator(const GenParam &gp, void * buffPtr, size_t buffSize)
+		{
+			if (sizeof(Gen) > buffSize)
+				return 0;
+			Gen * res = new (buffPtr) Gen(gp);
+			return sizeof(Gen);
+		}
+
+		BaseNodeGenerator * constructGenerator(const zenith::util::ObjectMap<char, char> &descr);
+		size_t constructGenerator(const zenith::util::ObjectMap<char, char> &descr, void * buffPtr, size_t buffSize);
 
 		template<size_t BuffSize>
 		class NodeFactory

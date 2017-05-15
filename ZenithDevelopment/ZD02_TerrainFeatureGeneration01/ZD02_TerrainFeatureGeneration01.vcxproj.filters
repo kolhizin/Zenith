@@ -24,6 +24,9 @@
     <ClCompile Include="..\..\Source\TerrainGeneration\MountainNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\TerrainGeneration\NodeFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeGenerator.h">
@@ -44,5 +47,10 @@
     <ClInclude Include="..\..\Source\TerrainGeneration\GeometryNodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="TerraGenConfig.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
