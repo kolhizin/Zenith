@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ff_base.h"
-
+#include "ff_img.h"
+#include "../str_utils.h"
 
 namespace zenith
 {
@@ -12,75 +13,41 @@ namespace zenith
 			/*
 			file structure:
 			FONT_HEADER
-			FONT_INFO
-			[0-1]DATA with filename of image file with glyph data
-			[0+]GLYPH
-			[0+]KERN
-			[0+]EXTRA
+			FONT_DATA - ENCODING			
+			FONT_DATA - [0+] GLYPH
+			FONT_DATA - [0+] KERNING
+			FONT_DATA - [0+] EXTRA - REFERENCES / DATA / ETC
 			*/
 			enum class FontType : uint8_t {
 				UNDEF = 0,
-				INT_ALPHA_FONT, INT_SDIST_FONT,
-				EXT_ALPHA_FONT, EXT_SDIST_FONT
+				ATLAS_ALPHA,
+				ATLAS_SIGDIST
 			};
 
-			enum class FontTraits : uint8_t
-			{
-				UNDEF = 0, /*COMMON*/
-				BOLD = 1,
-				ITALIC = 2,
-				BOLD_ITALIC = 3
+			enum class FontChunkType : uint8_t {
+				UNDEF = 0,
+				NAME_ENCODING,
+				GLYPH,
+				KERNING,
+				DATA_DESCRIPTOR
 			};
 
-			inline bool isFontInternal(FontType f)
+			struct FontTraits
 			{
-				if (f == FontType::INT_ALPHA_FONT || f == FontType::INT_SDIST_FONT)
-					return true;
-			}
-			inline bool isFontExternal(FontType f)
-			{
-				if (f == FontType::EXT_ALPHA_FONT || f == FontType::EXT_SDIST_FONT)
-					return true;
-			}
-			inline bool isFontBold(FontTraits f)
-			{
-				if (f == FontTraits::BOLD || f == FontTraits::BOLD_ITALIC)
-					return true;
-			}
-			inline bool isFontItalic(FontTraits f)
-			{
-				if (f == FontTraits::ITALIC || f == FontTraits::BOLD_ITALIC)
-					return true;
-			}
-			inline FontTraits fontTraits(bool bold = false, bool italic = false)
-			{
-				if(bold)
-				{
-					if (italic)
-						return FontTraits::BOLD_ITALIC;
-					else
-						return FontTraits::BOLD;
-				}
-				else
-				{
-					if (italic)
-						return FontTraits::ITALIC;
-					else
-						return FontTraits::UNDEF;
-				}
-				return FontTraits::UNDEF;
-			}
-
+				uint8_t isBold : 1;
+				uint8_t isItalic : 1;
+				uint8_t reserved_ : 6;
+			};
 			class ZChunk16B_FontHeader
 			{
-				ChunkType chunkType; /*FONT_HEADER*/
+				ChunkType chunkType; /*FONT_HEADER*/ //1b -- 1
 			public:
-				FontType fontType;
-				FontTraits fontTraits;
-				uint8_t fontSize;
-				uint32_t numGlyphs;
-				uint32_t numKernInfo;
-				uint32_t numExtraInfo;
+				FontType fontType; //1b -- 2
+				FontTraits fontTraits; //1b -- 3
+				uint8_t fontSize; //1b -- 4
+				uint32_t numGlyphs; //4b -- 8
+				uint32_t numKernInfo; //4b -- 12
+				uint32_t numExtraInfo; //4b -- 16
 			private:
 				inline bool checkChunk_() const { return chunkType == ChunkType::FONT_HEADER; }
 				
@@ -90,45 +57,155 @@ namespace zenith
 				}
 				inline bool isValid() const { return checkChunk_(); }
 			};
-
-			class ZChunk16B_FontInfo
+			
+			class ZChunk64B_FontData_Glyph
 			{
-				ChunkType chunkType; /*FONT_INFO*/
+				ChunkType chunkType;  //1b - 1
+				FontChunkType fchunkType; //1b - 2
 			public:
-				char encoding[11];
-				uint32_t externalFileNameLength;
+				int16_t xOffset, yOffset, xAdvance; //3*2b -- 8
+				double x, y, w, h; //normalized atlas location, 4*8b -- 40
+				uint32_t glyphId; //4b -- 44
+				uint8_t reserved[20]; 
 			private:
-				inline bool checkChunk_() const { return chunkType == ChunkType::FONT_INFO; }
+				inline bool checkChunk_() const { return chunkType == ChunkType::FONT_DATA && fchunkType == FontChunkType::GLYPH; }
 
 			public:
-				inline ZChunk16B_FontInfo() : chunkType(ChunkType::FONT_INFO)
+				inline ZChunk64B_FontData_Glyph() : chunkType(ChunkType::FONT_DATA), fchunkType(FontChunkType::GLYPH)
 				{
 				}
 				inline bool isValid() const { return checkChunk_(); }
 			};
 
-			class ZChunk64B_FontGlyph
+			class ZChunk64B_FontData_NameEncoding
 			{
-				ChunkType chunkType; /*FONT_GLYPH*/
+				ChunkType chunkType;  //1b - 1
+				FontChunkType fchunkType; //1b - 2
 			public:
-				uint8_t padding[3];/*padding*/
-				double x;
-				double y;
-				double w;
-				double h;
-				uint32_t glyphId;
-				int16_t xOffset;
-				int16_t yOffset;
-				int16_t xAdvance;
-				
+				static const size_t EncodingLength = 29;
+				static const size_t NameLength = 31;
+				char encodingName[EncodingLength+1]; //30b - 32
+				char fontName[NameLength+1];
 			private:
-				inline bool checkChunk_() const { return chunkType == ChunkType::FONT_GLYPH; }
+				inline bool checkChunk_() const { return chunkType == ChunkType::FONT_DATA && fchunkType == FontChunkType::NAME_ENCODING; }
 
 			public:
-				inline ZChunk64B_FontGlyph() : chunkType(ChunkType::FONT_GLYPH)
+				inline ZChunk64B_FontData_NameEncoding() : chunkType(ChunkType::FONT_DATA), fchunkType(FontChunkType::NAME_ENCODING)
+				{
+				}
+				inline ZChunk64B_FontData_NameEncoding(const char * encoding, const char * name) : chunkType(ChunkType::FONT_DATA), fchunkType(FontChunkType::NAME_ENCODING)
+				{
+					if (strlen(encoding) > EncodingLength)
+						throw ZFileException("ZChunk64B_FontData_Encoding(): too long enconding name!");
+
+					if (strlen(name) > NameLength)
+						throw ZFileException("ZChunk64B_FontData_Encoding(): too long font name!");
+					zstrcpy(encodingName, encoding);
+					zstrcpy(fontName, name);
+				}
+				inline bool isValid() const { return checkChunk_(); }
+				inline const char * encoding() const { return encodingName; }
+				inline const char * name() const { return fontName; }
+			};
+
+			struct FontData_DataDesc_Atlas
+			{
+				char paramType[5];
+				char atlasFormat[5];
+				char reserved[52];
+
+				inline bool isValid() const { return paramType[0] == 'A' && paramType[1] == 'T' && paramType[2] == 'L' && paramType[3] == 'A' && paramType[4] == 'S'; }
+			};
+			struct FontData_DataDesc_ExtRef
+			{
+				char paramType[6];
+				char extRefFormat[6];
+				char reserved[50];
+
+				inline bool isValid() const { return paramType[0] == 'E' && paramType[1] == 'X' && paramType[2] == 'T' && paramType[3] == 'R' && paramType[4] == 'E' && paramType[5] == 'F'; }
+			};
+
+			class ZChunk64B_FontData_DataDesc
+			{
+				ChunkType chunkType;  //1b - 1
+				FontChunkType fchunkType; //1b - 2
+			public:				
+				union
+				{
+					/*first 6 bytes specify type*/
+					uint8_t paramBytes[62];
+					char paramStr[62];
+					FontData_DataDesc_Atlas paramAtlas;
+					FontData_DataDesc_ExtRef paramExtRef;
+				};
+			private:
+				inline bool checkChunk_() const { return chunkType == ChunkType::FONT_DATA && fchunkType == FontChunkType::DATA_DESCRIPTOR; }
+
+			public:
+				inline ZChunk64B_FontData_DataDesc() : chunkType(ChunkType::FONT_DATA), fchunkType(FontChunkType::DATA_DESCRIPTOR)
 				{
 				}
 				inline bool isValid() const { return checkChunk_(); }
+			};
+
+			
+
+			class zFontGlyphDescription
+			{
+				uint16_t reserved_; //for padding
+			public:
+				int16_t xOffset, yOffset, xAdvance;
+				double x, y, w, h;
+				uint32_t glyphId;	
+			};
+
+			class zFontDescription
+			{
+				zFontGlyphDescription * glyphs_;
+				uint32_t glyphStride_, glyphNum_;				
+			public:
+				const char * extAtlasFileName;
+				zImgDescription intAtlasImage;
+
+				char encodingName[32], fontName[32];
+
+				FontType fontType;
+				FontTraits fontTraits;
+				uint8_t fontSize;
+
+				inline void setGlyphs(zFontGlyphDescription * pGlyphs, uint32_t numGlyphs, uint32_t glyphStride = sizeof(zFontGlyphDescription))
+				{
+					glyphs_ = pGlyphs;
+					glyphNum_ = numGlyphs;
+					glyphStride_ = glyphStride;
+				}
+				inline void setEncoding(const char * p) { zstrcpy(encodingName, p); }
+				inline void setName(const char * p) { zstrcpy(fontName, p); }
+				inline uint32_t numGlyphs() const {	return glyphNum_;}
+				inline zFontGlyphDescription * glyphsPtr() { return glyphs_; }
+				inline const zFontGlyphDescription * glyphsPtr() const { return glyphs_; }
+				inline zFontGlyphDescription &getGlyph(uint32_t id)
+				{
+					if (id >= glyphNum_)
+						throw ZFileException("getGlyph(): index out of bounds!");
+					return *reinterpret_cast<zFontGlyphDescription *>(reinterpret_cast<uint8_t *>(glyphs_) + id * glyphStride_);
+				}
+				inline const zFontGlyphDescription &getGlyph(uint32_t id) const
+				{
+					if (id >= glyphNum_)
+						throw ZFileException("getGlyph(): index out of bounds!");
+					return *reinterpret_cast<const zFontGlyphDescription *>(reinterpret_cast<const uint8_t *>(glyphs_) + id * glyphStride_);
+				}
+				static inline zFontDescription empty()
+				{
+					zFontDescription res;
+					res.glyphs_ = nullptr; res.glyphNum_ = 0; res.glyphStride_ = 0;
+
+					res.extAtlasFileName = nullptr;
+					res.intAtlasImage = zImgDescription::empty();
+					res.fontType = FontType::UNDEF;
+					res.fontSize = 0;
+				}
 			};
 
 		}

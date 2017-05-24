@@ -93,6 +93,7 @@ PFN_ZIMG_FormatConverter zimg_get_format_converter(ImageFormat src, ImageFormat 
 	throw ZFileException("zimg_get_format_converter(): no suitable identity converter found for requested format.");
 }
 
+
 zImgDescription zenith::util::zfile_format::zimg_change_format(const zImgDescription &src, ImageFormat dstFormat)
 {
 	zImgDescription r;
@@ -161,6 +162,63 @@ zImgDescription zenith::util::zfile_format::zimg_change_format(const zImgDescrip
 	}
 	return r;
 }
+
+zImgDescription zenith::util::zfile_format::zimg_clone(const zImgDescription &src)
+{
+	zImgDescription r;
+	r.width = src.width;
+	r.height = src.height;
+	r.arraySize = src.arraySize;
+	r.depth = src.depth;
+	r.imageType = src.imageType;
+	r.mipLevels = src.mipLevels;
+	r.imageFormat = src.imageFormat;
+
+	uint8_t pixSize = getPixelSize(src.imageFormat);
+
+	for (uint32_t i = 0; i < r.mipLevels; i++)
+	{
+		r.levelDescr[i] = new zImgDataDescription;
+		switch (r.imageType)
+		{
+		case ImageType::IMG1D: *r.levelDescr[i] = zImgDataDescription::create1D(pixSize, r.width); break;
+		case ImageType::IMG1D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create1DArr(pixSize, r.width, r.arraySize, src.levelDescr[i]->getArrayPitch()); break;
+		case ImageType::IMG2D: *r.levelDescr[i] = zImgDataDescription::create2D(r.width, r.height, src.levelDescr[i]->getRowPitch()); break;
+		case ImageType::IMG2D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create2DArr(r.width, r.height, r.arraySize, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getArrayPitch()); break;
+		case ImageType::IMG3D: *r.levelDescr[i] = zImgDataDescription::create3D(r.width, r.height, r.depth, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getDepthPitch()); break;
+		case ImageType::IMG3D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create3DArr(r.width, r.height, r.depth, r.arraySize, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getDepthPitch(), src.levelDescr[i]->getArrayPitch()); break;
+		}
+		uint64_t dstSize = r.levelDescr[i]->getRequiredDataSize();
+		r.levelData[i] = new uint8_t[dstSize];
+
+		uint64_t srcAPitch = src.levelDescr[i]->getArrayPitch();
+		uint64_t dstAPitch = r.levelDescr[i]->getArrayPitch();
+
+		uint64_t srcDPitch = src.levelDescr[i]->getDepthPitch();
+		uint64_t dstDPitch = r.levelDescr[i]->getDepthPitch();
+
+		uint64_t srcRPitch = src.levelDescr[i]->getRowPitch();
+		uint64_t dstRPitch = r.levelDescr[i]->getRowPitch();
+		for (uint32_t ia = 0; ia < r.arraySize; ia++)
+		{
+			const uint8_t * psa = reinterpret_cast<const uint8_t *>(src.levelData[i]) + srcAPitch * ia;
+			uint8_t * pda = reinterpret_cast<uint8_t *>(r.levelData[i]) + dstAPitch * ia;
+			for (uint32_t id = 0; id < r.depth; id++)
+			{
+				const uint8_t * psd = psa + srcDPitch * id;
+				uint8_t * pdd = pda + dstDPitch * id;
+				for (uint32_t ih = 0; ih < r.height; ih++)
+				{
+					const uint8_t * psh = psd + srcRPitch * ih;
+					uint8_t * pdh = pdd + dstRPitch * ih;
+					memcpy_s(pdh, srcRPitch, pdg, dstRPitch);
+				}
+			}
+		}
+	}
+	return r;
+}
+
 
 void zenith::util::zfile_format::zimg_free(zImgDescription &d)
 {

@@ -335,6 +335,14 @@ namespace zenith
 				{
 					return getDataSize() + getHeaderSize();
 				}
+				static inline zImgDescription empty()
+				{
+					zImgDescription res;
+					res.imageType = ImageType::UNDEF;
+					res.imageFormat = ImageFormat::UNDEF;
+					res.mipLevels = 0;
+					res.width = res.height = res.depth = res.arraySize = 0;					
+				}
 			};
 
 			inline zImgDescription zimg_from_mem(void * src, uint64_t size)

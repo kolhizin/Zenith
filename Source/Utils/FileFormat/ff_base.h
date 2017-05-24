@@ -3,6 +3,14 @@
 #include <cstdint>
 #include "../log_config.h"
 
+/*
+General phylosophy of Zenith-File-Format:
+1) Chunk-based -- hence can be read without knowing of actual chunks. Everything needed for reading is in this file.
+2) Associated formats (image, font, etc.) can be mapped to read file: no need for additional mem allocs. But stays dependent on mapped file.
+3) Memory is not managed by file format structure. All memory management is external. No new/delete statements in these files.
+4) Conversions from other formats and memory managements is only present in *_util files.
+*/
+
 namespace zenith
 {
 	namespace util
@@ -13,7 +21,7 @@ namespace zenith
 					HEADER=1,
 						IMAGE_HEADER, FONT_HEADER,
 					RESERVED=128,
-						IMAGE_DATA_HEADER, FONT_GLYPH_INFO,
+						IMAGE_DATA_HEADER, FONT_DATA,
 					DATA08=253, DATA16=254, DATA48=255};
 
 			class ZFileException : public zenith::util::LoggedException
