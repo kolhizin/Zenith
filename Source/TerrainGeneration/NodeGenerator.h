@@ -36,6 +36,9 @@ namespace zenith
 			inline const BaseNode * getParent() const { return parentNode_; }
 			inline bool hasParent() const { return (parentNode_ != nullptr); }
 
+			inline bool hasGenerator() const { return (generator_ != nullptr); }
+			inline bool isValid() const { return hasGenerator(); }
+
 			inline virtual const char * nodeClass() const { return ClassName; }
 			inline virtual const char * distanceDispatchGroup() const { return DistanceDispatchGroup; }
 
@@ -64,6 +67,26 @@ namespace zenith
 			const BaseNode ** allNodesPtr;
 
 			uint32_t seedNumber;
+		};
+
+		class BaseMetaGenerator
+		{
+		protected:
+			std::mt19937 randomEngine_;
+			inline void setSeed_(uint32_t seed)
+			{
+				if (seed)
+					randomEngine_.seed(seed);
+			}
+		public:
+			inline BaseMetaGenerator() {}
+			inline virtual ~BaseMetaGenerator() {}
+
+			virtual util::nameid select(const GeneratorArguments * arg) = 0;
+			inline virtual void setSeed(uint32_t seed)
+			{
+				randomEngine_.seed(seed);
+			}
 		};
 
 		class BaseNodeGenerator

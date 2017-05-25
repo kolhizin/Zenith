@@ -162,9 +162,12 @@
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeDispatcher.h" />
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeFactory.h" />
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeGenerator.h" />
+    <ClInclude Include="..\..\Source\Utils\Math\categorical_distribution.h" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="TerraGenConfig.xml" />
+    <Xml Include="TerraGenConfig.xml">
+      <SubType>Designer</SubType>
+    </Xml>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

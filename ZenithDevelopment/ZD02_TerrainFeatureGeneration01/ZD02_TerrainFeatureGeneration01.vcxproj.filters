@@ -47,6 +47,9 @@
     <ClInclude Include="..\..\Source\TerrainGeneration\GeometryNodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utils\Math\categorical_distribution.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="TerraGenConfig.xml">

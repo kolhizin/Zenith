@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TerraGenConfig>
   <Generators>
-    <Generator uid="MntTopGen1" type="MountainTopGenerator1">
-      <numTops value="1.0" prob="0.1"/>
-      <numTops value="2.0" prob="0.2"/>
+    <Generator uid="MntMetaGen1" isMeta="true" type="MountainMetaGenerator1">
+      <general value="MntTopRidgeGen1" prob="0.05"/>
+      <general value="MntRidgeForkGen1" prob="0.35"/>      
+      <general value="MntRidgeContGen1" prob="0.6"/>
+      <afterNull value="MntTopGen1" prob="1.0"/>
+      <afterTop value="MntTopRidgeGen1" prob="1.0"/>
+    </Generator>
+    <Generator uid="MntTopGen1" isMeta="false" type="MountainTopGenerator1">
+      <numTops value="1.0" prob="0.0"/>
+      <numTops value="2.0" prob="0.0"/>
       <numTops value="3.0" prob="0.3"/>
       <numTops value="4.0" prob="0.2"/>
-      <numTops value="5.0" prob="0.1"/>
-      <numTops value="6.0" prob="0.1"/>
+      <numTops value="5.0" prob="0.3"/>
+      <numTops value="6.0" prob="0.2"/>
       <boundingBox x0="-100.0" x1="100.0" y0="-100.0" y1="100.0"/>
       <heightLambda>100.0</heightLambda>
+      <sizeLambda>10.0</sizeLambda>
       <numTries>4</numTries>
       <minNodeDistance>20.0</minNodeDistance>
       <minMountainTopDistance>40.0</minMountainTopDistance>
     </Generator>
-    <Generator uid="MntTopRidgeGen1" type="MountainTopRidgeGenerator1">
+    <Generator uid="MntTopRidgeGen1" isMeta="false" type="MountainTopRidgeGenerator1">
       <numRidges value="3.0" prob="0.2"/>
       <numRidges value="4.0" prob="0.4"/>
       <numRidges value="5.0" prob="0.3"/>
@@ -22,20 +30,36 @@
       <alpha mu="0.0" sigma="0.5"/>
       <beta mu="-0.8" sigma="0.2"/>
       <betaBox x0="-1.4" x1="-0.3"/>
-      <numTries>4</numTries>
+      <numTries>10</numTries>
       <len mu="3.0" sigma="1.0"/>
       <lenBox x0="0.5" x1="10.0"/>
-      <minNodeDistance>10.0</minNodeDistance>
+      <minNodeDistance>0.5</minNodeDistance>
     </Generator>
-    <Generator uid="MntRidgeContGen1" type="MountainContGenerator1">
-      <mix mu="0.0" sigma="0.5"/>
+    <Generator uid="MntRidgeContGen1" isMeta="false" type="MountainContGenerator1">
+      <mix mu="0.5" sigma="0.5"/>
       <mixBox x0="0.0" x1="1.0"/>
-      <alpha mu="0.0" sigma="0.2"/>
+      <alpha mu="0.0" sigma="0.5"/>
       <alphaBox x0="-1.0" x1="1.0"/>
-      <numTries>4</numTries>
-      <len mu="3.0" sigma="1.0"/>
-      <lenBox x0="0.5" x1="10.0"/>
-      <minNodeDistance>10.0</minNodeDistance>
+      <beta mu="0.0" sigma="0.2"/>
+      <betaBox x0="-0.3" x1="0.3"/>
+      <numTries>10</numTries>
+      <len mu="3.0" sigma="2.0"/>
+      <lenBox x0="3.0" x1="10.0"/>
+      <minNodeDistance>0.5</minNodeDistance>
+    </Generator>
+    <Generator uid="MntRidgeForkGen1" isMeta="false" type="MountainForkGenerator1">
+      <mix mu="0.5" sigma="0.5"/>
+      <mixBox x0="0.0" x1="1.0"/>
+      <alpha0 mu="0.0" sigma="0.5"/>
+      <alpha0Box x0="-1.0" x1="1.0"/>
+      <alpha1 mu="0.0" sigma="0.3"/>
+      <alpha1Box x0="-0.2" x1="0.2"/>
+      <beta mu="0.0" sigma="0.2"/>
+      <betaBox x0="-0.3" x1="0.3"/>
+      <numTries>10</numTries>
+      <len mu="3.0" sigma="2.0"/>
+      <lenBox x0="3.0" x1="10.0"/>
+      <minNodeDistance>0.5</minNodeDistance>
     </Generator>
   </Generators>
 </TerraGenConfig>
