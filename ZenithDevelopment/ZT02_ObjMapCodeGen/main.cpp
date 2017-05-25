@@ -272,14 +272,21 @@ int main(int argc, char **argv)
 
 		std::string options = (locOptions.empty() ? gOptions : locOptions);
 
-		ObjectMap<char, char> omCodeDef;
-		xml::xml2objmap(ch.child("namespace"), omCodeDef);
 
 		std::cout << "generating file: " << fName << std::endl;
 
 		std::remove(fName.c_str());
 		std::ofstream f(fName.c_str());
-		f << prefix << "\n" << genCode(omCodeDef, omCodeGen, "namespace", "define") << "\n" << postfix;
+		f << prefix << "\n";
+		for (auto chn : ch.children("namespace"))
+		{
+			ObjectMap<char, char> omCodeDef;
+			xml::xml2objmap(ch.child("namespace"), omCodeDef);
+
+			f << genCode(omCodeDef, omCodeGen, "namespace", "define") << "\n";
+		}
+		
+		f << postfix;
 		f.close();
 
 		std::cout << "file (" << fName << ") generated." << std::endl;

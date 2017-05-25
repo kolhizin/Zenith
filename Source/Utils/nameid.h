@@ -128,22 +128,27 @@ namespace zenith
 		class nameid_densemap_impl
 		{
 			std::vector<NameidClass> arr_;
-			typename std::vector<NameidClass>::const_iterator find_(const NameidClass &nm) const
+			inline typename std::vector<NameidClass>::const_iterator findI_(const NameidClass &nm) const
 			{
-				auto it = std::lower_bound(arr_.begin(), arr_.end(), nm);
+				return std::lower_bound(arr_.begin(), arr_.end(), nm);
+			}
+			inline typename std::vector<NameidClass>::const_iterator find_(const NameidClass &nm) const
+			{
+				auto it = findI_(nm);
 				if (it == arr_.end())
 					return it;
 				if (*it == nm)
 					return it;
 				return arr_.end();
 			}
+			
 		public:
 			using const_iterator = typename std::vector<NameidClass>::const_iterator;
 
 			void insert(const NameidClass &nm)
 			{
-				auto it = find_(nm);
-				if (it != arr_.end())
+				auto it = findI_(nm);
+				if (it != arr_.end() && *it == nm)
 					throw std::logic_error("nameid_map::insert(): Name already exists in <nameid_densemap_impl>!");
 				arr_.insert(it, nm);
 			}
