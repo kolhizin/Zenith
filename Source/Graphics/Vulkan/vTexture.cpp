@@ -25,7 +25,7 @@ zenith::vulkan::vTextureRawImpl_::vTextureRawImpl_(vDeviceImpl_ * dev, vTextureD
 	if (ci.sharingMode == VK_SHARING_MODE_CONCURRENT)
 	{
 		qfs = std::move(sharingInfo_.supportedQueueFamilies());
-		ci.queueFamilyIndexCount = qfs.size();
+		ci.queueFamilyIndexCount = static_cast<uint32_t>(qfs.size());
 		ci.pQueueFamilyIndices = qfs.data();
 	}
 

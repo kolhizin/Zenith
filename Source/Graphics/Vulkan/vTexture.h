@@ -37,11 +37,11 @@ namespace zenith
 
 		class vTextureDimensions
 		{
-			size_t width_, height_, depth_, arraySize_;
-			size_t mipLevels_;
+			uint32_t width_, height_, depth_, arraySize_;
+			uint32_t mipLevels_;
 		public:
 			inline vTextureDimensions() : width_(1), height_(1), depth_(1), arraySize_(1), mipLevels_(1) {}
-			inline vTextureDimensions(size_t w, size_t h = 1, size_t d = 1, size_t arrSize = 1, size_t mipLevels = 1) : width_(w), height_(h), depth_(d), arraySize_(arrSize), mipLevels_(mipLevels)
+			inline vTextureDimensions(uint32_t w, uint32_t h = 1, uint32_t d = 1, uint32_t arrSize = 1, uint32_t mipLevels = 1) : width_(w), height_(h), depth_(d), arraySize_(arrSize), mipLevels_(mipLevels)
 			{
 				if (mipLevels == 0 || arrSize == 0)
 					throw vTextureException("vTextureDimensions::vTextureDimensions: incorrect mip-count or array-count (zero).");
@@ -49,39 +49,39 @@ namespace zenith
 				if (d == 0 || h == 0 || w == 0)
 					throw vTextureException("vTextureDimensions::vTextureDimensions: incorrect size (zero).");
 			}
-			inline size_t width() const { return width_; }
-			inline size_t height() const { return height_; }
-			inline size_t depth() const { return depth_; }
-			inline size_t arraySize() const { return arraySize_; }
-			inline size_t mipLevels() const { return mipLevels_; }
-			inline uint64_t size() const { return width_ * height_ * depth_; }
-			inline size_t dim() const { return (depth_ > 1 ? 3 : (height_ > 1 ? 2 : 1)); }
+			inline uint32_t width() const { return width_; }
+			inline uint32_t height() const { return height_; }
+			inline uint32_t depth() const { return depth_; }
+			inline uint32_t arraySize() const { return arraySize_; }
+			inline uint32_t mipLevels() const { return mipLevels_; }
+			inline uint64_t size() const { return uint64_t(width_) * uint64_t(height_) * uint64_t(depth_); }
+			inline uint32_t dim() const { return (depth_ > 1 ? 3 : (height_ > 1 ? 2 : 1)); }
 			inline VkImageType vkImageType() const { return static_cast<VkImageType>((dim() - 1) + VK_IMAGE_TYPE_1D); }
 
-			inline static vTextureDimensions SingleTextureWithoutMip(size_t w, size_t h = 1, size_t d = 1)
+			inline static vTextureDimensions SingleTextureWithoutMip(uint32_t w, uint32_t h = 1, uint32_t d = 1)
 			{
 				return vTextureDimensions(w, h, d, 1, 1);
 			}
 		};
 		class vTextureSubresource
 		{
-			size_t arrOffset_, arrSize_;
-			size_t mipOffset_, mipSize_;
+			uint32_t arrOffset_, arrSize_;
+			uint32_t mipOffset_, mipSize_;
 		public:
 			inline vTextureSubresource() : arrOffset_(0), arrSize_(1), mipOffset_(0), mipSize_(1){}
-			inline vTextureSubresource(size_t mipBase, size_t mipCount, size_t arrOffset, size_t arrCount) : arrOffset_(arrOffset), arrSize_(arrCount), mipOffset_(mipBase), mipSize_(mipCount) 
+			inline vTextureSubresource(uint32_t mipBase, uint32_t mipCount, uint32_t arrOffset, uint32_t arrCount) : arrOffset_(arrOffset), arrSize_(arrCount), mipOffset_(mipBase), mipSize_(mipCount)
 			{
 				if (mipCount == 0 || arrCount == 0)
 					throw vTextureException("vTextureSubresource::vTextureSubresource: incorrect mip-count or array-count.");
 			}
 
-			inline size_t arrayOffset() const { return arrOffset_; }
-			inline size_t arraySize() const { return arrSize_; }
-			inline size_t mipBase() const { return mipOffset_; }
-			inline size_t mipCount() const { return mipSize_; }
+			inline uint32_t arrayOffset() const { return arrOffset_; }
+			inline uint32_t arraySize() const { return arrSize_; }
+			inline uint32_t mipBase() const { return mipOffset_; }
+			inline uint32_t mipCount() const { return mipSize_; }
 
-			inline size_t arrayLast() const { return arrOffset_ + arrSize_ - 1; }
-			inline size_t mipLast() const { return mipOffset_ + mipSize_ - 1; }
+			inline uint32_t arrayLast() const { return arrOffset_ + arrSize_ - 1; }
+			inline uint32_t mipLast() const { return mipOffset_ + mipSize_ - 1; }
 
 			inline bool isRange() const { return (mipSize_ > 1 || arrSize_ > 1); }
 			inline bool isLayers() const { return (mipSize_ == 1); }
@@ -131,7 +131,7 @@ namespace zenith
 				return res;
 			}
 
-			inline static vTextureSubresource SingleMipSingleElement(size_t mipLevel = 0, size_t arrayIndex = 0)
+			inline static vTextureSubresource SingleMipSingleElement(uint32_t mipLevel = 0, uint32_t arrayIndex = 0)
 			{
 				return vTextureSubresource(mipLevel, 1, arrayIndex, 1);
 			}

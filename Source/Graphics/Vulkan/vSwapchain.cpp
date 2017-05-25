@@ -89,7 +89,7 @@ VkResult zenith::vulkan::vSwapchainImpl_::createSwapchain_(const VkAllocationCal
 		if (fIndices_.size() > 1)
 		{
 			ZLOG_WARNING("vSwapchainImpl_::createSwapchain_: specified exclusive mode and more than one queue families!");
-			ci.queueFamilyIndexCount = fIndices_.size();
+			ci.queueFamilyIndexCount = static_cast<uint32_t>(fIndices_.size());
 			ci.pQueueFamilyIndices = &fIndices_[0];
 		}
 		else
@@ -106,7 +106,7 @@ VkResult zenith::vulkan::vSwapchainImpl_::createSwapchain_(const VkAllocationCal
 
 		ci.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 
-		ci.queueFamilyIndexCount = fIndices_.size();
+		ci.queueFamilyIndexCount = static_cast<uint32_t>(fIndices_.size());
 		ci.pQueueFamilyIndices = &fIndices_[0];	
 	}else
 		throw vSwapchainException("vSwapchainImpl_::createSwapchain_: specified unknown sharing mode!");
@@ -304,7 +304,7 @@ void zenith::vulkan::vSwapchainImpl_::queuePresent(VkQueue q, uint32_t imgInd, s
 	pi.swapchainCount = 1;
 	pi.pSwapchains = &swapchain_;
 
-	pi.waitSemaphoreCount = signalSemaphore.size();
+	pi.waitSemaphoreCount = static_cast<uint32_t>(signalSemaphore.size());
 	pi.pWaitSemaphores = &signalSemaphore[0];
 
 	pi.pImageIndices = &tmpImgInd;

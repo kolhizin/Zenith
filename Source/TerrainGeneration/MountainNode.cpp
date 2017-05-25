@@ -128,15 +128,15 @@ uint32_t zenith::terragen::MountainContGenerator1::generate(const GeneratorArgum
 	mainDir /= GVec2::value_type(mainDirL);
 	double bestDist = 0;
 	double sigmaL = mainDirL * 0.3;
-	double sigmaD = 0.2;
+	double sigmaD = 0.5;
 	double mainDirDH = std::min<double>(0.0, (p0_.z - prevPoints[0].z)) * 0.8;
 
 	for (uint32_t i = 0; i < numTries_; i++)
 	{
 		double dx = nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDir.x, sigmaD));
 		double dy = nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDir.y, sigmaD));
-		double dl = glm::max<double>(0.2, nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDirL, sigmaL)));
-		double dh = glm::min<double>(-0.2, nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDirDH, 1.0)));
+		double dl = 1.0;//glm::max<double>(0.2, nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDirL, sigmaL)));
+		double dh = glm::min<double>(-0.2, nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDirDH, 1.0))) * glm::length(GVec2(dx, dy));
 		
 		GVec3 p1 = p0_ + GVec3(dx * dl, dy * dl, dh);
 		MountainRidgeNode m(p0_, p1, parent, this);
@@ -151,7 +151,7 @@ uint32_t zenith::terragen::MountainContGenerator1::generate(const GeneratorArgum
 			if (dst < minDistance)
 				minDistance = dst;
 		}
-		if (minDistance < 0.5 * glm::max(1.0,dl))
+		if (minDistance < 0.7 * glm::max(1.0,dl))
 			continue;
 		if (minDistance > bestDist)
 		{
@@ -250,7 +250,7 @@ uint32_t zenith::terragen::MountainForkGenerator1::generate(const GeneratorArgum
 			if (dst < minDistance)
 				minDistance = dst;
 		}
-		if (minDistance < 0.5 * glm::max(1.0, dlm))
+		if (minDistance < 0.7 * glm::max(1.0, dlm))
 			continue;
 		if (minDistance > bestDist)
 		{

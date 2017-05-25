@@ -145,10 +145,10 @@ void zenith::vulkan::vInstanceImpl_::fillInstanceCreateInfo(VkInstanceCreateInfo
 	inst.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	inst.flags = 0;
 	
-	inst.enabledLayerCount = configInt_.enabledLayers_.size();
+	inst.enabledLayerCount = static_cast<uint32_t>(configInt_.enabledLayers_.size());
 	inst.ppEnabledLayerNames = (configInt_.enabledLayers_.empty() ? nullptr : &configInt_.enabledLayers_[0]);
 
-	inst.enabledExtensionCount = configInt_.enabledExtensions_.size();
+	inst.enabledExtensionCount = static_cast<uint32_t>(configInt_.enabledExtensions_.size());
 	inst.ppEnabledExtensionNames = (configInt_.enabledExtensions_.empty() ? nullptr : &configInt_.enabledExtensions_[0]);
 
 	inst.pApplicationInfo = &app;
@@ -252,7 +252,7 @@ std::vector<vQueueFamilyProperties> zenith::vulkan::vInstanceImpl_::getQFPropert
 
 	vkGetPhysicalDeviceQueueFamilyProperties(dev, &cnt, &tmp[0]);
 
-	for (size_t i = 0; i < cnt; i++)
+	for (uint32_t i = 0; i < cnt; i++)
 	{
 		res[i].generalProperties = tmp[i];
 		for (const zenith::util::nameid &srf_uid : surfaces_.names())
