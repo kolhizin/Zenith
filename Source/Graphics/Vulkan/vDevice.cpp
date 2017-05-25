@@ -97,8 +97,8 @@ zenith::vulkan::vDeviceImpl_::vDeviceImpl_(const vInstanceImpl_ * inst, const vD
 	
 	std::vector<VkDeviceQueueCreateInfo> qcis(numFamilies);
 
-	size_t ind = 0;
-	for (size_t i = 0; i < qDistribution.size(); i++)
+	uint32_t ind = 0;
+	for (uint32_t i = 0; i < qDistribution.size(); i++)
 	{
 		if (qDistribution[i].empty())
 			continue;
@@ -107,7 +107,7 @@ zenith::vulkan::vDeviceImpl_::vDeviceImpl_(const vInstanceImpl_ * inst, const vD
 		qcis[ind].flags = 0;
 		qcis[ind].pNext = nullptr;
 		qcis[ind].queueFamilyIndex = i;
-		qcis[ind].queueCount = qDistribution[i].size();
+		qcis[ind].queueCount = static_cast<uint32_t>(qDistribution[i].size());
 		qcis[ind].pQueuePriorities = &qPriorities[i][0];
 	}
 	
@@ -119,15 +119,15 @@ zenith::vulkan::vDeviceImpl_::vDeviceImpl_(const vInstanceImpl_ * inst, const vD
 	dci.pNext = nullptr;
 	dci.flags = 0;
 
-	dci.queueCreateInfoCount = qcis.size();
+	dci.queueCreateInfoCount = static_cast<uint32_t>(qcis.size());
 	dci.pQueueCreateInfos = &qcis[0];
 
 	dci.pEnabledFeatures = &physDeviceFeatures_;
 
-	dci.enabledLayerCount = rawLayers_.size();
+	dci.enabledLayerCount = static_cast<uint32_t>(rawLayers_.size());
 	dci.ppEnabledLayerNames = (rawLayers_.empty() ? nullptr : &rawLayers_[0]);
 
-	dci.enabledExtensionCount = rawExts_.size();
+	dci.enabledExtensionCount = static_cast<uint32_t>(rawExts_.size());
 	dci.ppEnabledExtensionNames = (rawExts_.empty() ? nullptr : &rawExts_[0]);
 
 	VkResult res;
@@ -137,11 +137,11 @@ zenith::vulkan::vDeviceImpl_::vDeviceImpl_(const vInstanceImpl_ * inst, const vD
 	zenith::util::zLOG::log(zenith::util::LogType::REGULAR, "vDeviceImpl_: Device created.");
 	zenith::util::zLOG::log(zenith::util::LogType::REGULAR, "vDeviceImpl_: Getting queues.");
 
-	for (size_t i = 0; i < qDistribution.size(); i++)
+	for (uint32_t i = 0; i < qDistribution.size(); i++)
 	{
 		if (qDistribution[i].empty())
 			continue;
-		for (size_t j = 0; j < qDistribution[i].size(); j++)
+		for (uint32_t j = 0; j < qDistribution[i].size(); j++)
 		{
 			vQueueData_ q;
 

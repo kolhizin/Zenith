@@ -19,7 +19,7 @@ public:
 		double rnd = uDistr_(randomEngine_);
 		if(rnd < 0.01)
 			return zenith::util::nameid("ridge-top");
-		if (rnd > 0.90)
+		if (rnd > 0.8)
 		{
 			std::cout << "fork\n";
 			return zenith::util::nameid("ridge-fork");
@@ -47,7 +47,6 @@ int main()
 	pugi::xml_document xmlGenParams;
 	xmlGenParams.load_file("TerraGenConfig.xml");
 	
-
 	auto xmlGeneratorSection = xmlGenParams.child("TerraGenConfig").child("Generators");
 	for (const auto &ch : xmlGeneratorSection.children("Generator"))
 	{
@@ -77,7 +76,7 @@ int main()
 		const zenith::terragen::SegmentNode * sNode = dynamic_cast<const zenith::terragen::SegmentNode *>(terraFactory.getNode(i));
 		if (!sNode)
 			continue;
-		ridges << "[ [ " << sNode->point0().x << ", " << sNode->point0().y << " ], [ " << sNode->point1().x << ", " << sNode->point1().y << "] ],\n";
+		ridges << "[ [ " << sNode->point0().x << ", " << sNode->point0().y << ", " << sNode->point0().z << " ], [ " << sNode->point1().x << ", " << sNode->point1().y << ", " << sNode->point1().z << "] ],\n";
 	}
 	ridges << "])";
 	ridges.close();

@@ -316,7 +316,7 @@ double zenith::terragen::MountainContGenerator1::evaluateState_(const InternalSt
 	{
 		const BaseNode * ptr = arg->allNodesPtr[j];
 		if (ptr == arg->previousNode)
-			continue;
+      continue;
 		double dst = getNodeDistance(&m, ptr, 50.0) / nl;
 		if (dst < minDistance)
 			minDistance = dst;
@@ -365,108 +365,6 @@ size_t zenith::terragen::MountainContGenerator1::get(uint32_t nodeId, void * buf
 	new (buffPtr) MountainRidgeNode(stateFix_.p0_, stateVar_.p1_, stateFix_.sz_, stateFix_.od_, stateFix_.topNode_, curParent_, this);
 	return szReq;
 }
-/*
-uint32_t zenith::terragen::MountainForkGenerator1::generate(const GeneratorArguments * arg)
-{
-	setSeed_(arg->seedNumber);
-
-	uint32_t numG = 2;
-
-	const BaseNode * parent = arg->previousNode;
-	if (!parent)
-		throw TerraGenGeneratorException("MountainForkGenerator1::generate(): parent node expected to be non-null!");
-
-	GVec3 prevPoints[8];
-	uint8_t numPrevPoints = 1;
-
-	if (dynamic_cast<const MountainRidgeNode *>(parent))
-	{
-		prevPoints[0] = static_cast<const MountainRidgeNode *>(parent)->point0();
-		p0_ = static_cast<const MountainRidgeNode *>(parent)->point1();
-		const MountainRidgeNode * pNode = static_cast<const MountainRidgeNode *>(parent);
-		while (numPrevPoints < 8 && dynamic_cast<const MountainRidgeNode *>(pNode->getParent()))
-		{
-			pNode = static_cast<const MountainRidgeNode *>(pNode->getParent());
-			prevPoints[numPrevPoints] = pNode->point0();
-			numPrevPoints++;
-		}
-	}
-	else throw TerraGenGeneratorException("MountainForkGenerator1::generate(): parent node expected to be one of following types: MountainRidge!");
-
-	GVec2 mainDir = p0_ - prevPoints[0];
-	double mainDirL = glm::length(mainDir);
-	mainDir /= GVec2::value_type(mainDirL);
-	double bestDist = 0;
-	double sigmaL = mainDirL * 0.3;
-	double sigmaD = 0.2;
-	double mainDirDH = std::min<double>(0.0, (p0_.z - prevPoints[0].z)) * 0.8;
-
-	for (uint32_t i = 0; i < numTries_; i++)
-	{
-		double a0 = nDistr_(randomEngine_, std::normal_distribution<>::param_type(glm::pi<double>() * 0.3, glm::pi<double>() * 0.1));
-		a0 = glm::clamp(a0, glm::pi<double>() * 0.05, glm::pi<double>() * 0.4);
-		double a1 = nDistr_(randomEngine_, std::normal_distribution<>::param_type(a0, a0 * 0.2));
-		double a2 = nDistr_(randomEngine_, std::normal_distribution<>::param_type(-a0, a0 * 0.2));
-		a1 = glm::clamp(a1, glm::pi<double>() * 0.01, glm::pi<double>() * 0.5);
-		a2 = glm::clamp(a2, -glm::pi<double>() * 0.5, -glm::pi<double>() * 0.01);
-
-		glm::dmat2x2 r1(glm::cos(a1), -glm::sin(a1), glm::sin(a1), glm::cos(a1));
-		glm::dmat2x2 r2(glm::cos(a2), -glm::sin(a2), glm::sin(a2), glm::cos(a2));
-
-		GVec2 d1 = r1 * mainDir;
-		GVec2 d2 = r2 * mainDir;
-
-		double dl1 = glm::max<double>(0.2, nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDirL, sigmaL)));
-		double dl2 = glm::max<double>(0.2, nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDirL, sigmaL)));
-		double dlm = glm::max(dl1, dl2);
-		double dh1 = glm::min<double>(-0.2, nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDirDH, 1.0)));
-		double dh2 = glm::min<double>(-0.2, nDistr_(randomEngine_, std::normal_distribution<>::param_type(mainDirDH, 1.0)));
-
-		GVec3 p1 = p0_ + GVec3(d1.x * dl1, d1.y * dl1, dh1);
-		GVec3 p2 = p0_ + GVec3(d2.x * dl2, d2.y * dl2, dh2);
-		MountainRidgeNode m1(p0_, p1, parent, this);
-		MountainRidgeNode m2(p0_, p2, parent, this);
-
-		double minDistance = TerraGenInfty;
-		for (uint32_t j = 0; j < arg->allNodesNum; j++)
-		{
-			const BaseNode * ptr = arg->allNodesPtr[j];
-			if (ptr == parent)
-				continue;
-			double dst = getNodeDistance(&m1, ptr, 50.0);
-			if (dst < minDistance)
-				minDistance = dst;
-			dst = getNodeDistance(&m2, ptr, 50.0);
-			if (dst < minDistance)
-				minDistance = dst;
-		}
-		if (minDistance < 0.5 * glm::max(1.0, dlm))
-			continue;
-		if (minDistance > bestDist)
-		{
-			bestDist = minDistance;
-			p1_[0] = p1;
-			p1_[1] = p2;
-		}
-	}
-	if (isZero(bestDist))
-		setState_(0, arg->previousNode);
-	else
-		setState_(2, arg->previousNode);
-	return numGenerated_;
-}
-
-size_t zenith::terragen::MountainForkGenerator1::get(uint32_t nodeId, void * buffPtr, size_t buffSize) const
-{
-	checkId_(nodeId);
-	size_t szReq = checkSize_<MountainRidgeNode>(buffSize);
-	if (szReq == 0)
-		return 0;
-	new (buffPtr) MountainRidgeNode(p0_, p1_[nodeId], curParent_, this);
-	return szReq;
-}
-*/
-
 void zenith::terragen::MountainForkGenerator1::setFixedState_(const GeneratorArguments * arg)
 {
 	stateFix_.numPrevPts_ = 1;

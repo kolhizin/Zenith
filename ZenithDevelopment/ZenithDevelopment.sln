@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZD01_MultigridSolver", "ZD01_MultigridSolver\ZD01_MultigridSolver.vcxproj", "{3730FDE1-603E-4F05-B637-C3B2199A0CD8}"
 EndProject
@@ -10,6 +10,12 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZT01_ZIMGViewer", "ZT01_ZIMGViewer\ZT01_ZIMGViewer.vcxproj", "{3898979F-BBB4-4DE1-98B5-2EC22CD79C4A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZT02_ObjMapCodeGen", "ZT02_ObjMapCodeGen\ZT02_ObjMapCodeGen.vcxproj", "{353928E9-7C7E-4E9C-9B73-69FCAE932CA3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZD03_SystemFont", "ZD03_SystemFont\ZD03_SystemFont.vcxproj", "{379FBD24-A226-475E-B47B-D2911F4056BE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZT03_ZFontEdit", "ZT03_ZFontEdit\ZT03_ZFontEdit.vcxproj", "{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZT04_ZIMGEdit", "ZT04_ZIMGEdit\ZT04_ZIMGEdit.vcxproj", "{2D85AFD5-F376-4E32-914A-CC5053640672}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +57,30 @@ Global
 		{353928E9-7C7E-4E9C-9B73-69FCAE932CA3}.Release|x64.Build.0 = Release|x64
 		{353928E9-7C7E-4E9C-9B73-69FCAE932CA3}.Release|x86.ActiveCfg = Release|Win32
 		{353928E9-7C7E-4E9C-9B73-69FCAE932CA3}.Release|x86.Build.0 = Release|Win32
+		{379FBD24-A226-475E-B47B-D2911F4056BE}.Debug|x64.ActiveCfg = Debug|x64
+		{379FBD24-A226-475E-B47B-D2911F4056BE}.Debug|x64.Build.0 = Debug|x64
+		{379FBD24-A226-475E-B47B-D2911F4056BE}.Debug|x86.ActiveCfg = Debug|Win32
+		{379FBD24-A226-475E-B47B-D2911F4056BE}.Debug|x86.Build.0 = Debug|Win32
+		{379FBD24-A226-475E-B47B-D2911F4056BE}.Release|x64.ActiveCfg = Release|x64
+		{379FBD24-A226-475E-B47B-D2911F4056BE}.Release|x64.Build.0 = Release|x64
+		{379FBD24-A226-475E-B47B-D2911F4056BE}.Release|x86.ActiveCfg = Release|Win32
+		{379FBD24-A226-475E-B47B-D2911F4056BE}.Release|x86.Build.0 = Release|Win32
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Debug|x64.ActiveCfg = Debug|x64
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Debug|x64.Build.0 = Debug|x64
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Debug|x86.ActiveCfg = Debug|Win32
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Debug|x86.Build.0 = Debug|Win32
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Release|x64.ActiveCfg = Release|x64
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Release|x64.Build.0 = Release|x64
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Release|x86.ActiveCfg = Release|Win32
+		{C8CFED8F-76B1-45DD-97FA-77B9C22FCF83}.Release|x86.Build.0 = Release|Win32
+		{2D85AFD5-F376-4E32-914A-CC5053640672}.Debug|x64.ActiveCfg = Debug|x64
+		{2D85AFD5-F376-4E32-914A-CC5053640672}.Debug|x64.Build.0 = Debug|x64
+		{2D85AFD5-F376-4E32-914A-CC5053640672}.Debug|x86.ActiveCfg = Debug|Win32
+		{2D85AFD5-F376-4E32-914A-CC5053640672}.Debug|x86.Build.0 = Debug|Win32
+		{2D85AFD5-F376-4E32-914A-CC5053640672}.Release|x64.ActiveCfg = Release|x64
+		{2D85AFD5-F376-4E32-914A-CC5053640672}.Release|x64.Build.0 = Release|x64
+		{2D85AFD5-F376-4E32-914A-CC5053640672}.Release|x86.ActiveCfg = Release|Win32
+		{2D85AFD5-F376-4E32-914A-CC5053640672}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

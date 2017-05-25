@@ -363,7 +363,7 @@ zenith::vulkan::vMemoryBlock zenith::vulkan::vMemoryPool_::allocatePhysical_(vMe
 	{
 		blk = chnk->allocate(sz);
 	}
-	catch (zenith::vulkan::vMemoryException_OutOfMemory &outofmem) /*catch only out of mem excpetions*/
+	catch (zenith::vulkan::vMemoryException_OutOfMemory &) /*catch only out of mem excpetions*/
 	{
 		return vMemoryBlock(nullptr, nullptr, blk0);
 	}
@@ -405,7 +405,7 @@ zenith::vulkan::vMemoryBlock zenith::vulkan::vMemoryPool_::allocateLogical_(vMem
 			sp->addChunk(&chnk);
 			return sp->allocate(sz); /*may be exception here, but we assigned chunk before*/
 		}
-		catch (zenith::vulkan::vMemoryException_OutOfMemory &outofmem) /*catch only out of mem excpetions*/
+		catch (zenith::vulkan::vMemoryException_OutOfMemory &) /*catch only out of mem excpetions*/
 		{
 			continue;
 		}
@@ -516,7 +516,7 @@ zenith::vulkan::vMemoryManagerImpl_::vMemoryManagerImpl_(vDeviceImpl_ * dev, con
 
 	ZLOG_REGULAR("vMemoryManagerImpl_::vMemoryManagerImpl_: usage mapped. Creating individual memory pools.");
 
-	for (size_t i = 0; i < poolMapping.size(); i++)
+	for (uint32_t i = 0; i < poolMapping.size(); i++)
 		pools_.emplace_back(dev_, pools[poolMapping[i]], i);
 
 	ZLOG_REGULAR("vMemoryManagerImpl_::vMemoryManagerImpl_: memory manager created.");
@@ -535,7 +535,7 @@ zenith::vulkan::vMemoryBlock zenith::vulkan::vMemoryManagerImpl_::allocate(size_
 	if (!ptr)
 		throw vMemoryException("vMemoryManagerImpl_::allocate: failed to find suiting memory pool.");
 	auto res = ptr->allocate(size, alignment, static_cast<uint32_t>(layout), dedicatedMemory);
-	if (res.offset() & (alignment - 1) != 0)
+	if ((res.offset() & (alignment - 1)) != 0)
 	{
 		ptr->deallocate(res);
 		throw vMemoryException_NotAligned("vMemoryManagerImpl_::allocate: alignment requirement violated.");
