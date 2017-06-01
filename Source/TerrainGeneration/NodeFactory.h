@@ -199,11 +199,7 @@ namespace zenith
 			std::vector<NodeMeta> nodeMeta_;
 			uint8_t buffer_[BuffSize];
 			size_t bufferTop_ = 0;
-			/*
-			void * metaGeneratorUserData_ = nullptr;
-			PFN_TerraGenMetaGenerator metaGenerator_ = nullptr;
-			PFN_TerraGenMetaSetSeed metaSetSeed_ = nullptr;
-			*/
+			
 			inline void freeLastNNodes_(uint32_t numNodes)
 			{
 				for (uint32_t i = 0; i < numNodes; i++)
@@ -391,6 +387,22 @@ namespace zenith
 
 			inline size_t numNodes() const { return nodes_.size(); }
 			inline const BaseNode * getNode(size_t i) const { return nodes_.at(i); }
+
+			inline std::vector<const BaseNode *> getNodes() const //return by value, not by reference
+			{
+				return nodes_;
+			}
+			template<class T>
+			inline std::vector<const T *> getNodes() const //return by value, not by reference
+			{
+				std::vector<const T *> res;
+				res.reserve(nodes_.size());
+				for (const auto &p : nodes_)
+					if (dynamic_cast<const T *>(p))
+						res.push_back(static_cast<const T *>(p));
+				res.shrink_to_fit();
+				return res;
+			}
 		};
 
 		template<size_t NodeBuffSize, size_t GenBuffSize, size_t Align = 16>
@@ -439,6 +451,9 @@ namespace zenith
 			}
 			inline size_t numNodes() const { return nodeFactory_.numNodes(); }
 			inline const BaseNode * getNode(size_t i) const { return nodeFactory_.getNode(i); }
+			inline std::vector<const BaseNode *> getNodes() const { return nodeFactory_.getNodes(); }
+			template<class T>
+			inline std::vector<const T *> getNodes() const{return nodeFactory_.getNodes<T>(); }
 		};
 	}
 }
