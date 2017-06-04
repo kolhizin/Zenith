@@ -515,8 +515,8 @@ void initTexture(const zenith::util::zfile_format::zImgDescription &img)
 	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R32G32B32F)
 	{
 		format = VK_FORMAT_R32G32B32_SFLOAT;
-		actNumChan = 1;
-		actChanSize = 1;
+		actNumChan = 3;
+		actChanSize = 4;
 	}
 	else throw std::runtime_error("initTexture: unsupported texture format!");
 

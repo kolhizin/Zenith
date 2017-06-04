@@ -122,8 +122,8 @@ namespace zenith
 				inline GridDimensionType xStep() const { return (dimBox_.xMax - dimBox_.xMin) / (xSize_ - 1); }
 				inline GridDimensionType yStep() const { return (dimBox_.yMax - dimBox_.yMin) / (ySize_ - 1); }
 
-				inline GridDimensionType getX(SizeType x) const { return dimBox_.xMin + xStep() * x; }
-				inline GridDimensionType getY(SizeType y) const { return dimBox_.yMin + yStep() * y; }
+				inline GridDimensionType getX(SizeType x) const { return dimBox_.xMin + (xSize_ > 1 ? xStep() * x : dimBox_.xSize() * GridDimensionType(0.5)); }
+				inline GridDimensionType getY(SizeType y) const { return dimBox_.yMin + (ySize_ > 1 ? yStep() * y : dimBox_.ySize() * GridDimensionType(0.5)); }
 
 				inline bool validLinear() const { return xStride_ > 0; }
 				inline bool validGrid() const { return (yStride_ > 0) && (xStride_ > 0); }

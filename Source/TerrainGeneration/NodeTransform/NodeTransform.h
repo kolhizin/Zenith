@@ -37,6 +37,16 @@ namespace zenith
 			res.z /= n;
 			return res;
 		}
+		template<class T>
+		T normalizeGradient(const T &g)
+		{
+			glm::tvec2<typename T::value_type, glm::packed_highp> v = g;
+			typename T::value_type l = glm::length(v);
+			const typename T::value_type lCutoff = 1e-10;
+			if(l > lCutoff)
+				return g / l;
+			return T(0,0,0);
+		}
 
 		template<class T>
 		T weightedMix(const T &t1, const T &t2, double w1, double w2)
@@ -104,16 +114,17 @@ namespace zenith
 			for(uint32_t yi = 0; yi < wWeights.ySize(); yi++)
 				for (uint32_t xi = 0; xi < wWeights.xSize(); xi++)
 				{
-					auto &gWeight = gWeights.get(xi, yi);
 					const auto &wWeight = wWeights.get(xi, yi);
 
 					if (wWeight.w > 0.0)
 					{
 						auto tWeight = normalizeWeight(wWeight);
-						gWeight = WElem(Elem(tWeight.x), Elem(tWeight.z));
+						auto gWeight = WElem(Elem(tWeight.x), Elem(tWeight.z));
+						
+						gWeights.get(xi, yi) = gWeight;
 						
 						gGradients.get(xi, yi) = (tWeight.x > Elem(0) ?
-							GElem(wGradients.get(xi, yi)) : GElem(Elem(0), Elem(0), Elem(0)));
+							normalizeGradient(GElem(wGradients.get(xi, yi))) : GElem(Elem(0), Elem(0), Elem(0)));
 
 						gRHS.get(xi, yi) = (tWeight.y > Elem(0) ? wRHS.get(xi, yi) : Elem(0));
 
@@ -121,7 +132,7 @@ namespace zenith
 					}
 					else
 					{
-						gWeight = WElem(Elem(0), Elem(0));
+						gWeights.get(xi,yi) = WElem(Elem(0), Elem(0));
 
 						gGradients.get(xi, yi) = GElem(Elem(0), Elem(0), Elem(0));
 						gConstraints.get(xi, yi) = Elem(0);
@@ -138,8 +149,8 @@ namespace zenith
 			util::math::GridAccessor2D<Elem, Dim> *gRHS,
 			uint32_t numGrids, uint8_t * wrkBuff = nullptr, uint32_t wrkBuffSize = 0)
 		{
-			auto xSize = gWeights[0].xSize();
-			auto ySize = gWeights[0].ySize();
+			auto xSize = gWeights[numGrids - 1].xSize();
+			auto ySize = gWeights[numGrids - 1].ySize();
 			size_t reqSize0 = xSize * ySize;
 			size_t reqSize = reqSize0 * (4 + 3 + 1 + 1) * sizeof(double);
 			std::unique_ptr<uint8_t[]> ownBuffer;

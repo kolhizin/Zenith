@@ -88,12 +88,14 @@ namespace zenith
 				{
 					gWeights[stepInd] = GridAccessor2D<WElem, Dim>(reinterpret_cast<WElem *>(ptr), xSize0, ySize0);
 					ptr += sizeof(WElem) * xSize0 * ySize0;
+					fillGrid(gWeights[stepInd], WElem(Elem(0), Elem(0)));
 
 					gGradients[stepInd] = GridAccessor2D<GElem, Dim>(reinterpret_cast<GElem *>(ptr), xSize0, ySize0);
 					ptr += sizeof(GElem) * xSize0 * ySize0;
 
 					gRHS[stepInd] = GridAccessor2D<Elem, Dim>(reinterpret_cast<Elem *>(ptr), xSize0, ySize0);
 					ptr += sizeof(Elem) * xSize0 * ySize0;
+					fillGrid(gRHS[stepInd], Elem(0));
 
 					gConstraints[stepInd] = GridAccessor2D<Elem, Dim>(reinterpret_cast<Elem *>(ptr), xSize0, ySize0);
 					ptr += sizeof(Elem) * xSize0 * ySize0;
@@ -323,10 +325,10 @@ namespace zenith
 							const WElem &w = gWeight->get(xi, yi);
 							Elem res = Elem(0);
 
-							if (w.x > Elem(0))
-								res += w.x * gConstraint->get(xi, yi);
-
 							if (w.y > Elem(0))
+								res += w.y * gConstraint->get(xi, yi);
+
+							if (w.x > Elem(0))
 							{
 								const GElem &g = gGradient->get(xi, yi);
 								auto gxi = multigrid_update_index_by_gradient_(g.x, xi, xSize - 1);
@@ -335,7 +337,7 @@ namespace zenith
 								auto gy = gSrc(xi, gyi);
 								auto gPrev = gx * g.x * g.x + gy * g.y * g.y;
 								auto gStep = xh * g.x * g.x + yh * g.y * g.y;
-								res += w.y * (gPrev + gStep * g.z);
+								res += w.x * (gPrev + gStep * g.z);
 							}
 
 							gDst(xi, yi) = res + (Elem(1) - w.x - w.y) * ff;

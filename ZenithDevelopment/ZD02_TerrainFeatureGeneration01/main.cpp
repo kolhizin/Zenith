@@ -34,6 +34,50 @@ zenith::util::math::GridAccessor2D<Elem, Dim> newGrid(const zenith::util::math::
 	return res;
 }
 
+
+zenith::util::math::GridAccessor2D<glm::vec3> newGridW(const zenith::util::math::GridAccessor2D<glm::dvec2> &src)
+{
+	glm::vec3 * data = new glm::vec3[src.xSize() * src.ySize()];
+	zenith::util::math::GridAccessor2D<glm::vec3> res(data, src.xSize(), src.ySize());
+	for (zenith::util::math::GridAccessor2D<glm::vec3>::SizeType xi = 0; xi < src.xSize(); xi++)
+		for (zenith::util::math::GridAccessor2D<glm::vec3>::SizeType yi = 0; yi < src.ySize(); yi++)
+		{
+			const auto &v = src.get(xi, yi);
+			res.get(xi, yi) = glm::vec3(v.x, v.y, 1-v.x-v.y);
+		}
+	res.setDimensions(src.xMin(), src.xMax(), src.yMin(), src.yMax());
+	return res;
+}
+
+zenith::util::math::GridAccessor2D<float> newGridWx(const zenith::util::math::GridAccessor2D<glm::dvec2> &src)
+{
+	float * data = new float[src.xSize() * src.ySize()];
+	zenith::util::math::GridAccessor2D<float> res(data, src.xSize(), src.ySize());
+	for (zenith::util::math::GridAccessor2D<float>::SizeType xi = 0; xi < src.xSize(); xi++)
+		for (zenith::util::math::GridAccessor2D<float>::SizeType yi = 0; yi < src.ySize(); yi++)
+		{
+			const auto &v = src.get(xi, yi);
+			res.get(xi, yi) = v.x;
+		}
+	res.setDimensions(src.xMin(), src.xMax(), src.yMin(), src.yMax());
+	return res;
+}
+
+
+zenith::util::math::GridAccessor2D<float> newGridWy(const zenith::util::math::GridAccessor2D<glm::dvec2> &src)
+{
+	float * data = new float[src.xSize() * src.ySize()];
+	zenith::util::math::GridAccessor2D<float> res(data, src.xSize(), src.ySize());
+	for (zenith::util::math::GridAccessor2D<float>::SizeType xi = 0; xi < src.xSize(); xi++)
+		for (zenith::util::math::GridAccessor2D<float>::SizeType yi = 0; yi < src.ySize(); yi++)
+		{
+			const auto &v = src.get(xi, yi);
+			res.get(xi, yi) = v.y;
+		}
+	res.setDimensions(src.xMin(), src.xMax(), src.yMin(), src.yMax());
+	return res;
+}
+
 template<class Elem, class Dim>
 void deleteGrid(zenith::util::math::GridAccessor2D<Elem, Dim> &grid)
 {
@@ -56,6 +100,42 @@ void saveGridZIMG(const zenith::util::math::GridAccessor2D<glm::vec3> &gSrc, con
 
 	descr.imageType = zenith::util::zfile_format::ImageType::IMG2D;
 	descr.imageFormat = zenith::util::zfile_format::ImageFormat::R32G32B32F;
+	descr.mipLevels = 1;
+	descr.arraySize = 1;
+	descr.depth = 1;
+
+	descr.width = gSrc.xSize();
+	descr.height = gSrc.ySize();
+
+	descr.levelDescr[0] = new zenith::util::zfile_format::zImgDataDescription;
+
+	uint8_t pixSize = zenith::util::zfile_format::getPixelSize(descr.imageFormat);
+	uint64_t rowPitch = pixSize * descr.width;
+	uint64_t dataSize = rowPitch * descr.height;
+
+	auto &dd = *(descr.levelDescr[0]);
+
+	dd = zenith::util::zfile_format::zImgDataDescription::create2D(descr.width, descr.height, rowPitch);
+	descr.levelData[0] = gSrc.data();
+
+
+	uint64_t fSize = descr.getFullSize();
+	uint8_t * fData = new uint8_t[fSize];
+	zenith::util::zfile_format::zimg_to_mem(descr, fData, fSize);
+
+	auto futW = writeFile(fname, fData, fSize);
+	futW.get();
+
+	delete[] fData;
+	delete descr.levelDescr[0];
+}
+
+void saveGridZIMG(const zenith::util::math::GridAccessor2D<glm::vec2> &gSrc, const char * fname)
+{
+	zenith::util::zfile_format::zImgDescription descr;
+
+	descr.imageType = zenith::util::zfile_format::ImageType::IMG2D;
+	descr.imageFormat = zenith::util::zfile_format::ImageFormat::R32G32F;
 	descr.mipLevels = 1;
 	descr.arraySize = 1;
 	descr.depth = 1;
@@ -142,7 +222,7 @@ int main()
 	}
 	
 	terraFactory.setMainMetaGenerator("MntMetaGen1");
-	terraFactory.setSeed(7);
+	terraFactory.setSeed(2);
 
 	uint32_t numWaves = 10;
 	for (uint32_t i = 0; i < numWaves; i++)
@@ -203,24 +283,20 @@ int main()
 		xMin, xMax, yMin, yMax, &gridsWeights[0],
 		&gridsGradients[0], &gridsRHS[0], &gridsConstraints[0], numGrids);
 	
+	auto nodes = terraFactory.getNodes();
+	std::vector<const zenith::terragen::BaseNode *> rNodes;
+	for (auto i = 0; i < 29; i++)
+		rNodes.push_back(nodes[i]);
+
 	zenith::terragen::transformNodeToMGSsetup(terraFactory.getNodes(),
 		&gridsWeights[0], &gridsGradients[0], &gridsConstraints[0], &gridsRHS[0],
-		numGrids, multigridSetupBuff, multigridSetupSize);
-
-	for(size_t yi = 0; yi < gridsWeights[4].ySize(); yi++)
-		for (size_t xi = 0; xi < gridsWeights[4].xSize(); xi++)
-		{
-			const auto &r = gridsGradients[4].get(xi, yi);
-			if (gridsWeights[4].get(xi, yi).y > 0.0)
-				std::cout << "strange";
-//			std::cout << xi << " " << yi << " " << r.x << " " << r.y << " " << r.z << "\n";
-		}
-
+		numGrids);
 
 	zenith::util::math::multigrid_run<glm::dvec2, glm::dvec3, double, double>(gridResult,
 		multigridRunBuff, multigridRunSize,
 		//"j10uj100uj100uj100uj100uj100uj100uj100uj10uj10",
-		"j10uj10uj10uj10uj10uj10uj10uj10uj10uj10",
+		//"j10uj10uj10uj10uj10uj10uj10uj10uj10uj10",
+		"j10uj100uj100uj100uj100uj100uj100uj100uj100uj10uj10",
 		nullptr, &gridsWeights[0], &gridsGradients[0], &gridsConstraints[0], &gridsRHS[0],
 		numGrids);
 
@@ -263,6 +339,9 @@ int main()
 	*/
 	auto gridRes = newGrid<float>(gridResult);
 	saveGridZIMG(gridRes, "initialGrid.zimg");
+	auto gridWRes = newGridW(gridsWeights[10]);
+	saveGridZIMG(gridWRes, "weightGrid.zimg");
+
 
 	delete pTerraFactory;
 	/*
