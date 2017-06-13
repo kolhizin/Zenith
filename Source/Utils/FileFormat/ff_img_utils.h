@@ -11,6 +11,10 @@ namespace zenith
 			zImgDescription zimg_clone(const zImgDescription &src);
 			zImgDescription zimg_change_format(const zImgDescription &src, ImageFormat dstFormat);
 			void zimg_free(zImgDescription &d);
+
+			//value ptr should point to data of pixel size!
+			void zimg_fill(zImgDescription &d, uint32_t mipLevel, void * valuePtr);
+			void zimg_fill(zImgDescription &d, void * valuePtr);
 		}
 	}
 }
