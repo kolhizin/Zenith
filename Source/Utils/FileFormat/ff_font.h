@@ -179,9 +179,16 @@ namespace zenith
 					glyphNum_ = numGlyphs;
 					glyphStride_ = glyphStride;
 				}
+				inline void setGlyphs(const zFontDescription &fnt)
+				{
+					glyphs_ = fnt.glyphs_;
+					glyphNum_ = fnt.glyphNum_;
+					glyphStride_ = fnt.glyphStride_;
+				}
 				inline void setEncoding(const char * p) { zstrcpy(encodingName, p); }
 				inline void setName(const char * p) { zstrcpy(fontName, p); }
 				inline uint32_t numGlyphs() const {	return glyphNum_;}
+				inline uint32_t glyphStride()const { return glyphStride_; }
 				inline zFontGlyphDescription * glyphsPtr() { return glyphs_; }
 				inline const zFontGlyphDescription * glyphsPtr() const { return glyphs_; }
 				inline zFontGlyphDescription &getGlyph(uint32_t id)
@@ -205,6 +212,7 @@ namespace zenith
 					res.intAtlasImage = zImgDescription::empty();
 					res.fontType = FontType::UNDEF;
 					res.fontSize = 0;
+					return res;
 				}
 			};
 

@@ -44,5 +44,8 @@
     <ClInclude Include="..\..\Source\Utils\str_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utils\FileFormat\ff_util_vulkan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

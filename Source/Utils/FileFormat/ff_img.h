@@ -16,6 +16,9 @@ namespace zenith
 				R8G8B8A8, R16G16B16A16, R32G32B32A32, R32G32B32A32F,
 			};
 
+			enum class ImageFormatUsage : uint8_t {UNDEF = 0,
+				UNORM, SNORM, UINT, SINT, FLOAT};
+
 			constexpr uint8_t getPixelSizeConstExpr(ImageFormat f)
 			{
 				return
@@ -62,7 +65,56 @@ namespace zenith
 				default: throw ZFileException("getPixelSize: unsupported format.");
 				}
 			}
-
+			//returns number of channels
+			inline uint8_t getNumChannels(ImageFormat f)
+			{
+				switch (f)
+				{
+				case zenith::util::zfile_format::ImageFormat::UNDEF: return 0;
+				case zenith::util::zfile_format::ImageFormat::R8: return 1;
+				case zenith::util::zfile_format::ImageFormat::R16: return 1;
+				case zenith::util::zfile_format::ImageFormat::R32: return 1;
+				case zenith::util::zfile_format::ImageFormat::R32F: return 1;
+				case zenith::util::zfile_format::ImageFormat::R8G8: return 2;
+				case zenith::util::zfile_format::ImageFormat::R16G16: return 2;
+				case zenith::util::zfile_format::ImageFormat::R32G32: return 2;
+				case zenith::util::zfile_format::ImageFormat::R32G32F: return 2;
+				case zenith::util::zfile_format::ImageFormat::R8G8B8: return 3;
+				case zenith::util::zfile_format::ImageFormat::R16G16B16: return 3;
+				case zenith::util::zfile_format::ImageFormat::R32G32B32: return 3;
+				case zenith::util::zfile_format::ImageFormat::R32G32B32F: return 3;
+				case zenith::util::zfile_format::ImageFormat::R8G8B8A8: return 4;
+				case zenith::util::zfile_format::ImageFormat::R16G16B16A16: return 4;
+				case zenith::util::zfile_format::ImageFormat::R32G32B32A32: return 4;
+				case zenith::util::zfile_format::ImageFormat::R32G32B32A32F: return 4;
+				default: throw ZFileException("getNumChannels: unsupported format.");
+				}
+			}
+			//returns channel size in bits
+			inline uint8_t getChannelSize(ImageFormat f, uint32_t chanId = 0)
+			{
+				switch (f)
+				{
+				case zenith::util::zfile_format::ImageFormat::UNDEF: return 0;
+				case zenith::util::zfile_format::ImageFormat::R8: return 8;
+				case zenith::util::zfile_format::ImageFormat::R16: return 16;
+				case zenith::util::zfile_format::ImageFormat::R32: return 32;
+				case zenith::util::zfile_format::ImageFormat::R32F: return 32;
+				case zenith::util::zfile_format::ImageFormat::R8G8: return 8;
+				case zenith::util::zfile_format::ImageFormat::R16G16: return 16;
+				case zenith::util::zfile_format::ImageFormat::R32G32: return 32;
+				case zenith::util::zfile_format::ImageFormat::R32G32F: return 32;
+				case zenith::util::zfile_format::ImageFormat::R8G8B8: return 8;
+				case zenith::util::zfile_format::ImageFormat::R16G16B16: return 16;
+				case zenith::util::zfile_format::ImageFormat::R32G32B32: return 32;
+				case zenith::util::zfile_format::ImageFormat::R32G32B32F: return 32;
+				case zenith::util::zfile_format::ImageFormat::R8G8B8A8: return 8;
+				case zenith::util::zfile_format::ImageFormat::R16G16B16A16: return 16;
+				case zenith::util::zfile_format::ImageFormat::R32G32B32A32: return 32;
+				case zenith::util::zfile_format::ImageFormat::R32G32B32A32F: return 32;
+				default: throw ZFileException("getChannelSize: unsupported format.");
+				}
+			}
 			inline const char * ImageFormat2str(ImageFormat f)
 			{
 				switch (f)
@@ -299,6 +351,10 @@ namespace zenith
 				inline uint64_t getRowPitch() const { return rowPitch.get(); }
 				inline uint64_t getDepthPitch() const { return depthPitch.get(); }
 				inline uint64_t getArrayPitch() const { return arrayPitch.get(); }
+				inline uint32_t getWidth() const { return width; }
+				inline uint32_t getHeight() const { return height; }
+				inline uint32_t getDepth() const { return depth; }
+				inline uint32_t getArraySize() const { return arraySize; }
 			};
 			struct zImgDescription
 			{
@@ -341,7 +397,8 @@ namespace zenith
 					res.imageType = ImageType::UNDEF;
 					res.imageFormat = ImageFormat::UNDEF;
 					res.mipLevels = 0;
-					res.width = res.height = res.depth = res.arraySize = 0;					
+					res.width = res.height = res.depth = res.arraySize = 0;	
+					return res;
 				}
 			};
 
