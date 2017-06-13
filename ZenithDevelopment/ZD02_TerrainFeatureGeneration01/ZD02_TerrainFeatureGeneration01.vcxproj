@@ -153,6 +153,8 @@
     <ClCompile Include="..\..\Source\TerrainGeneration\GeometryNodes.cpp" />
     <ClCompile Include="..\..\Source\TerrainGeneration\MountainNode.cpp" />
     <ClCompile Include="..\..\Source\TerrainGeneration\NodeFactory.cpp" />
+    <ClCompile Include="..\..\Source\TerrainGeneration\NodeTransform\MountainTransform.cpp" />
+    <ClCompile Include="..\..\Source\TerrainGeneration\NodeTransform\NodeTransform.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -162,7 +164,10 @@
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeDispatcher.h" />
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeFactory.h" />
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeGenerator.h" />
+    <ClInclude Include="..\..\Source\TerrainGeneration\NodeTransform\MountainTransform.h" />
+    <ClInclude Include="..\..\Source\TerrainGeneration\NodeTransform\NodeTransform.h" />
     <ClInclude Include="..\..\Source\Utils\Math\categorical_distribution.h" />
+    <ClInclude Include="..\..\Source\Utils\Math\common_types.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="TerraGenConfig.xml">

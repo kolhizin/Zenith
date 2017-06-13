@@ -20,6 +20,7 @@ void init()
 	ZLOG_REGULAR("init: FileSystem created.");
 
 	pugi::xml_document docA;
+
 	auto resXML = readFile(appConfFilename.c_str(), (uint8_t *)buff1, BUFF_SIZE_XML);
 	auto resIMG0 = readFile(texFilename.c_str());
 

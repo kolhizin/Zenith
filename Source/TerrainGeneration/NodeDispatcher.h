@@ -46,5 +46,21 @@ namespace zenith
 			}
 			throw TerraGenDispatcherException("getNodeDistance(): unknown arguments for getNodeDistance!");
 		}
+		inline double getNodeDistance(const GVec2 &p, const BaseNode * p2, double distanceCutoff)
+		{
+			PointNode pn(GVec3(p, 0.0), nullptr, nullptr);
+			if (p2->distanceDispatchGroup() == BaseNode::DistanceDispatchGroup)
+				throw TerraGenDispatcherException("getNodeDistance(): one of nodes is BaseNode!");
+			if (p2->distanceDispatchGroup() == RootNode::DistanceDispatchGroup)
+				return TerraGenInfty;
+			
+			if (p2->distanceDispatchGroup() == PointNode::DistanceDispatchGroup)
+				return getNodeDistance(&pn, static_cast<const PointNode *>(p2));
+			if (p2->distanceDispatchGroup() == SegmentNode::DistanceDispatchGroup)
+				return getNodeDistance(&pn, static_cast<const SegmentNode *>(p2));
+			
+			throw TerraGenDispatcherException("getNodeDistance(): unknown arguments for getNodeDistance!");
+		}
+
 	}
 }

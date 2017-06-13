@@ -27,6 +27,12 @@
     <ClCompile Include="..\..\Source\TerrainGeneration\NodeFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\TerrainGeneration\NodeTransform\NodeTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\TerrainGeneration\NodeTransform\MountainTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\TerrainGeneration\NodeGenerator.h">
@@ -48,6 +54,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utils\Math\categorical_distribution.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\TerrainGeneration\NodeTransform\NodeTransform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\TerrainGeneration\NodeTransform\MountainTransform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utils\Math\common_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

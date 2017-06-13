@@ -512,7 +512,13 @@ void initTexture(const zenith::util::zfile_format::zImgDescription &img)
 		actNumChan = 1;
 		actChanSize = 4;
 	}
-	else throw std::runtime_error("initTexture: unsupported number of textures!");
+	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R32G32B32F)
+	{
+		format = VK_FORMAT_R32G32B32_SFLOAT;
+		actNumChan = 3;
+		actChanSize = 4;
+	}
+	else throw std::runtime_error("initTexture: unsupported texture format!");
 
 
 	texture = new zenith::vulkan::vTextureAutoImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
