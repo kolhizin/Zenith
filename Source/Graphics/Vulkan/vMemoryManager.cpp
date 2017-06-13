@@ -410,6 +410,8 @@ zenith::vulkan::vMemoryBlock zenith::vulkan::vMemoryPool_::allocateLogical_(vMem
 			continue;
 		}
 	}
+	if (sz > conf_.physicalChunk.maxChunkSize)
+		throw zenith::vulkan::vMemoryException_OutOfMemory("vMemoryPool_::allocateLogical_: requested size exceeds max chunk size!");
 
 	addPhysicalChunk_(conf_.physicalChunk.maxChunkSize);
 	sp->addChunk(&memChunks_.back());

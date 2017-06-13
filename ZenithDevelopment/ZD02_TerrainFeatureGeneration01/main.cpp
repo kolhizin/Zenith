@@ -296,7 +296,7 @@ int main()
 		multigridRunBuff, multigridRunSize,
 		//"j10uj100uj100uj100uj100uj100uj100uj100uj10uj10",
 		//"j10uj10uj10uj10uj10uj10uj10uj10uj10uj10",
-		"j10uj100uj100uj100uj100uj100uj100uj100uj100uj10uj10",
+		"j100uj1000uj1000uj1000uj1000uj100uj100uj100uj100uj10uj10",
 		nullptr, &gridsWeights[0], &gridsGradients[0], &gridsConstraints[0], &gridsRHS[0],
 		numGrids);
 
