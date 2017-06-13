@@ -36,6 +36,302 @@ namespace zenith
 				}
 				virtual ~ZFileException() {}
 			};
+
+			template<class SizeType = uint64_t>
+			class zf_memaddr1d
+			{
+				SizeType elemSize_;
+				SizeType elemStride_;
+			public:
+				typedef SizeType SizeType;
+
+				zf_memaddr1d(SizeType elemSize = 1) : elemStride_(elemSize), elemSize_(elemSize) {}
+				zf_memaddr1d(SizeType elemSize, SizeType elemStride) : elemStride_(elemStride), elemSize_(elemSize) {}
+				zf_memaddr1d(const zf_memaddr1d &z) : elemStride_(z.elemStride_), elemSize_(z.elemSize_) {}
+				zf_memaddr1d &operator =(const zf_memaddr1d &z)
+				{
+					elemSize_ = z.elemSize_;
+					elemStride_ = z.elemStride_;
+				}
+
+				inline bool is_valid() const { return elemSize_ > 0 && elemStride_ >= elemSize_; }
+				inline bool is_dense() const { return elemSize_ > 0 && elemStride_ == elemSize_; }
+
+				inline SizeType elem_stride() const { return elemStride_; }
+				inline SizeType elem_size() const { return elemSize_; }
+
+				inline SizeType offset(SizeType ind) const { return elemStride_ * ind; }
+				inline void * addr(SizeType ind, void * ptr = nullptr) const { return static_cast<uint8_t *>(ptr) + offset(ind); }
+			};
+
+			template<class SizeType = uint64_t>
+			class zf_memaddr2d
+			{
+				zf_memaddr1d<SizeType> elemInfo_;
+				SizeType rowPitch_;
+			public:
+				typedef SizeType SizeType;
+
+				zf_memaddr2d(SizeType elemSize = 1) : rowPitch_(elemSize), elemInfo_(elemSize) {}
+				zf_memaddr2d(SizeType elemSize, SizeType elemStride, SizeType rowPitch) : elemInfo_(elemSize, elemStride), rowPitch_(rowPitch) {}
+				zf_memaddr2d(const zf_memaddr2d &z) : elemInfo_(z.elemInfo_), rowPitch_(z.rowPitch_) {}
+				zf_memaddr2d &operator =(const zf_memaddr2d &z)
+				{
+					elemInfo_ = z.elemInfo_;
+					rowPitch_ = z.rowPitch_;
+				}
+
+				inline bool is_valid() const { return elemInfo_.is_valid() && rowPitch_ > elemInfo_.elemStride(); }
+				inline bool is_dense1d() const { return elemInfo_.is_dense(); }
+				inline bool is_dense2d(SizeType rowSize) const { return elemInfo_.is_dense() && rowPitch_ == rowSize; }
+
+
+				inline SizeType row_pitch() const { return rowPitch_; }
+				inline SizeType elem_stride() const { return elemInfo_.elem_stride(); }
+				inline SizeType elem_size() const { return elemInfo_.elem_size(); }
+				
+				inline SizeType offset(SizeType rowInd) const { return rowInd * rowPitch_; }
+				inline SizeType offset(SizeType rowInd, SizeType elemInd) const { return rowInd * rowPitch_ + elemInfo_.offset(elemInd); }
+				inline void * addr(SizeType rowInd, void * ptr = nullptr) const { return static_cast<uint8_t *>(ptr) + offset(rowInd); }
+				inline void * addr(SizeType rowInd, SizeType elemInd, void * ptr = nullptr) const { return static_cast<uint8_t *>(ptr) + offset(rowInd, elemInd); }
+			};
+
+			template<class SizeType = uint64_t>
+			class zf_memregion1d
+			{
+				void * ptr_;
+				zf_memaddr1d<SizeType> memAddr_;
+				SizeType numElem_;
+
+				inline SizeType checkIndex_(SizeType ind) const
+				{
+					if (ind >= numElem_)
+						throw ZFileException("zf_memregion1d: index out of bound!");
+					return ind;
+				}
+			public:
+				typedef SizeType SizeType;
+				zf_memregion1d(SizeType elemSize = 1, SizeType numElem = 1, void * ptr = nullptr)
+					: memAddr_(elemSize), numElem_(numElem), ptr_(ptr) {}
+				zf_memregion1d(const zf_memaddr1d<SizeType> &memAddr, SizeType numElem = 1, void * ptr = nullptr)
+					: memAddr_(memAddr), numElem_(numElem), ptr_(ptr) {}
+				zf_memregion1d(const zf_memregion1d &z) : memAddr_(z.memAddr_), numElem_(z.numElem_), ptr_(z.ptr_) {}
+				zf_memregion1d &operator =(const zf_memregion1d &z)
+				{
+					memAddr_ = z.memAddr_;
+					numElem_ = z.numElem_;
+					ptr_ = z.ptr_;
+				}
+
+				inline bool is_valid() const { return memAddr_.is_valid() && numElem_ > 0; }
+				inline bool is_dense() const { return memAddr_.is_dense(); }
+
+				inline SizeType elem_stride() const { return memAddr_.elem_stride(); }
+				inline SizeType elem_size() const { return memAddr_.elem_size(); }
+				inline SizeType elem_num() const { return numElem_; }
+				inline void * ptr() const { return ptr_; }
+
+				inline SizeType size_dense() const { return numElem_ * memAddr_.elem_size(); }
+				inline SizeType size_full() const { return numElem_ * memAddr_.elem_stride(); }
+
+				inline void * begin() const { return ptr_; }
+				inline void * end() const { return static_cast<uint8_t *>(ptr_) + size_full(); }
+
+				inline SizeType offset(SizeType ind) const { return memAddr_.offset(checkIndex_(ind)); }
+				inline void * addr(SizeType ind) const { return static_cast<uint8_t *>(ptr_) + memAddr_.offset(checkIndex_(ind)); }
+
+				template<class T>
+				inline T &get(SizeType ind) { return *static_cast<T *>(addr(ind)); }
+				template<class T>
+				inline const T &get(SizeType ind) const { return *static_cast<const T *>(addr(ind)); }
+
+				inline static bool compatible(const zf_memregion1d<SizeType> &m1, const zf_memregion1d<SizeType> &m2)
+				{
+					return (m1.elem_size() == m2.elem_size() && m1.elem_num() == m2.elem_num());
+				}
+
+				inline static void memcpy(zf_memregion1d<SizeType> &dst, const zf_memregion1d<SizeType> &src)
+				{
+					if (!compatible(dst, src))
+						throw ZFileException("zf_memregion1d::memcpy: regions are not compatible!");
+					if (dst.is_dense() && src.is_dense())
+						memcpy_s(dst.ptr(), dst.size_full(), src.ptr(), src.size_full());
+					else
+					{
+						uint8_t * sp = static_cast<uint8_t *>(src.ptr());
+						uint8_t * dp = static_cast<uint8_t *>(dst.ptr());
+						SizeType sStride = src.elem_stride();
+						SizeType dStride = dst.elem_stride();
+						SizeType eSize = src.elem_size();
+						SizeType eNum = src.elem_num();
+						for (SizeType i = 0; i < eNum; i++)
+						{
+							memcpy_s(dp, eSize, sp, eSize);
+							dp += dStride;
+							sp += sStride;
+						}
+					}
+				}
+				inline static void memcpy(void * dst, SizeType dstSize, const zf_memregion1d<SizeType> &src)
+				{
+					zf_memaddr1d<SizeType> dma(src.elem_size(), src.elem_size());
+					zf_memregion1d<SizeType> dmr(dma, src.elem_num(), dst);
+					if(dmr.size_full() > dstSize)
+						throw ZFileException("zf_memregion1d::memcpy: dstSize is not enough!");
+					memcpy(dmt, src);
+				}
+				inline static void memcpy(zf_memregion1d<SizeType> &dst, void * src, SizeType srcSize)
+				{
+					zf_memaddr1d<SizeType> sma(dst.elem_size(), dst.elem_size());
+					zf_memregion1d<SizeType> smr(sma, dst.elem_num(), src);
+					if (smr.size_full() > srcSize)
+						throw ZFileException("zf_memregion1d::memcpy: srcSize is not enough!");
+					memcpy(dst, smr);
+				}
+			};
+
+			template<class SizeType = uint64_t>
+			class zf_memregion2d
+			{
+				void * ptr_;
+				zf_memaddr2d<SizeType> memAddr_;
+				SizeType numElem_, numRow_;
+
+				inline SizeType checkElemIndex_(SizeType ind) const
+				{
+					if (ind >= numElem_)
+						throw ZFileException("zf_memregion2d: element index out of bound!");
+					return ind;
+				}
+
+				inline SizeType checkRowIndex_(SizeType ind) const
+				{
+					if (ind >= numRow_)
+						throw ZFileException("zf_memregion2d: row index out of bound!");
+					return ind;
+				}
+			public:
+				typedef SizeType SizeType;
+				zf_memregion2d(SizeType elemSize = 1, SizeType numElem = 1, SizeType numRow = 1, void * ptr = nullptr)
+					: memAddr_(elemSize), numElem_(numElem), numRow_(numRow), ptr_(ptr) {}
+				zf_memregion2d(const zf_memaddr2d<SizeType> &memAddr, SizeType numElem = 1, SizeType numRow = 1, void * ptr = nullptr)
+					: memAddr_(memAddr), numElem_(numElem), numRow_(numRow), ptr_(ptr) {}
+				zf_memregion2d(const zf_memregion2d &z)
+					: memAddr_(z.memAddr_), numElem_(z.numElem_), numRow_(z.numRow_), ptr_(z.ptr_) {}
+				zf_memregion2d &operator =(const zf_memregion2d &z)
+				{
+					memAddr_ = z.memAddr_;
+					numElem_ = z.numElem_;
+					numRow_ = z.numRow_;
+					ptr_ = z.ptr_;
+				}
+
+				inline bool is_valid() const { return memAddr_.is_valid() && numElem_ > 0 && numRow_ > 0; }
+				inline bool is_dense1d() const { return memAddr_.is_dense1d(); }
+				inline bool is_dense2d() const { return memAddr_.is_dense2d(numElem_ * memAddr_.elem_stride()); }
+
+				inline SizeType row_pitch() const { return memAddr_.row_pitch(); }
+				inline SizeType elem_stride() const { return memAddr_.elem_stride(); }
+				inline SizeType elem_size() const { return memAddr_.elem_size(); }
+				inline SizeType elem_num() const { return numElem_; }
+				inline SizeType row_num() const { return numRow_; }
+				inline void * ptr() const { return ptr_; }
+
+				inline SizeType size_dense() const { return numRow_ * numElem_ * memAddr_.elem_size(); }
+				inline SizeType size_full() const { return numRow_ * memAddr_.row_pitch(); }
+				inline SizeType row_size_dense() const { return numElem_ * memAddr_.elem_size(); }
+				inline SizeType row_size_full() const { return numElem_ * memAddr_.elem_stride(); }
+
+				inline void * begin() const { return ptr_; }
+				inline void * end() const { return static_cast<uint8_t *>(ptr_) + size_full(); }
+
+				inline SizeType offset(SizeType rowInd) const { return memAddr_.offset(checkRowIndex_(rowInd)); }
+				inline void * addr(SizeType rowInd) const { return static_cast<uint8_t *>(ptr_) + memAddr_.offset(checkRowIndex_(rowInd)); }
+
+				inline SizeType offset(SizeType rowInd, SizeType elemInd) const { return memAddr_.offset(checkRowIndex_(rowInd), checkElemIndex_(elemInd)); }
+				inline void * addr(SizeType rowInd, SizeType elemInd) const { return static_cast<uint8_t *>(ptr_) + memAddr_.offset(checkRowIndex_(rowInd), checkElemIndex_(elemInd)); }
+
+				template<class T>
+				inline T &get(SizeType rowInd, SizeType elemInd) { return *static_cast<T *>(addr(rowInd, elemInd)); }
+				template<class T>
+				inline const T &get(SizeType rowInd, SizeType elemInd) const { return *static_cast<const T *>(addr(rowInd, elemInd)); }
+
+
+				inline static bool compatible(const zf_memregion2d<SizeType> &m1, const zf_memregion2d<SizeType> &m2)
+				{
+					return (m1.elem_size() == m2.elem_size() && m1.elem_num() == m2.elem_num() && m1.row_num() == m2.row_num());
+				}
+
+				inline static void memcpy(zf_memregion2d<SizeType> &dst, const zf_memregion2d<SizeType> &src)
+				{
+					if (!compatible(dst, src))
+						throw ZFileException("zf_memregion2d::memcpy: regions are not compatible!");
+					if (dst.is_dense2d() && src.is_dense2d())
+						memcpy_s(dst.ptr(), dst.size_full(), src.ptr(), src.size_full());
+					else if (dst.is_dense1d() && src.is_dense1d())
+					{
+						uint8_t * sp = static_cast<uint8_t *>(src.ptr());
+						uint8_t * dp = static_cast<uint8_t *>(dst.ptr());
+						SizeType sPitch = src.row_pitch();
+						SizeType dPitch = dst.row_pitch();
+						SizeType rSize = src.row_size_full();
+						SizeType rNum = src.row_num();
+						for (SizeType i = 0; i < rNum; i++)
+						{
+							memcpy_s(dp, rSize, sp, rSize);
+							dp += dPitch;
+							sp += sPitch;
+						}
+					}
+					else
+					{
+						uint8_t * sp = static_cast<uint8_t *>(src.ptr());
+						uint8_t * dp = static_cast<uint8_t *>(dst.ptr());
+
+						SizeType sPitch = src.row_pitch();
+						SizeType dPitch = dst.row_pitch();
+						SizeType rNum = src.row_num();
+
+						SizeType sStride = src.elem_stride();
+						SizeType dStride = dst.elem_stride();
+						SizeType eSize = src.elem_size();
+						SizeType eNum = src.elem_num();
+						for (SizeType ri = 0; ri < rNum; ri++)
+						{
+							uint8_t * sp0 = sp;
+							uint8_t * dp0 = dp;
+							for (SizeType i = 0; i < eNum; i++)
+							{
+								memcpy_s(dp0, eSize, sp0, eSize);
+								dp0 += dStride;
+								sp0 += sStride;
+							}
+							dp += dPitch;
+							sp += sPitch;
+						}
+					}
+				}
+				inline static void memcpy(void * dst, SizeType dstSize, const zf_memregion2d<SizeType> &src)
+				{
+					zf_memaddr2d<SizeType> dma(src.elem_size(), src.elem_size(), src.elem_size() * src.elem_num());
+					zf_memregion2d<SizeType> dmr(dma, src.elem_num(), src.row_num(), dst);
+					if (dmr.size_full() > dstSize)
+						throw ZFileException("zf_memregion2d::memcpy: dstSize is not enough!");
+					memcpy(dmt, src);
+				}
+				inline static void memcpy(zf_memregion2d<SizeType> &dst, void * src, SizeType srcSize)
+				{
+					zf_memaddr2d<SizeType> sma(dst.elem_size(), dst.elem_size(), dst.elem_size() * dst.elem_num());
+					zf_memregion2d<SizeType> smr(sma, dst.elem_num(), dst.row_num(), src);
+					if (smr.size_full() > srcSize)
+						throw ZFileException("zf_memregion2d::memcpy: srcSize is not enough!");
+					memcpy(dst, smr);
+				}
+			};
+
+			typedef zf_memregion1d<uint64_t> zf_memregion1d_t;
+			typedef zf_memregion2d<uint64_t> zf_memregion2d_t;
+			
 			class zf_size16_t
 			{
 				uint8_t data_[2];

@@ -1,4 +1,5 @@
 #include "init.h"
+#include <Utils\str_cast.h>
 
 zenith::util::io::FileSystem * fs;
 
@@ -13,6 +14,16 @@ inline std::pair<std::future<zenith::util::io::FileResult>, std::unique_ptr<unsi
 	f.close();
 	return std::pair<std::future<zenith::util::io::FileResult>, std::unique_ptr<unsigned char[]>>(std::move(r), std::move(h));
 }
+
+inline std::future<zenith::util::io::FileResult> writeFile(const char * fname, uint8_t * data, size_t size, float priority = 1.0f)
+{
+	auto f = fs->createFile();
+	f.open(fname, 'w', priority);
+	auto r = f.write(data, size);
+	f.close();
+	return r;
+}
+
 
 struct NamedParameter
 {
@@ -124,6 +135,88 @@ zenith::util::zfile_format::zFontDescription combineFonts(const std::vector<Name
 		return *fntAtl;
 
 	zenith::util::zfile_format::zFontDescription res = zenith::util::zfile_format::zFontDescription::empty();
+
+	res.setGlyphs(*fntDsc);
+	fntDsc->setGlyphs(nullptr, 0);
+
+	res.setEncoding(fntDsc->encodingName);
+	res.setName(fntDsc->fontName);
+	res.fontSize = fntDsc->fontSize;
+	res.fontTraits = fntDsc->fontTraits;
+	res.fontType = fntDsc->fontType;
+
+	res.intAtlasImage = fntAtl->intAtlasImage;
+	fntAtl->intAtlasImage = zenith::util::zfile_format::zImgDescription::empty();
+
+	return res;
+}
+
+const NamedParameter * findParam(const std::vector<NamedParameter> &params, const std::string &paramName)
+{
+	for (auto i = 0; i < params.size(); i++)
+		if (params[i].paramName == paramName)
+			return &params[i];
+	return nullptr;
+}
+
+void performOutAtlas(const zenith::util::zfile_format::zFontDescription &font, const std::string &fname)
+{
+	uint64_t fSize = font.intAtlasImage.getFullSize();
+	uint8_t * fData = new uint8_t[fSize];
+	zenith::util::zfile_format::zimg_to_mem(font.intAtlasImage, fData, fSize);
+
+	auto futW = writeFile(fname.c_str(), fData, fSize);
+	futW.get();
+
+	delete[] fData;
+}
+
+void transformSigDist(const std::vector<NamedParameter> &params, zenith::util::zfile_format::zFontDescription &font)
+{
+	uint32_t pExtDist = 8;
+	uint32_t pPadding = 1;
+
+	const NamedParameter * np = nullptr;
+	if (np = findParam(params, "extDist"))
+		pExtDist = zenith::util::str_cast<uint32_t>(np->paramValue);
+	if (np = findParam(params, "padding"))
+		pPadding = zenith::util::str_cast<uint32_t>(np->paramValue);
+
+	double guessNum = std::ceil(std::sqrt(font.numGlyphs())*1.05); //+5%
+	uint32_t extraSize = guessNum * (pExtDist * 2 + pPadding * 2);
+	uint32_t pW = font.intAtlasImage.width + extraSize;
+	uint32_t pH = font.intAtlasImage.height + extraSize;
+	float pClampMin = -float(pExtDist);
+	float pClampMax = float(pExtDist);
+
+	if (np = findParam(params, "width"))
+		pW = zenith::util::str_cast<uint32_t>(np->paramValue);
+	if (np = findParam(params, "height"))
+		pH = zenith::util::str_cast<uint32_t>(np->paramValue);
+	if (np = findParam(params, "clampMin"))
+		pClampMin = zenith::util::str_cast<float>(np->paramValue);
+	if (np = findParam(params, "clampMax"))
+		pClampMax = zenith::util::str_cast<float>(np->paramValue);
+
+	zenith::util::zfile_format::zFontDescription tmp = zenith::util::zfile_format::zfont_atlas_sigdist(font, pExtDist, pW, pH, pPadding, pClampMin, pClampMax);
+	zenith::util::zfile_format::zfont_free(font);
+	font = tmp;
+}
+
+void performOperations(const std::vector<NamedParameter> &params, zenith::util::zfile_format::zFontDescription &font)
+{
+	const NamedParameter * np = nullptr;
+
+	if (np = findParam(params, "transform"))
+	{
+		if (np->paramValue == "sigdist")
+			transformSigDist(params, font);
+		else
+			throw std::runtime_error("Unknown transform option!");
+	}
+
+	if (np = findParam(params, "out_atlas"))
+		performOutAtlas(font, np->paramValue);
 }
 
 int main(int argc, const char *argv[])
@@ -135,14 +228,13 @@ int main(int argc, const char *argv[])
 	std::vector<NamedParameter> pArgs = parseArguments(argc, argv);
 
 	std::vector<zenith::util::zfile_format::zFontDescription> srcFonts = loadFontData(pArgs);
+	zenith::util::zfile_format::zFontDescription srcFont = combineFonts(pArgs, srcFonts);
+
+	performOperations(pArgs, srcFont);
 
 	std::cout << sizeof(zenith::util::zfile_format::FontTraits) << " - " << alignof(zenith::util::zfile_format::FontTraits) << std::endl;
 	std::cout << sizeof(zenith::util::zfile_format::ZChunk16B_FontHeader) << " - " << alignof(zenith::util::zfile_format::ZChunk16B_FontHeader) << std::endl;
 	std::cout << sizeof(zenith::util::zfile_format::ZChunk64B_FontData_Glyph) << " - " << alignof(zenith::util::zfile_format::ZChunk64B_FontData_Glyph) << std::endl;
-	char r[3], d[3];
-	std::string q = "na";
-
-	zenith::util::zstrcpy(r, q.c_str());
 	
 	return 0;
 }

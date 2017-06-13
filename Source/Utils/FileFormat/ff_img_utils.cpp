@@ -120,12 +120,12 @@ zImgDescription zenith::util::zfile_format::zimg_change_format(const zImgDescrip
 		r.levelDescr[i] = new zImgDataDescription;
 		switch (r.imageType)
 		{
-		case ImageType::IMG1D: *r.levelDescr[i] = zImgDataDescription::create1D(dstPixSize, r.width); break;
-		case ImageType::IMG1D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create1DArr(dstPixSize, r.width, r.arraySize, uint64_t(dstPixSize) * r.width); break;
-		case ImageType::IMG2D: *r.levelDescr[i] = zImgDataDescription::create2D(r.width, r.height, uint64_t(dstPixSize) * r.width); break;
-		case ImageType::IMG2D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create2DArr(r.width, r.height, r.arraySize, uint64_t(dstPixSize) * r.width, uint64_t(dstPixSize) * r.width * r.height); break;
-		case ImageType::IMG3D: *r.levelDescr[i] = zImgDataDescription::create3D(r.width, r.height, r.depth, uint64_t(dstPixSize) * r.width, uint64_t(dstPixSize) * r.width * r.height); break;
-		case ImageType::IMG3D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create3DArr(r.width, r.height, r.depth, r.arraySize, uint64_t(dstPixSize) * r.width, uint64_t(dstPixSize) * r.width * r.height, uint64_t(dstPixSize) * r.width * r.height * r.depth); break;
+		case ImageType::IMG1D: *r.levelDescr[i] = zImgDataDescription::create1D(dstPixSize, r.levelDescr[i]->getWidth()); break;
+		case ImageType::IMG1D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create1DArr(dstPixSize, r.levelDescr[i]->getWidth(), r.arraySize, src.levelDescr[i]->getArrayPitch()); break;
+		case ImageType::IMG2D: *r.levelDescr[i] = zImgDataDescription::create2D(r.levelDescr[i]->getWidth(), r.levelDescr[i]->getHeight(), src.levelDescr[i]->getRowPitch()); break;
+		case ImageType::IMG2D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create2DArr(r.levelDescr[i]->getWidth(), r.levelDescr[i]->getHeight(), r.arraySize, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getArrayPitch()); break;
+		case ImageType::IMG3D: *r.levelDescr[i] = zImgDataDescription::create3D(r.levelDescr[i]->getWidth(), r.levelDescr[i]->getHeight(), r.levelDescr[i]->getDepth(), src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getDepthPitch()); break;
+		case ImageType::IMG3D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create3DArr(r.levelDescr[i]->getWidth(), r.levelDescr[i]->getHeight(), r.levelDescr[i]->getDepth(), r.arraySize, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getDepthPitch(), src.levelDescr[i]->getArrayPitch()); break;
 		}
 		uint64_t dstSize = r.levelDescr[i]->getRequiredDataSize();
 		r.levelData[i] = new uint8_t[dstSize];
@@ -142,15 +142,15 @@ zImgDescription zenith::util::zfile_format::zimg_change_format(const zImgDescrip
 		{
 			const uint8_t * psa = reinterpret_cast<const uint8_t *>(src.levelData[i]) + srcAPitch * ia;
 			uint8_t * pda = reinterpret_cast<uint8_t *>(r.levelData[i]) + dstAPitch * ia;			
-			for (uint32_t id = 0; id < r.depth; id++)
+			for (uint32_t id = 0; id < r.levelDescr[i]->getDepth(); id++)
 			{
 				const uint8_t * psd = psa + srcDPitch * id;
 				uint8_t * pdd = pda + dstDPitch * id;
-				for (uint32_t ih = 0; ih < r.height; ih++)
+				for (uint32_t ih = 0; ih < r.levelDescr[i]->getHeight(); ih++)
 				{
 					const uint8_t * psh = psd + srcRPitch * ih;
 					uint8_t * pdh = pdd + dstRPitch * ih;
-					for (uint32_t iw = 0; iw < r.width; iw++)
+					for (uint32_t iw = 0; iw < r.levelDescr[i]->getWidth(); iw++)
 					{
 						const uint8_t * ps = psh + uint64_t(iw) * srcPixSize;
 						uint8_t * pd = pdh + uint64_t(iw) * dstPixSize;
@@ -181,12 +181,12 @@ zImgDescription zenith::util::zfile_format::zimg_clone(const zImgDescription &sr
 		r.levelDescr[i] = new zImgDataDescription;
 		switch (r.imageType)
 		{
-		case ImageType::IMG1D: *r.levelDescr[i] = zImgDataDescription::create1D(pixSize, r.width); break;
-		case ImageType::IMG1D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create1DArr(pixSize, r.width, r.arraySize, src.levelDescr[i]->getArrayPitch()); break;
-		case ImageType::IMG2D: *r.levelDescr[i] = zImgDataDescription::create2D(r.width, r.height, src.levelDescr[i]->getRowPitch()); break;
-		case ImageType::IMG2D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create2DArr(r.width, r.height, r.arraySize, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getArrayPitch()); break;
-		case ImageType::IMG3D: *r.levelDescr[i] = zImgDataDescription::create3D(r.width, r.height, r.depth, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getDepthPitch()); break;
-		case ImageType::IMG3D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create3DArr(r.width, r.height, r.depth, r.arraySize, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getDepthPitch(), src.levelDescr[i]->getArrayPitch()); break;
+		case ImageType::IMG1D: *r.levelDescr[i] = zImgDataDescription::create1D(pixSize, r.levelDescr[i]->getWidth()); break;
+		case ImageType::IMG1D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create1DArr(pixSize, r.levelDescr[i]->getWidth(), r.arraySize, src.levelDescr[i]->getArrayPitch()); break;
+		case ImageType::IMG2D: *r.levelDescr[i] = zImgDataDescription::create2D(r.levelDescr[i]->getWidth(), r.levelDescr[i]->getHeight(), src.levelDescr[i]->getRowPitch()); break;
+		case ImageType::IMG2D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create2DArr(r.levelDescr[i]->getWidth(), r.levelDescr[i]->getHeight(), r.arraySize, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getArrayPitch()); break;
+		case ImageType::IMG3D: *r.levelDescr[i] = zImgDataDescription::create3D(r.levelDescr[i]->getWidth(), r.levelDescr[i]->getHeight(), r.levelDescr[i]->getDepth(), src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getDepthPitch()); break;
+		case ImageType::IMG3D_ARRAY: *r.levelDescr[i] = zImgDataDescription::create3DArr(r.levelDescr[i]->getWidth(), r.levelDescr[i]->getHeight(), r.levelDescr[i]->getDepth(), r.arraySize, src.levelDescr[i]->getRowPitch(), src.levelDescr[i]->getDepthPitch(), src.levelDescr[i]->getArrayPitch()); break;
 		}
 		uint64_t dstSize = r.levelDescr[i]->getRequiredDataSize();
 		r.levelData[i] = new uint8_t[dstSize];
@@ -203,15 +203,15 @@ zImgDescription zenith::util::zfile_format::zimg_clone(const zImgDescription &sr
 		{
 			const uint8_t * psa = reinterpret_cast<const uint8_t *>(src.levelData[i]) + srcAPitch * ia;
 			uint8_t * pda = reinterpret_cast<uint8_t *>(r.levelData[i]) + dstAPitch * ia;
-			for (uint32_t id = 0; id < r.depth; id++)
+			for (uint32_t id = 0; id < r.levelDescr[i]->getDepth(); id++)
 			{
 				const uint8_t * psd = psa + srcDPitch * id;
 				uint8_t * pdd = pda + dstDPitch * id;
-				for (uint32_t ih = 0; ih < r.height; ih++)
+				for (uint32_t ih = 0; ih < r.levelDescr[i]->getHeight(); ih++)
 				{
 					const uint8_t * psh = psd + srcRPitch * ih;
 					uint8_t * pdh = pdd + dstRPitch * ih;
-					memcpy_s(pdh, srcRPitch, pdg, dstRPitch);
+					memcpy_s(pdh, dstRPitch, psh, srcRPitch);
 				}
 			}
 		}
@@ -229,3 +229,35 @@ void zenith::util::zfile_format::zimg_free(zImgDescription &d)
 	}
 }
 
+void zenith::util::zfile_format::zimg_fill(zImgDescription &d, uint32_t mipLevel, void * valuePtr)
+{
+	if (mipLevel >= d.mipLevels)
+		throw ZFileException("zimg_fill: mip-level out of bounds!");
+	uint32_t pixSize = getPixelSize(d.imageFormat);
+
+	uint64_t srcAPitch = d.levelDescr[mipLevel]->getArrayPitch();
+	uint64_t srcDPitch = d.levelDescr[mipLevel]->getDepthPitch();
+	uint64_t srcRPitch = d.levelDescr[mipLevel]->getRowPitch();
+	for (uint32_t ia = 0; ia < d.arraySize; ia++)
+	{
+		uint8_t * pa = reinterpret_cast<uint8_t *>(d.levelData[mipLevel]) + srcAPitch * ia;
+		for (uint32_t id = 0; id < d.levelDescr[mipLevel]->getDepth(); id++)
+		{
+			uint8_t * pd = pa + srcDPitch * id;
+			for (uint32_t ih = 0; ih < d.levelDescr[mipLevel]->getHeight(); ih++)
+			{
+				uint8_t * ph = pd + srcRPitch * ih;
+				for (uint32_t iw = 0; iw < d.levelDescr[mipLevel]->getWidth(); iw++)
+				{
+					uint8_t * p = ph + pixSize * iw;
+					memcpy_s(p, pixSize, valuePtr, pixSize);
+				}
+			}
+		}
+	}
+}
+void zimg_fill(zImgDescription &d, void * valuePtr)
+{
+	for (uint32_t i = 0; i < d.mipLevels; i++)
+		zimg_fill(d, i, valuePtr);
+}
