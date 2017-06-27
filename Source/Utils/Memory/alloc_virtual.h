@@ -10,7 +10,8 @@ namespace zenith
 			template<class Base, size_t MinSize, size_t MaxSize, size_t NumBlocks>
 			class MemAllocVirtual_StaticSize : public Base
 			{
-				uint8_t used_[NumBlocks >> 3];
+				static const NumServiceBytes = (NumBlocks >> 3) + (NumBlocks & 7 > 0 ? 1 : 0);
+				uint8_t used_[NumServiceBytes];
 				inline uint8_t getbit_(size_t index) const
 				{
 					uint8_t tmp = used_[index >> 3];
@@ -76,7 +77,8 @@ namespace zenith
 			template<class Base, size_t BlockSize, size_t NumBlocks>
 			class MemAllocVirtual_BitmapStatic : public Base
 			{
-				uint8_t used_[NumBlocks >> 3];
+				static const NumServiceBytes = (NumBlocks >> 3) + (NumBlocks & 7 > 0 ? 1 : 0);
+				uint8_t used_[NumServiceBytes];
 
 				inline uint8_t getbit_(size_t index) const
 				{
@@ -161,7 +163,7 @@ namespace zenith
 				{
 					blockSize_ = mai->allocMinSize;
 					numBlocks_ = mai->allocNumBlock;
-					serviceBlk_ = StatelessAlloc::allocate(numBlocks_ >> 3);
+					serviceBlk_ = StatelessAlloc::allocate((numBlocks_ >> 3) + (numBlocks_ & 7 > 0 ? 1 : 0));
 					used_ = reinterpret_cast<uint8_t *>(serviceBlk_.ptr);
 
 					for (size_t i = 0; i < (numBlocks_ >> 3); i++)
@@ -243,7 +245,7 @@ namespace zenith
 
 					blockSize_ = mai->allocMinSize;
 					numBlocks_ = mai->allocNumBlock;
-					serviceBlk_ = pfnAllocate_(allocPtr_, numBlocks_ >> 3, MemAllocHint::UNDEF);
+					serviceBlk_ = pfnAllocate_(allocPtr_, (numBlocks_ >> 3) + (numBlocks_ & 7 > 0 ? 1 : 0), MemAllocHint::UNDEF);
 					used_ = reinterpret_cast<uint8_t *>(serviceBlk_.ptr);
 
 					for (size_t i = 0; i < (numBlocks_ >> 3); i++)

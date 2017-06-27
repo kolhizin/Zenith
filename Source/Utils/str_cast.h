@@ -501,12 +501,23 @@ namespace zenith
 		class str_cast_impl_s3<const Char *, std::basic_string<Char, std::char_traits<Char>, A>>
 		{
 		public:
-			inline static void cast(const char *from, std::basic_string<Char, std::char_traits<Char>, A> &to, size_t maxSize)
+			inline static void cast(const Char *from, std::basic_string<Char, std::char_traits<Char>, A> &to, size_t maxSize = 0)
 			{
 				to = from;
 			}
 		};
-
+		/*
+		template<>
+		class str_cast_impl_s3<const char *, std::string>
+		{
+		public:
+			inline static void cast(const char *from, std::string &to, size_t maxSize)
+			{
+				to = from;
+			}
+		};
+		*/
+		
 		template<class To>
 		class str_cast_impl_s3<zenith::util::nameid, To>
 		{

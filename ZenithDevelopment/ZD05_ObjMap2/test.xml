@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Test b0="1" a="9" b2="3">
+  <q>67</q>
+  <a>10</a>
+  <a>11</a>
+  <Poly>
+    <index>1</index>
+    <index>2</index>
+    <index>5</index>
+    <index>6</index>
+    <point name="p1">
+      <x>32.0</x>
+      <y>12.0</y>
+    </point>
+    <point name="p2">
+      <x>20.0</x>
+      <y>1.0</y>
+    </point>
+    <point name="p3">
+      <x>-20.5</x>
+      <y>111.0</y>
+    </point>
+  </Poly>
+  <a>12</a>
+  <c>45</c>
+</Test>
