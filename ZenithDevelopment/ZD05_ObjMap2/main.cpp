@@ -180,42 +180,59 @@ void test_ioconv()
 
 void test_prefix_dag()
 {
-	zenith::util::prefix_dag<char, int> pd;
+	zenith::util::prefix_dag<char, int, 64> pd;
 
 	//simple add
 	pd.add("ab", 7);
 	pd.add("cd", 8);
 	pd.add("ef", 9);
-	std::cout << "a: " << pd.get("a") << "\n";
-	std::cout << "ab: " << pd.get("ab") << "\n";
-	std::cout << "abc: " << pd.get("abc") << "\n";
-	std::cout << "cd: " << pd.get("cd") << "\n";
-	std::cout << "ef: " << pd.get("ef") << "\n";
-	std::cout << "gh: " << pd.get("gh") << "\n";
+	std::cout << "a: " << pd.exists("a") << "\n";
+	std::cout << "ab: " << pd.exists("ab") << "\n";
+	std::cout << "abc: " << pd.exists("abc") << "\n";
+	std::cout << "cd: " << pd.exists("cd") << "\n";
+	std::cout << "ef: " << pd.exists("ef") << "\n";
+	std::cout << "gh: " << pd.exists("gh") << "\n";
 
 	//first structure
 	pd.add("abc", 72);
 	pd.add("cde", 82);
 	pd.add("efg", 92);
 
-	std::cout << "a: " << pd.get("a") << "\n";
-	std::cout << "ab: " << pd.get("ab") << "\n";
-	std::cout << "abc: " << pd.get("abc") << "\n";
-	std::cout << "cd: " << pd.get("cd") << "\n";
-	std::cout << "cde: " << pd.get("cde") << "\n";
-	std::cout << "ef: " << pd.get("ef") << "\n";
-	std::cout << "efg: " << pd.get("efg") << "\n";
-	std::cout << "gh: " << pd.get("gh") << "\n";
+	std::cout << "a: " << pd.exists("a") << "\n";
+	std::cout << "ab: " << pd.exists("ab") << "\n";
+	std::cout << "abc: " << pd.exists("abc") << "\n";
+	std::cout << "cd: " << pd.exists("cd") << "\n";
+	std::cout << "cde: " << pd.exists("cde") << "\n";
+	std::cout << "ef: " << pd.exists("ef") << "\n";
+	std::cout << "efg: " << pd.exists("efg") << "\n";
+	std::cout << "gh: " << pd.exists("gh") << "\n";
 
 	//split structure
 	pd.add("a", 11);
 	pd.add("b", 12);
 	pd.add("c", 13);
-	pd.add("d", 14);
+//	pd.add("d", 14);
 	pd.add("e", 15);
 	pd.add("f", 16);
 	pd.add("g", 17);
 	pd.add("h", 18);
+
+	std::cout << "a: " << pd.exists("a") << "\n";
+	std::cout << "ab: " << pd.exists("ab") << "\n";
+	std::cout << "abc: " << pd.exists("abc") << "\n";
+	std::cout << "cd: " << pd.exists("cd") << "\n";
+	std::cout << "cde: " << pd.exists("cde") << "\n";
+	std::cout << "ef: " << pd.exists("ef") << "\n";
+	std::cout << "efg: " << pd.exists("efg") << "\n";
+	std::cout << "gh: " << pd.exists("gh") << "\n";
+	std::cout << "b: " << pd.exists("b") << "\n";
+	std::cout << "c: " << pd.exists("c") << "\n";
+	std::cout << "d: " << pd.exists("d") << "\n";
+	std::cout << "e: " << pd.exists("e") << "\n";
+	std::cout << "f: " << pd.exists("f") << "\n";
+	std::cout << "g: " << pd.exists("g") << "\n";
+	std::cout << "h: " << pd.exists("h") << "\n";
+
 
 	std::cout << "a: " << pd.get("a") << "\n";
 	std::cout << "ab: " << pd.get("ab") << "\n";
@@ -224,10 +241,10 @@ void test_prefix_dag()
 	std::cout << "cde: " << pd.get("cde") << "\n";
 	std::cout << "ef: " << pd.get("ef") << "\n";
 	std::cout << "efg: " << pd.get("efg") << "\n";
-	std::cout << "gh: " << pd.get("gh") << "\n";
+//	std::cout << "gh: " << pd.get("gh") << "\n";
 	std::cout << "b: " << pd.get("b") << "\n";
 	std::cout << "c: " << pd.get("c") << "\n";
-	std::cout << "d: " << pd.get("d") << "\n";
+//	std::cout << "d: " << pd.get("d") << "\n";
 	std::cout << "e: " << pd.get("e") << "\n";
 	std::cout << "f: " << pd.get("f") << "\n";
 	std::cout << "g: " << pd.get("g") << "\n";
