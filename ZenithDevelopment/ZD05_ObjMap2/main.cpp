@@ -249,6 +249,27 @@ void test_prefix_dag()
 	std::cout << "f: " << pd.get("f") << "\n";
 	std::cout << "g: " << pd.get("g") << "\n";
 	std::cout << "h: " << pd.get("h") << "\n";
+
+	//auto it = pd.begin();
+	char buff[32];
+	for (auto it = pd.begin(); it != pd.end(); ++it)
+	{
+		//auto len = it.key_fill(buff, 32); buff[len] = 0;
+		std::cout << it.key_string() << " -> " << *it << "\n";
+	}
+	for (auto &x : pd)
+	{
+		std::cout << " -> " << x << "\n";
+	}
+	/*
+	while (it.valid())
+	{
+		auto len = it.key_fill(buff, 32);
+		buff[len] = 0;
+		std::cout << buff << " -> " << *it << "\n";
+		it = it.next();
+	}
+	*/
 }
 
 int main()
