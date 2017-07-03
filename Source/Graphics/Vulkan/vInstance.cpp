@@ -100,7 +100,6 @@ void zenith::vulkan::vInstanceImpl_::updateInternalConfig_(const vInstanceConfig
 			configInt_.layerExts_.erase(iter);
 	}
 
-	
 	config_.apiVersion = VK_API_VERSION_1_0;
 	if(conf.apiVersion != config_.apiVersion)
 		throw vInstanceException("vInstanceImpl_::updateInternalConfig_(): unsupported api version!");

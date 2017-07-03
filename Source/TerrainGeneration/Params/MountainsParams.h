@@ -16,49 +16,28 @@ namespace zenith
 			std::vector<TerraGenParam_CatDistrString> afterNull;
 			std::vector<TerraGenParam_CatDistrString> afterTop;
 		};
-		inline void to_objmap(const MountainMetaGenerator1_Params &obj, zenith::util::ObjectMap<char, char> &om)
+		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainMetaGenerator1_Params, It>
 		{
-			char buff[128];
-			om.addValue("type", "MountainMetaGenerator1_Params", zenith::util::ObjectMapValueHint::ATTR);
-
-			om.addValue("uid", obj.uid.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			om.addValue("type", obj.type.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			for (auto x : obj.general)
-				to_objmap(x, om.addObject("general"));
-			for (auto x : obj.afterNull)
-				to_objmap(x, om.addObject("afterNull"));
-			for (auto x : obj.afterTop)
-				to_objmap(x, om.addObject("afterTop"));
-		}
-		inline void from_objmap(MountainMetaGenerator1_Params &obj, const zenith::util::ObjectMap<char, char> &om)
-		{
-			OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-			OBJMAP_GET_ONE_VALUE(om, obj.type, "type");
+		public:
+			typedef zenith::terragen::MountainMetaGenerator1_Params value_type;
+			static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+			inline static void input(zenith::terragen::MountainMetaGenerator1_Params &val, const It &it)
 			{
-				auto v = om.getObjects("general");
-				for (auto it = v.first; it != v.second; it++)
-				{
-					obj.general.resize(obj.general.size()+1);
-					from_objmap(obj.general.back(), it->second);
-				}
+				zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+				zenith::util::ioconv::input_named_required(val.type, it, "type");
+				zenith::util::ioconv::input_named_multiple(val.general, it, "general");
+				zenith::util::ioconv::input_named_multiple(val.afterNull, it, "afterNull");
+				zenith::util::ioconv::input_named_multiple(val.afterTop, it, "afterTop");
 			}
+			inline static void output(const zenith::terragen::MountainMetaGenerator1_Params &val, It &it)
 			{
-				auto v = om.getObjects("afterNull");
-				for (auto it = v.first; it != v.second; it++)
-				{
-					obj.afterNull.resize(obj.afterNull.size()+1);
-					from_objmap(obj.afterNull.back(), it->second);
-				}
+				zenith::util::ioconv::output_single(val.uid, it.append_value("uid", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.type, it.append_value("type", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::input_named_multiple(val.general, it, "general");
+				zenith::util::ioconv::input_named_multiple(val.afterNull, it, "afterNull");
+				zenith::util::ioconv::input_named_multiple(val.afterTop, it, "afterTop");
 			}
-			{
-				auto v = om.getObjects("afterTop");
-				for (auto it = v.first; it != v.second; it++)
-				{
-					obj.afterTop.resize(obj.afterTop.size()+1);
-					from_objmap(obj.afterTop.back(), it->second);
-				}
-			}
-		}
+		};
 
 
 		struct MountainTopGenerator1_Params
@@ -73,46 +52,41 @@ namespace zenith
 			double minMountainTopDistance;
 			uint32_t numTries;
 		};
-		inline void to_objmap(const MountainTopGenerator1_Params &obj, zenith::util::ObjectMap<char, char> &om)
+		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainTopGenerator1_Params, It>
 		{
-			char buff[128];
-			om.addValue("type", "MountainTopGenerator1_Params", zenith::util::ObjectMapValueHint::ATTR);
-
-			om.addValue("uid", obj.uid.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			om.addValue("type", obj.type.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			to_objmap(obj.boundingBox, om.addObject("boundingBox"));
-			zenith::util::str_cast(obj.heightLambda, buff, 128);
-			om.addValue("heightLambda", buff);
-			zenith::util::str_cast(obj.sizeLambda, buff, 128);
-			om.addValue("sizeLambda", buff);
-			for (auto x : obj.numTops)
-				to_objmap(x, om.addObject("numTops"));
-			zenith::util::str_cast(obj.minNodeDistance, buff, 128);
-			om.addValue("minNodeDistance", buff);
-			zenith::util::str_cast(obj.minMountainTopDistance, buff, 128);
-			om.addValue("minMountainTopDistance", buff);
-			zenith::util::str_cast(obj.numTries, buff, 128);
-			om.addValue("numTries", buff);
-		}
-		inline void from_objmap(MountainTopGenerator1_Params &obj, const zenith::util::ObjectMap<char, char> &om)
-		{
-			OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-			OBJMAP_GET_ONE_VALUE(om, obj.type, "type");
-			from_objmap(obj.boundingBox, om.getObjects("boundingBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.heightLambda, "heightLambda", 100.0);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.sizeLambda, "sizeLambda", 100.0);
+		public:
+			typedef zenith::terragen::MountainTopGenerator1_Params value_type;
+			static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+			inline static void input(zenith::terragen::MountainTopGenerator1_Params &val, const It &it)
 			{
-				auto v = om.getObjects("numTops");
-				for (auto it = v.first; it != v.second; it++)
-				{
-					obj.numTops.resize(obj.numTops.size()+1);
-					from_objmap(obj.numTops.back(), it->second);
-				}
+				zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+				zenith::util::ioconv::input_named_required(val.type, it, "type");
+				zenith::util::ioconv::input_named_required(val.boundingBox, it, "boundingBox");
+				val.heightLambda = 100.0;
+				zenith::util::ioconv::input_named_optional(val.heightLambda, it, "heightLambda");
+				val.sizeLambda = 100.0;
+				zenith::util::ioconv::input_named_optional(val.sizeLambda, it, "sizeLambda");
+				zenith::util::ioconv::input_named_multiple(val.numTops, it, "numTops");
+				val.minNodeDistance = 10.0;
+				zenith::util::ioconv::input_named_optional(val.minNodeDistance, it, "minNodeDistance");
+				val.minMountainTopDistance = 50.0;
+				zenith::util::ioconv::input_named_optional(val.minMountainTopDistance, it, "minMountainTopDistance");
+				val.numTries = 1;
+				zenith::util::ioconv::input_named_optional(val.numTries, it, "numTries");
 			}
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.minNodeDistance, "minNodeDistance", 10.0);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.minMountainTopDistance, "minMountainTopDistance", 50.0);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.numTries, "numTries", 1);
-		}
+			inline static void output(const zenith::terragen::MountainTopGenerator1_Params &val, It &it)
+			{
+				zenith::util::ioconv::output_single(val.uid, it.append_value("uid", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.type, it.append_value("type", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.boundingBox, it.append_complex("boundingBox"));
+				zenith::util::ioconv::output_single(val.heightLambda, it.append_value("heightLambda"));
+				zenith::util::ioconv::output_single(val.sizeLambda, it.append_value("sizeLambda"));
+				zenith::util::ioconv::input_named_multiple(val.numTops, it, "numTops");
+				zenith::util::ioconv::output_single(val.minNodeDistance, it.append_value("minNodeDistance"));
+				zenith::util::ioconv::output_single(val.minMountainTopDistance, it.append_value("minMountainTopDistance"));
+				zenith::util::ioconv::output_single(val.numTries, it.append_value("numTries"));
+			}
+		};
 
 
 		struct MountainTopRidgeGenerator1_Params
@@ -128,45 +102,40 @@ namespace zenith
 			double minNodeDistance;
 			uint32_t numTries;
 		};
-		inline void to_objmap(const MountainTopRidgeGenerator1_Params &obj, zenith::util::ObjectMap<char, char> &om)
+		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainTopRidgeGenerator1_Params, It>
 		{
-			char buff[128];
-			om.addValue("type", "MountainTopRidgeGenerator1_Params", zenith::util::ObjectMapValueHint::ATTR);
-
-			om.addValue("uid", obj.uid.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			om.addValue("type", obj.type.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			to_objmap(obj.alpha, om.addObject("alpha"));
-			to_objmap(obj.beta, om.addObject("beta"));
-			to_objmap(obj.betaBox, om.addObject("betaBox"));
-			to_objmap(obj.len, om.addObject("len"));
-			to_objmap(obj.lenBox, om.addObject("lenBox"));
-			for (auto x : obj.numRidges)
-				to_objmap(x, om.addObject("numRidges"));
-			zenith::util::str_cast(obj.minNodeDistance, buff, 128);
-			om.addValue("minNodeDistance", buff);
-			zenith::util::str_cast(obj.numTries, buff, 128);
-			om.addValue("numTries", buff);
-		}
-		inline void from_objmap(MountainTopRidgeGenerator1_Params &obj, const zenith::util::ObjectMap<char, char> &om)
-		{
-			OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-			OBJMAP_GET_ONE_VALUE(om, obj.type, "type");
-			from_objmap(obj.alpha, om.getObjects("alpha", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.beta, om.getObjects("beta", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.betaBox, om.getObjects("betaBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.len, om.getObjects("len", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.lenBox, om.getObjects("lenBox", zenith::util::ObjectMapPresence::ONE).first->second);
+		public:
+			typedef zenith::terragen::MountainTopRidgeGenerator1_Params value_type;
+			static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+			inline static void input(zenith::terragen::MountainTopRidgeGenerator1_Params &val, const It &it)
 			{
-				auto v = om.getObjects("numRidges");
-				for (auto it = v.first; it != v.second; it++)
-				{
-					obj.numRidges.resize(obj.numRidges.size()+1);
-					from_objmap(obj.numRidges.back(), it->second);
-				}
+				zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+				zenith::util::ioconv::input_named_required(val.type, it, "type");
+				zenith::util::ioconv::input_named_required(val.alpha, it, "alpha");
+				zenith::util::ioconv::input_named_required(val.beta, it, "beta");
+				zenith::util::ioconv::input_named_required(val.betaBox, it, "betaBox");
+				zenith::util::ioconv::input_named_required(val.len, it, "len");
+				zenith::util::ioconv::input_named_required(val.lenBox, it, "lenBox");
+				zenith::util::ioconv::input_named_multiple(val.numRidges, it, "numRidges");
+				val.minNodeDistance = 10.0;
+				zenith::util::ioconv::input_named_optional(val.minNodeDistance, it, "minNodeDistance");
+				val.numTries = 1;
+				zenith::util::ioconv::input_named_optional(val.numTries, it, "numTries");
 			}
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.minNodeDistance, "minNodeDistance", 10.0);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.numTries, "numTries", 1);
-		}
+			inline static void output(const zenith::terragen::MountainTopRidgeGenerator1_Params &val, It &it)
+			{
+				zenith::util::ioconv::output_single(val.uid, it.append_value("uid", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.type, it.append_value("type", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.alpha, it.append_complex("alpha"));
+				zenith::util::ioconv::output_single(val.beta, it.append_complex("beta"));
+				zenith::util::ioconv::output_single(val.betaBox, it.append_complex("betaBox"));
+				zenith::util::ioconv::output_single(val.len, it.append_complex("len"));
+				zenith::util::ioconv::output_single(val.lenBox, it.append_complex("lenBox"));
+				zenith::util::ioconv::input_named_multiple(val.numRidges, it, "numRidges");
+				zenith::util::ioconv::output_single(val.minNodeDistance, it.append_value("minNodeDistance"));
+				zenith::util::ioconv::output_single(val.numTries, it.append_value("numTries"));
+			}
+		};
 
 
 		struct MountainContGenerator1_Params
@@ -184,41 +153,44 @@ namespace zenith
 			double minNodeDistance;
 			uint32_t numTries;
 		};
-		inline void to_objmap(const MountainContGenerator1_Params &obj, zenith::util::ObjectMap<char, char> &om)
+		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainContGenerator1_Params, It>
 		{
-			char buff[128];
-			om.addValue("type", "MountainContGenerator1_Params", zenith::util::ObjectMapValueHint::ATTR);
-
-			om.addValue("uid", obj.uid.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			om.addValue("type", obj.type.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			to_objmap(obj.alpha, om.addObject("alpha"));
-			to_objmap(obj.alphaBox, om.addObject("alphaBox"));
-			to_objmap(obj.beta, om.addObject("beta"));
-			to_objmap(obj.betaBox, om.addObject("betaBox"));
-			to_objmap(obj.mix, om.addObject("mix"));
-			to_objmap(obj.mixBox, om.addObject("mixBox"));
-			to_objmap(obj.len, om.addObject("len"));
-			to_objmap(obj.lenBox, om.addObject("lenBox"));
-			zenith::util::str_cast(obj.minNodeDistance, buff, 128);
-			om.addValue("minNodeDistance", buff);
-			zenith::util::str_cast(obj.numTries, buff, 128);
-			om.addValue("numTries", buff);
-		}
-		inline void from_objmap(MountainContGenerator1_Params &obj, const zenith::util::ObjectMap<char, char> &om)
-		{
-			OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-			OBJMAP_GET_ONE_VALUE(om, obj.type, "type");
-			from_objmap(obj.alpha, om.getObjects("alpha", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.alphaBox, om.getObjects("alphaBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.beta, om.getObjects("beta", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.betaBox, om.getObjects("betaBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.mix, om.getObjects("mix", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.mixBox, om.getObjects("mixBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.len, om.getObjects("len", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.lenBox, om.getObjects("lenBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.minNodeDistance, "minNodeDistance", 10.0);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.numTries, "numTries", 1);
-		}
+		public:
+			typedef zenith::terragen::MountainContGenerator1_Params value_type;
+			static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+			inline static void input(zenith::terragen::MountainContGenerator1_Params &val, const It &it)
+			{
+				zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+				zenith::util::ioconv::input_named_required(val.type, it, "type");
+				zenith::util::ioconv::input_named_required(val.alpha, it, "alpha");
+				zenith::util::ioconv::input_named_required(val.alphaBox, it, "alphaBox");
+				zenith::util::ioconv::input_named_required(val.beta, it, "beta");
+				zenith::util::ioconv::input_named_required(val.betaBox, it, "betaBox");
+				zenith::util::ioconv::input_named_required(val.mix, it, "mix");
+				zenith::util::ioconv::input_named_required(val.mixBox, it, "mixBox");
+				zenith::util::ioconv::input_named_required(val.len, it, "len");
+				zenith::util::ioconv::input_named_required(val.lenBox, it, "lenBox");
+				val.minNodeDistance = 10.0;
+				zenith::util::ioconv::input_named_optional(val.minNodeDistance, it, "minNodeDistance");
+				val.numTries = 1;
+				zenith::util::ioconv::input_named_optional(val.numTries, it, "numTries");
+			}
+			inline static void output(const zenith::terragen::MountainContGenerator1_Params &val, It &it)
+			{
+				zenith::util::ioconv::output_single(val.uid, it.append_value("uid", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.type, it.append_value("type", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.alpha, it.append_complex("alpha"));
+				zenith::util::ioconv::output_single(val.alphaBox, it.append_complex("alphaBox"));
+				zenith::util::ioconv::output_single(val.beta, it.append_complex("beta"));
+				zenith::util::ioconv::output_single(val.betaBox, it.append_complex("betaBox"));
+				zenith::util::ioconv::output_single(val.mix, it.append_complex("mix"));
+				zenith::util::ioconv::output_single(val.mixBox, it.append_complex("mixBox"));
+				zenith::util::ioconv::output_single(val.len, it.append_complex("len"));
+				zenith::util::ioconv::output_single(val.lenBox, it.append_complex("lenBox"));
+				zenith::util::ioconv::output_single(val.minNodeDistance, it.append_value("minNodeDistance"));
+				zenith::util::ioconv::output_single(val.numTries, it.append_value("numTries"));
+			}
+		};
 
 
 		struct MountainForkGenerator1_Params
@@ -238,45 +210,48 @@ namespace zenith
 			double minNodeDistance;
 			uint32_t numTries;
 		};
-		inline void to_objmap(const MountainForkGenerator1_Params &obj, zenith::util::ObjectMap<char, char> &om)
+		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainForkGenerator1_Params, It>
 		{
-			char buff[128];
-			om.addValue("type", "MountainForkGenerator1_Params", zenith::util::ObjectMapValueHint::ATTR);
-
-			om.addValue("uid", obj.uid.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			om.addValue("type", obj.type.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-			to_objmap(obj.alpha0, om.addObject("alpha0"));
-			to_objmap(obj.alpha0Box, om.addObject("alpha0Box"));
-			to_objmap(obj.alpha1, om.addObject("alpha1"));
-			to_objmap(obj.alpha1Box, om.addObject("alpha1Box"));
-			to_objmap(obj.beta, om.addObject("beta"));
-			to_objmap(obj.betaBox, om.addObject("betaBox"));
-			to_objmap(obj.mix, om.addObject("mix"));
-			to_objmap(obj.mixBox, om.addObject("mixBox"));
-			to_objmap(obj.len, om.addObject("len"));
-			to_objmap(obj.lenBox, om.addObject("lenBox"));
-			zenith::util::str_cast(obj.minNodeDistance, buff, 128);
-			om.addValue("minNodeDistance", buff);
-			zenith::util::str_cast(obj.numTries, buff, 128);
-			om.addValue("numTries", buff);
-		}
-		inline void from_objmap(MountainForkGenerator1_Params &obj, const zenith::util::ObjectMap<char, char> &om)
-		{
-			OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-			OBJMAP_GET_ONE_VALUE(om, obj.type, "type");
-			from_objmap(obj.alpha0, om.getObjects("alpha0", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.alpha0Box, om.getObjects("alpha0Box", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.alpha1, om.getObjects("alpha1", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.alpha1Box, om.getObjects("alpha1Box", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.beta, om.getObjects("beta", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.betaBox, om.getObjects("betaBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.mix, om.getObjects("mix", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.mixBox, om.getObjects("mixBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.len, om.getObjects("len", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.lenBox, om.getObjects("lenBox", zenith::util::ObjectMapPresence::ONE).first->second);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.minNodeDistance, "minNodeDistance", 10.0);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.numTries, "numTries", 1);
-		}
+		public:
+			typedef zenith::terragen::MountainForkGenerator1_Params value_type;
+			static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+			inline static void input(zenith::terragen::MountainForkGenerator1_Params &val, const It &it)
+			{
+				zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+				zenith::util::ioconv::input_named_required(val.type, it, "type");
+				zenith::util::ioconv::input_named_required(val.alpha0, it, "alpha0");
+				zenith::util::ioconv::input_named_required(val.alpha0Box, it, "alpha0Box");
+				zenith::util::ioconv::input_named_required(val.alpha1, it, "alpha1");
+				zenith::util::ioconv::input_named_required(val.alpha1Box, it, "alpha1Box");
+				zenith::util::ioconv::input_named_required(val.beta, it, "beta");
+				zenith::util::ioconv::input_named_required(val.betaBox, it, "betaBox");
+				zenith::util::ioconv::input_named_required(val.mix, it, "mix");
+				zenith::util::ioconv::input_named_required(val.mixBox, it, "mixBox");
+				zenith::util::ioconv::input_named_required(val.len, it, "len");
+				zenith::util::ioconv::input_named_required(val.lenBox, it, "lenBox");
+				val.minNodeDistance = 10.0;
+				zenith::util::ioconv::input_named_optional(val.minNodeDistance, it, "minNodeDistance");
+				val.numTries = 1;
+				zenith::util::ioconv::input_named_optional(val.numTries, it, "numTries");
+			}
+			inline static void output(const zenith::terragen::MountainForkGenerator1_Params &val, It &it)
+			{
+				zenith::util::ioconv::output_single(val.uid, it.append_value("uid", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.type, it.append_value("type", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.alpha0, it.append_complex("alpha0"));
+				zenith::util::ioconv::output_single(val.alpha0Box, it.append_complex("alpha0Box"));
+				zenith::util::ioconv::output_single(val.alpha1, it.append_complex("alpha1"));
+				zenith::util::ioconv::output_single(val.alpha1Box, it.append_complex("alpha1Box"));
+				zenith::util::ioconv::output_single(val.beta, it.append_complex("beta"));
+				zenith::util::ioconv::output_single(val.betaBox, it.append_complex("betaBox"));
+				zenith::util::ioconv::output_single(val.mix, it.append_complex("mix"));
+				zenith::util::ioconv::output_single(val.mixBox, it.append_complex("mixBox"));
+				zenith::util::ioconv::output_single(val.len, it.append_complex("len"));
+				zenith::util::ioconv::output_single(val.lenBox, it.append_complex("lenBox"));
+				zenith::util::ioconv::output_single(val.minNodeDistance, it.append_value("minNodeDistance"));
+				zenith::util::ioconv::output_single(val.numTries, it.append_value("numTries"));
+			}
+		};
 
 	}
 }

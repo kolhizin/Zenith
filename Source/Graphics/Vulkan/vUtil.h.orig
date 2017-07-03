@@ -1,6 +1,6 @@
 
       #pragma once
-      #include <Utils\object_map.h>
+      #include <Utils\ioconv\io_config.h>
       #include <Utils\macro_version.h>
       #include <Utils\nameid.h>
       #include <Graphics\Vulkan\vulkan_config.h>
@@ -17,22 +17,18 @@ struct vLayerConfig {
 std::string name;
 std::vector<std::string> requiredExtensions;
 };
-inline void to_objmap(const vLayerConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vLayerConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("name", obj.name.c_str(), zenith::util::ObjectMapValueHint::ATTR);
-for (auto x : obj.requiredExtensions)
-om.addValue("requiredExtensions", x.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vLayerConfig, It>{public:
+typedef zenith::vulkan::vLayerConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vLayerConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.name, it, "name");
+zenith::util::ioconv::input_named_multiple(val.requiredExtensions, it, "requiredExtensions");
 }
-inline void from_objmap(vLayerConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.name, "name");
-{
-auto v = om.getValues("requiredExtensions");
-for (auto it = v.first; it != v.second; it++)
-obj.requiredExtensions.emplace_back(it->second.first.c_str());
+inline static void output(const zenith::vulkan::vLayerConfig &val, It &it){
+zenith::util::ioconv::output_single(val.name, it.append_value("name", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_multiple(val.requiredExtensions, it, "requiredExtensions");
 }
-}
+};
 
 
 struct vInstanceConfig {
@@ -41,82 +37,34 @@ std::vector<std::string> requiredExtensions;
 std::string appName;
 std::string engineName;
 bool debug;
-uint32_t appVersion;
-uint32_t engineVersion;
-uint32_t apiVersion;
+zenith::version32_t appVersion;
+zenith::version32_t engineVersion;
+zenith::version32_t apiVersion;
 };
-inline void to_objmap(const vInstanceConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vInstanceConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-for (auto x : obj.enabledLayers)
-to_objmap(x, om.addObject("enabledLayers"));
-for (auto x : obj.requiredExtensions)
-om.addValue("requiredExtensions", x.c_str());
-om.addValue("appName", obj.appName.c_str());
-om.addValue("engineName", obj.engineName.c_str());
- zenith::util::str_cast(obj.debug, buff, 128);
-om.addValue("debug", buff);
-{auto &r=om.addObject("appVersion");
-r.addValue("type", "version", zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.appVersion), buff, 128);
-r.addValue("major", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.appVersion), buff, 128);
-r.addValue("minor", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.appVersion), buff, 128);
-r.addValue("patch", buff, zenith::util::ObjectMapValueHint::ATTR);
-}{auto &r=om.addObject("engineVersion");
-r.addValue("type", "version", zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.engineVersion), buff, 128);
-r.addValue("major", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.engineVersion), buff, 128);
-r.addValue("minor", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.engineVersion), buff, 128);
-r.addValue("patch", buff, zenith::util::ObjectMapValueHint::ATTR);
-}{auto &r=om.addObject("apiVersion");
-r.addValue("type", "version", zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.apiVersion), buff, 128);
-r.addValue("major", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.apiVersion), buff, 128);
-r.addValue("minor", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.apiVersion), buff, 128);
-r.addValue("patch", buff, zenith::util::ObjectMapValueHint::ATTR);
-}}
-inline void from_objmap(vInstanceConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-{
-auto v = om.getObjects("enabledLayers");
-for (auto it = v.first; it != v.second; it++){
-obj.enabledLayers.resize(obj.enabledLayers.size()+1);
-from_objmap(obj.enabledLayers.back(), it->second);}}{
-auto v = om.getValues("requiredExtensions");
-for (auto it = v.first; it != v.second; it++)
-obj.requiredExtensions.emplace_back(it->second.first.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vInstanceConfig, It>{public:
+typedef zenith::vulkan::vInstanceConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vInstanceConfig &val, const It &it){
+zenith::util::ioconv::input_named_multiple(val.enabledLayers, it, "enabledLayers");
+zenith::util::ioconv::input_named_multiple(val.requiredExtensions, it, "requiredExtensions");
+zenith::util::ioconv::input_named_required(val.appName, it, "appName");
+zenith::util::ioconv::input_named_required(val.engineName, it, "engineName");
+zenith::util::ioconv::input_named_required(val.debug, it, "debug");
+zenith::util::ioconv::input_named_required(val.appVersion, it, "appVersion");
+zenith::util::ioconv::input_named_required(val.engineVersion, it, "engineVersion");
+zenith::util::ioconv::input_named_required(val.apiVersion, it, "apiVersion");
 }
-OBJMAP_GET_ONE_VALUE(om, obj.appName, "appName");
-OBJMAP_GET_ONE_VALUE(om, obj.engineName, "engineName");
-OBJMAP_GET_ONE_VALUE(om, obj.debug, "debug");
-{auto &r = om.getObjects("appVersion", zenith::util::ObjectMapPresence::ONE).first->second;
-uint32_t major,minor,patch;
-OBJMAP_GET_ONE_VALUE(r, major, "major");
-OBJMAP_GET_ONE_VALUE(r, minor, "minor");
-OBJMAP_GET_ONE_VALUE(r, patch, "patch");
-obj.appVersion = ZENITH_MAKE_VERSION(major, minor, patch);
+inline static void output(const zenith::vulkan::vInstanceConfig &val, It &it){
+zenith::util::ioconv::output_multiple(val.enabledLayers, it, "enabledLayers");
+zenith::util::ioconv::output_multiple(val.requiredExtensions, it, "requiredExtensions");
+zenith::util::ioconv::output_single(val.appName, it.append_value("appName"));
+zenith::util::ioconv::output_single(val.engineName, it.append_value("engineName"));
+zenith::util::ioconv::output_single(val.debug, it.append_value("debug"));
+zenith::util::ioconv::output_single(val.appVersion, it.append_complex("appVersion"));
+zenith::util::ioconv::output_single(val.engineVersion, it.append_complex("engineVersion"));
+zenith::util::ioconv::output_single(val.apiVersion, it.append_complex("apiVersion"));
 }
-{auto &r = om.getObjects("engineVersion", zenith::util::ObjectMapPresence::ONE).first->second;
-uint32_t major,minor,patch;
-OBJMAP_GET_ONE_VALUE(r, major, "major");
-OBJMAP_GET_ONE_VALUE(r, minor, "minor");
-OBJMAP_GET_ONE_VALUE(r, patch, "patch");
-obj.engineVersion = ZENITH_MAKE_VERSION(major, minor, patch);
-}
-{auto &r = om.getObjects("apiVersion", zenith::util::ObjectMapPresence::ONE).first->second;
-uint32_t major,minor,patch;
-OBJMAP_GET_ONE_VALUE(r, major, "major");
-OBJMAP_GET_ONE_VALUE(r, minor, "minor");
-OBJMAP_GET_ONE_VALUE(r, patch, "patch");
-obj.apiVersion = ZENITH_MAKE_VERSION(major, minor, patch);
-}
-}
+};
 
 
 struct vSamplerFilteringConfig {
@@ -125,25 +73,26 @@ vSamplerFilter magFilter;
 vSamplerFilter mipFilter;
 float maxAnisotropy;
 };
-inline void to_objmap(const vSamplerFilteringConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vSamplerFilteringConfig", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.minFilter, buff, 128);
-om.addValue("minFilter", buff);
- zenith::util::str_cast(obj.magFilter, buff, 128);
-om.addValue("magFilter", buff);
- zenith::util::str_cast(obj.mipFilter, buff, 128);
-om.addValue("mipFilter", buff);
- zenith::util::str_cast(obj.maxAnisotropy, buff, 128);
-om.addValue("maxAnisotropy", buff);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerFilteringConfig, It>{public:
+typedef zenith::vulkan::vSamplerFilteringConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vSamplerFilteringConfig &val, const It &it){
+val.minFilter = zenith::vulkan::vSamplerFilter::LINEAR;
+zenith::util::ioconv::input_named_optional(val.minFilter, it, "minFilter");
+val.magFilter = zenith::vulkan::vSamplerFilter::LINEAR;
+zenith::util::ioconv::input_named_optional(val.magFilter, it, "magFilter");
+val.mipFilter = zenith::vulkan::vSamplerFilter::LINEAR;
+zenith::util::ioconv::input_named_optional(val.mipFilter, it, "mipFilter");
+val.maxAnisotropy = 0.0f;
+zenith::util::ioconv::input_named_optional(val.maxAnisotropy, it, "maxAnisotropy");
 }
-inline void from_objmap(vSamplerFilteringConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.minFilter, "minFilter", zenith::vulkan::vSamplerFilter::LINEAR);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.magFilter, "magFilter", zenith::vulkan::vSamplerFilter::LINEAR);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.mipFilter, "mipFilter", zenith::vulkan::vSamplerFilter::LINEAR);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.maxAnisotropy, "maxAnisotropy", 0.0f);
+inline static void output(const zenith::vulkan::vSamplerFilteringConfig &val, It &it){
+zenith::util::ioconv::output_single(val.minFilter, it.append_value("minFilter"));
+zenith::util::ioconv::output_single(val.magFilter, it.append_value("magFilter"));
+zenith::util::ioconv::output_single(val.mipFilter, it.append_value("mipFilter"));
+zenith::util::ioconv::output_single(val.maxAnisotropy, it.append_value("maxAnisotropy"));
 }
+};
 
 
 struct vSamplerAddressingConfig {
@@ -154,31 +103,32 @@ vSamplerBorderColor borderColor;
 vSamplerBorderType borderType;
 bool normalizedCoord;
 };
-inline void to_objmap(const vSamplerAddressingConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vSamplerAddressingConfig", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.u, buff, 128);
-om.addValue("u", buff);
- zenith::util::str_cast(obj.v, buff, 128);
-om.addValue("v", buff);
- zenith::util::str_cast(obj.w, buff, 128);
-om.addValue("w", buff);
- zenith::util::str_cast(obj.borderColor, buff, 128);
-om.addValue("borderColor", buff);
- zenith::util::str_cast(obj.borderType, buff, 128);
-om.addValue("borderType", buff);
- zenith::util::str_cast(obj.normalizedCoord, buff, 128);
-om.addValue("normalizedCoord", buff);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerAddressingConfig, It>{public:
+typedef zenith::vulkan::vSamplerAddressingConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vSamplerAddressingConfig &val, const It &it){
+val.u = zenith::vulkan::vSamplerAddress::CLAMP;
+zenith::util::ioconv::input_named_optional(val.u, it, "u");
+val.v = zenith::vulkan::vSamplerAddress::CLAMP;
+zenith::util::ioconv::input_named_optional(val.v, it, "v");
+val.w = zenith::vulkan::vSamplerAddress::CLAMP;
+zenith::util::ioconv::input_named_optional(val.w, it, "w");
+val.borderColor = zenith::vulkan::vSamplerBorderColor::OPAQUE_BLACK;
+zenith::util::ioconv::input_named_optional(val.borderColor, it, "borderColor");
+val.borderType = zenith::vulkan::vSamplerBorderType::FLOAT;
+zenith::util::ioconv::input_named_optional(val.borderType, it, "borderType");
+val.normalizedCoord = true;
+zenith::util::ioconv::input_named_optional(val.normalizedCoord, it, "normalizedCoord");
 }
-inline void from_objmap(vSamplerAddressingConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.u, "u", zenith::vulkan::vSamplerAddress::CLAMP);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.v, "v", zenith::vulkan::vSamplerAddress::CLAMP);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.w, "w", zenith::vulkan::vSamplerAddress::CLAMP);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.borderColor, "borderColor", zenith::vulkan::vSamplerBorderColor::OPAQUE_BLACK);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.borderType, "borderType", zenith::vulkan::vSamplerBorderType::FLOAT);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.normalizedCoord, "normalizedCoord", true);
+inline static void output(const zenith::vulkan::vSamplerAddressingConfig &val, It &it){
+zenith::util::ioconv::output_single(val.u, it.append_value("u"));
+zenith::util::ioconv::output_single(val.v, it.append_value("v"));
+zenith::util::ioconv::output_single(val.w, it.append_value("w"));
+zenith::util::ioconv::output_single(val.borderColor, it.append_value("borderColor"));
+zenith::util::ioconv::output_single(val.borderType, it.append_value("borderType"));
+zenith::util::ioconv::output_single(val.normalizedCoord, it.append_value("normalizedCoord"));
 }
+};
 
 
 struct vSamplerLODConfig {
@@ -186,329 +136,23 @@ float minLOD;
 float maxLOD;
 float biasLOD;
 };
-inline void to_objmap(const vSamplerLODConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vSamplerLODConfig", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.minLOD, buff, 128);
-om.addValue("minLOD", buff);
- zenith::util::str_cast(obj.maxLOD, buff, 128);
-om.addValue("maxLOD", buff);
- zenith::util::str_cast(obj.biasLOD, buff, 128);
-om.addValue("biasLOD", buff);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerLODConfig, It>{public:
+typedef zenith::vulkan::vSamplerLODConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vSamplerLODConfig &val, const It &it){
+val.minLOD = 0.0f;
+zenith::util::ioconv::input_named_optional(val.minLOD, it, "minLOD");
+val.maxLOD = 1024.0f;
+zenith::util::ioconv::input_named_optional(val.maxLOD, it, "maxLOD");
+val.biasLOD = 0.0f;
+zenith::util::ioconv::input_named_optional(val.biasLOD, it, "biasLOD");
 }
-inline void from_objmap(vSamplerLODConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.minLOD, "minLOD", 0.0f);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.maxLOD, "maxLOD", 1024.0f);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.biasLOD, "biasLOD", 0.0f);
+inline static void output(const zenith::vulkan::vSamplerLODConfig &val, It &it){
+zenith::util::ioconv::output_single(val.minLOD, it.append_value("minLOD"));
+zenith::util::ioconv::output_single(val.maxLOD, it.append_value("maxLOD"));
+zenith::util::ioconv::output_single(val.biasLOD, it.append_value("biasLOD"));
 }
-
-
-inline void to_objmap(const VkLayerProperties &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "VkLayerProperties", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("layerName", obj.layerName);
-{auto &r=om.addObject("specVersion");
-r.addValue("type", "version", zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.specVersion), buff, 128);
-r.addValue("major", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.specVersion), buff, 128);
-r.addValue("minor", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.specVersion), buff, 128);
-r.addValue("patch", buff, zenith::util::ObjectMapValueHint::ATTR);
-}{auto &r=om.addObject("implementationVersion");
-r.addValue("type", "version", zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.implementationVersion), buff, 128);
-r.addValue("major", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.implementationVersion), buff, 128);
-r.addValue("minor", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.implementationVersion), buff, 128);
-r.addValue("patch", buff, zenith::util::ObjectMapValueHint::ATTR);
-}om.addValue("description", obj.description);
-}
-
-
-inline void to_objmap(const VkExtensionProperties &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "VkExtensionProperties", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("extensionName", obj.extensionName);
-{auto &r=om.addObject("specVersion");
-r.addValue("type", "version", zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.specVersion), buff, 128);
-r.addValue("major", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.specVersion), buff, 128);
-r.addValue("minor", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.specVersion), buff, 128);
-r.addValue("patch", buff, zenith::util::ObjectMapValueHint::ATTR);
-}}
-
-
-inline void to_objmap(const VkPhysicalDeviceLimits &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "VkPhysicalDeviceLimits", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.maxImageDimension1D, buff, 128);
-om.addValue("maxImageDimension1D", buff);
- zenith::util::str_cast(obj.maxImageDimension2D, buff, 128);
-om.addValue("maxImageDimension2D", buff);
- zenith::util::str_cast(obj.maxImageDimension3D, buff, 128);
-om.addValue("maxImageDimension3D", buff);
- zenith::util::str_cast(obj.maxImageDimensionCube, buff, 128);
-om.addValue("maxImageDimensionCube", buff);
- zenith::util::str_cast(obj.maxImageArrayLayers, buff, 128);
-om.addValue("maxImageArrayLayers", buff);
- zenith::util::str_cast(obj.maxTexelBufferElements, buff, 128);
-om.addValue("maxTexelBufferElements", buff);
- zenith::util::str_cast(obj.maxUniformBufferRange, buff, 128);
-om.addValue("maxUniformBufferRange", buff);
- zenith::util::str_cast(obj.maxStorageBufferRange, buff, 128);
-om.addValue("maxStorageBufferRange", buff);
- zenith::util::str_cast(obj.maxPushConstantsSize, buff, 128);
-om.addValue("maxPushConstantsSize", buff);
- zenith::util::str_cast(obj.maxMemoryAllocationCount, buff, 128);
-om.addValue("maxMemoryAllocationCount", buff);
- zenith::util::str_cast(obj.maxSamplerAllocationCount, buff, 128);
-om.addValue("maxSamplerAllocationCount", buff);
- zenith::util::str_cast(obj.bufferImageGranularity, buff, 128);
-om.addValue("bufferImageGranularity", buff);
- zenith::util::str_cast(obj.sparseAddressSpaceSize, buff, 128);
-om.addValue("sparseAddressSpaceSize", buff);
- zenith::util::str_cast(obj.maxBoundDescriptorSets, buff, 128);
-om.addValue("maxBoundDescriptorSets", buff);
- zenith::util::str_cast(obj.maxPerStageDescriptorSamplers, buff, 128);
-om.addValue("maxPerStageDescriptorSamplers", buff);
- zenith::util::str_cast(obj.maxPerStageDescriptorUniformBuffers, buff, 128);
-om.addValue("maxPerStageDescriptorUniformBuffers", buff);
- zenith::util::str_cast(obj.maxPerStageDescriptorStorageBuffers, buff, 128);
-om.addValue("maxPerStageDescriptorStorageBuffers", buff);
- zenith::util::str_cast(obj.maxPerStageDescriptorSampledImages, buff, 128);
-om.addValue("maxPerStageDescriptorSampledImages", buff);
- zenith::util::str_cast(obj.maxPerStageDescriptorStorageImages, buff, 128);
-om.addValue("maxPerStageDescriptorStorageImages", buff);
- zenith::util::str_cast(obj.maxPerStageDescriptorInputAttachments, buff, 128);
-om.addValue("maxPerStageDescriptorInputAttachments", buff);
- zenith::util::str_cast(obj.maxPerStageResources, buff, 128);
-om.addValue("maxPerStageResources", buff);
- zenith::util::str_cast(obj.maxDescriptorSetSamplers, buff, 128);
-om.addValue("maxDescriptorSetSamplers", buff);
- zenith::util::str_cast(obj.maxDescriptorSetUniformBuffers, buff, 128);
-om.addValue("maxDescriptorSetUniformBuffers", buff);
- zenith::util::str_cast(obj.maxDescriptorSetUniformBuffersDynamic, buff, 128);
-om.addValue("maxDescriptorSetUniformBuffersDynamic", buff);
- zenith::util::str_cast(obj.maxDescriptorSetStorageBuffers, buff, 128);
-om.addValue("maxDescriptorSetStorageBuffers", buff);
- zenith::util::str_cast(obj.maxDescriptorSetStorageBuffersDynamic, buff, 128);
-om.addValue("maxDescriptorSetStorageBuffersDynamic", buff);
- zenith::util::str_cast(obj.maxDescriptorSetSampledImages, buff, 128);
-om.addValue("maxDescriptorSetSampledImages", buff);
- zenith::util::str_cast(obj.maxDescriptorSetStorageImages, buff, 128);
-om.addValue("maxDescriptorSetStorageImages", buff);
- zenith::util::str_cast(obj.maxDescriptorSetInputAttachments, buff, 128);
-om.addValue("maxDescriptorSetInputAttachments", buff);
- zenith::util::str_cast(obj.maxVertexInputAttributes, buff, 128);
-om.addValue("maxVertexInputAttributes", buff);
- zenith::util::str_cast(obj.maxVertexInputBindings, buff, 128);
-om.addValue("maxVertexInputBindings", buff);
- zenith::util::str_cast(obj.maxVertexInputAttributeOffset, buff, 128);
-om.addValue("maxVertexInputAttributeOffset", buff);
- zenith::util::str_cast(obj.maxVertexInputBindingStride, buff, 128);
-om.addValue("maxVertexInputBindingStride", buff);
- zenith::util::str_cast(obj.maxVertexOutputComponents, buff, 128);
-om.addValue("maxVertexOutputComponents", buff);
- zenith::util::str_cast(obj.maxTessellationGenerationLevel, buff, 128);
-om.addValue("maxTessellationGenerationLevel", buff);
- zenith::util::str_cast(obj.maxTessellationPatchSize, buff, 128);
-om.addValue("maxTessellationPatchSize", buff);
- zenith::util::str_cast(obj.maxTessellationControlPerVertexInputComponents, buff, 128);
-om.addValue("maxTessellationControlPerVertexInputComponents", buff);
- zenith::util::str_cast(obj.maxTessellationControlPerVertexOutputComponents, buff, 128);
-om.addValue("maxTessellationControlPerVertexOutputComponents", buff);
- zenith::util::str_cast(obj.maxTessellationControlPerPatchOutputComponents, buff, 128);
-om.addValue("maxTessellationControlPerPatchOutputComponents", buff);
- zenith::util::str_cast(obj.maxTessellationControlTotalOutputComponents, buff, 128);
-om.addValue("maxTessellationControlTotalOutputComponents", buff);
- zenith::util::str_cast(obj.maxTessellationEvaluationInputComponents, buff, 128);
-om.addValue("maxTessellationEvaluationInputComponents", buff);
- zenith::util::str_cast(obj.maxTessellationEvaluationOutputComponents, buff, 128);
-om.addValue("maxTessellationEvaluationOutputComponents", buff);
- zenith::util::str_cast(obj.maxGeometryShaderInvocations, buff, 128);
-om.addValue("maxGeometryShaderInvocations", buff);
- zenith::util::str_cast(obj.maxGeometryInputComponents, buff, 128);
-om.addValue("maxGeometryInputComponents", buff);
- zenith::util::str_cast(obj.maxGeometryOutputComponents, buff, 128);
-om.addValue("maxGeometryOutputComponents", buff);
- zenith::util::str_cast(obj.maxGeometryOutputVertices, buff, 128);
-om.addValue("maxGeometryOutputVertices", buff);
- zenith::util::str_cast(obj.maxGeometryTotalOutputComponents, buff, 128);
-om.addValue("maxGeometryTotalOutputComponents", buff);
- zenith::util::str_cast(obj.maxFragmentInputComponents, buff, 128);
-om.addValue("maxFragmentInputComponents", buff);
- zenith::util::str_cast(obj.maxFragmentOutputAttachments, buff, 128);
-om.addValue("maxFragmentOutputAttachments", buff);
- zenith::util::str_cast(obj.maxFragmentDualSrcAttachments, buff, 128);
-om.addValue("maxFragmentDualSrcAttachments", buff);
- zenith::util::str_cast(obj.maxFragmentCombinedOutputResources, buff, 128);
-om.addValue("maxFragmentCombinedOutputResources", buff);
- zenith::util::str_cast(obj.maxComputeSharedMemorySize, buff, 128);
-om.addValue("maxComputeSharedMemorySize", buff);
- zenith::util::str_cast(obj.maxComputeWorkGroupInvocations, buff, 128);
-om.addValue("maxComputeWorkGroupInvocations", buff);
- zenith::util::str_cast(obj.maxComputeWorkGroupCount[0], buff, 128);
-om.addValue("maxComputeWorkGroupCount[0]", buff);
- zenith::util::str_cast(obj.maxComputeWorkGroupSize[0], buff, 128);
-om.addValue("maxComputeWorkGroupSize[0]", buff);
- zenith::util::str_cast(obj.maxComputeWorkGroupCount[1], buff, 128);
-om.addValue("maxComputeWorkGroupCount[1]", buff);
- zenith::util::str_cast(obj.maxComputeWorkGroupSize[1], buff, 128);
-om.addValue("maxComputeWorkGroupSize[1]", buff);
- zenith::util::str_cast(obj.maxComputeWorkGroupCount[2], buff, 128);
-om.addValue("maxComputeWorkGroupCount[2]", buff);
- zenith::util::str_cast(obj.maxComputeWorkGroupSize[2], buff, 128);
-om.addValue("maxComputeWorkGroupSize[2]", buff);
- zenith::util::str_cast(obj.subPixelPrecisionBits, buff, 128);
-om.addValue("subPixelPrecisionBits", buff);
- zenith::util::str_cast(obj.subTexelPrecisionBits, buff, 128);
-om.addValue("subTexelPrecisionBits", buff);
- zenith::util::str_cast(obj.mipmapPrecisionBits, buff, 128);
-om.addValue("mipmapPrecisionBits", buff);
- zenith::util::str_cast(obj.maxDrawIndexedIndexValue, buff, 128);
-om.addValue("maxDrawIndexedIndexValue", buff);
- zenith::util::str_cast(obj.maxDrawIndirectCount, buff, 128);
-om.addValue("maxDrawIndirectCount", buff);
- zenith::util::str_cast(obj.maxSamplerLodBias, buff, 128);
-om.addValue("maxSamplerLodBias", buff);
- zenith::util::str_cast(obj.maxSamplerAnisotropy, buff, 128);
-om.addValue("maxSamplerAnisotropy", buff);
- zenith::util::str_cast(obj.maxViewports, buff, 128);
-om.addValue("maxViewports", buff);
- zenith::util::str_cast(obj.maxViewportDimensions[0], buff, 128);
-om.addValue("maxViewportDimensions[0]", buff);
- zenith::util::str_cast(obj.maxViewportDimensions[1], buff, 128);
-om.addValue("maxViewportDimensions[1]", buff);
- zenith::util::str_cast(obj.viewportBoundsRange[0], buff, 128);
-om.addValue("viewportBoundsRange[0]", buff);
- zenith::util::str_cast(obj.viewportBoundsRange[1], buff, 128);
-om.addValue("viewportBoundsRange[1]", buff);
- zenith::util::str_cast(obj.viewportSubPixelBits, buff, 128);
-om.addValue("viewportSubPixelBits", buff);
- zenith::util::str_cast(obj.minMemoryMapAlignment, buff, 128);
-om.addValue("minMemoryMapAlignment", buff);
- zenith::util::str_cast(obj.minTexelBufferOffsetAlignment, buff, 128);
-om.addValue("minTexelBufferOffsetAlignment", buff);
- zenith::util::str_cast(obj.minUniformBufferOffsetAlignment, buff, 128);
-om.addValue("minUniformBufferOffsetAlignment", buff);
- zenith::util::str_cast(obj.minStorageBufferOffsetAlignment, buff, 128);
-om.addValue("minStorageBufferOffsetAlignment", buff);
- zenith::util::str_cast(obj.minTexelOffset, buff, 128);
-om.addValue("minTexelOffset", buff);
- zenith::util::str_cast(obj.maxTexelOffset, buff, 128);
-om.addValue("maxTexelOffset", buff);
- zenith::util::str_cast(obj.minTexelGatherOffset, buff, 128);
-om.addValue("minTexelGatherOffset", buff);
- zenith::util::str_cast(obj.maxTexelGatherOffset, buff, 128);
-om.addValue("maxTexelGatherOffset", buff);
- zenith::util::str_cast(obj.minInterpolationOffset, buff, 128);
-om.addValue("minInterpolationOffset", buff);
- zenith::util::str_cast(obj.maxInterpolationOffset, buff, 128);
-om.addValue("maxInterpolationOffset", buff);
- zenith::util::str_cast(obj.subPixelInterpolationOffsetBits, buff, 128);
-om.addValue("subPixelInterpolationOffsetBits", buff);
- zenith::util::str_cast(obj.maxFramebufferWidth, buff, 128);
-om.addValue("maxFramebufferWidth", buff);
- zenith::util::str_cast(obj.maxFramebufferHeight, buff, 128);
-om.addValue("maxFramebufferHeight", buff);
- zenith::util::str_cast(obj.maxFramebufferLayers, buff, 128);
-om.addValue("maxFramebufferLayers", buff);
- zenith::util::str_cast(obj.maxColorAttachments, buff, 128);
-om.addValue("maxColorAttachments", buff);
- zenith::util::str_cast(obj.maxSampleMaskWords, buff, 128);
-om.addValue("maxSampleMaskWords", buff);
- zenith::util::str_cast(obj.timestampComputeAndGraphics, buff, 128);
-om.addValue("timestampComputeAndGraphics", buff);
- zenith::util::str_cast(obj.timestampPeriod, buff, 128);
-om.addValue("timestampPeriod", buff);
- zenith::util::str_cast(obj.maxClipDistances, buff, 128);
-om.addValue("maxClipDistances", buff);
- zenith::util::str_cast(obj.maxCullDistances, buff, 128);
-om.addValue("maxCullDistances", buff);
- zenith::util::str_cast(obj.maxCombinedClipAndCullDistances, buff, 128);
-om.addValue("maxCombinedClipAndCullDistances", buff);
- zenith::util::str_cast(obj.discreteQueuePriorities, buff, 128);
-om.addValue("discreteQueuePriorities", buff);
- zenith::util::str_cast(obj.strictLines, buff, 128);
-om.addValue("strictLines", buff);
- zenith::util::str_cast(obj.standardSampleLocations, buff, 128);
-om.addValue("standardSampleLocations", buff);
- zenith::util::str_cast(obj.optimalBufferCopyOffsetAlignment, buff, 128);
-om.addValue("optimalBufferCopyOffsetAlignment", buff);
- zenith::util::str_cast(obj.optimalBufferCopyRowPitchAlignment, buff, 128);
-om.addValue("optimalBufferCopyRowPitchAlignment", buff);
- zenith::util::str_cast(obj.nonCoherentAtomSize, buff, 128);
-om.addValue("nonCoherentAtomSize", buff);
- zenith::util::str_cast(obj.pointSizeGranularity, buff, 128);
-om.addValue("pointSizeGranularity", buff);
- zenith::util::str_cast(obj.lineWidthGranularity, buff, 128);
-om.addValue("lineWidthGranularity", buff);
- zenith::util::str_cast(obj.pointSizeRange[0], buff, 128);
-om.addValue("pointSizeRange[0]", buff);
- zenith::util::str_cast(obj.pointSizeRange[1], buff, 128);
-om.addValue("pointSizeRange[1]", buff);
- zenith::util::str_cast(obj.lineWidthRange[0], buff, 128);
-om.addValue("lineWidthRange[0]", buff);
- zenith::util::str_cast(obj.lineWidthRange[1], buff, 128);
-om.addValue("lineWidthRange[1]", buff);
- zenith::util::str_cast(obj.framebufferColorSampleCounts, buff, 128);
-om.addValue("framebufferColorSampleCounts", buff);
- zenith::util::str_cast(obj.framebufferDepthSampleCounts, buff, 128);
-om.addValue("framebufferDepthSampleCounts", buff);
- zenith::util::str_cast(obj.framebufferStencilSampleCounts, buff, 128);
-om.addValue("framebufferStencilSampleCounts", buff);
- zenith::util::str_cast(obj.framebufferNoAttachmentsSampleCounts, buff, 128);
-om.addValue("framebufferNoAttachmentsSampleCounts", buff);
- zenith::util::str_cast(obj.sampledImageColorSampleCounts, buff, 128);
-om.addValue("sampledImageColorSampleCounts", buff);
- zenith::util::str_cast(obj.sampledImageIntegerSampleCounts, buff, 128);
-om.addValue("sampledImageIntegerSampleCounts", buff);
- zenith::util::str_cast(obj.sampledImageDepthSampleCounts, buff, 128);
-om.addValue("sampledImageDepthSampleCounts", buff);
- zenith::util::str_cast(obj.sampledImageStencilSampleCounts, buff, 128);
-om.addValue("sampledImageStencilSampleCounts", buff);
- zenith::util::str_cast(obj.storageImageSampleCounts, buff, 128);
-om.addValue("storageImageSampleCounts", buff);
-}
-
-
-inline void to_objmap(const VkPhysicalDeviceProperties &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "VkPhysicalDeviceProperties", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("deviceName", obj.deviceName);
- zenith::util::str_cast(obj.vendorID, buff, 128);
-om.addValue("vendorID", buff);
- zenith::util::str_cast(obj.deviceID, buff, 128);
-om.addValue("deviceID", buff);
-{auto &r=om.addObject("driverVersion");
-r.addValue("type", "version", zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.driverVersion), buff, 128);
-r.addValue("major", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.driverVersion), buff, 128);
-r.addValue("minor", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.driverVersion), buff, 128);
-r.addValue("patch", buff, zenith::util::ObjectMapValueHint::ATTR);
-}{auto &r=om.addObject("apiVersion");
-r.addValue("type", "version", zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MAJOR(obj.apiVersion), buff, 128);
-r.addValue("major", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_MINOR(obj.apiVersion), buff, 128);
-r.addValue("minor", buff, zenith::util::ObjectMapValueHint::ATTR);
-zenith::util::str_cast(ZENITH_VERSION_PATCH(obj.apiVersion), buff, 128);
-r.addValue("patch", buff, zenith::util::ObjectMapValueHint::ATTR);
-} zenith::util::str_cast(static_cast<vPhysicalDeviceType>(obj.deviceType), buff, 128);
-om.addValue("deviceType", buff);
-to_objmap(obj.limits, om.addObject("limits"));
-}
+};
 
 
 struct vDeviceQueueReqs {
@@ -522,42 +166,39 @@ bool fPresent;
 float priority;
 std::vector<zenith::util::nameid> aliases;
 };
-inline void to_objmap(const vDeviceQueueReqs &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vDeviceQueueReqs", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
-om.addValue("surfaceUID", obj.surfaceUID.c_str());
- zenith::util::str_cast(obj.fGraphics, buff, 128);
-om.addValue("fGraphics", buff);
- zenith::util::str_cast(obj.fCompute, buff, 128);
-om.addValue("fCompute", buff);
- zenith::util::str_cast(obj.fTransfer, buff, 128);
-om.addValue("fTransfer", buff);
- zenith::util::str_cast(obj.fSparse, buff, 128);
-om.addValue("fSparse", buff);
- zenith::util::str_cast(obj.fPresent, buff, 128);
-om.addValue("fPresent", buff);
- zenith::util::str_cast(obj.priority, buff, 128);
-om.addValue("priority", buff);
-for (auto x : obj.aliases)
-om.addValue("aliases", x.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceQueueReqs, It>{public:
+typedef zenith::vulkan::vDeviceQueueReqs value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vDeviceQueueReqs &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+val.surfaceUID = "UNDEF";
+zenith::util::ioconv::input_named_optional(val.surfaceUID, it, "surfaceUID");
+val.fGraphics = false;
+zenith::util::ioconv::input_named_optional(val.fGraphics, it, "fGraphics");
+val.fCompute = false;
+zenith::util::ioconv::input_named_optional(val.fCompute, it, "fCompute");
+val.fTransfer = false;
+zenith::util::ioconv::input_named_optional(val.fTransfer, it, "fTransfer");
+val.fSparse = false;
+zenith::util::ioconv::input_named_optional(val.fSparse, it, "fSparse");
+val.fPresent = false;
+zenith::util::ioconv::input_named_optional(val.fPresent, it, "fPresent");
+val.priority = 1.0f;
+zenith::util::ioconv::input_named_optional(val.priority, it, "priority");
+zenith::util::ioconv::input_named_multiple(val.aliases, it, "aliases");
 }
-inline void from_objmap(vDeviceQueueReqs &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.surfaceUID, "surfaceUID", "UNDEF");
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fGraphics, "fGraphics", false);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fCompute, "fCompute", false);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fTransfer, "fTransfer", false);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fSparse, "fSparse", false);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fPresent, "fPresent", false);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.priority, "priority", 1.0f);
-{
-auto v = om.getValues("aliases");
-for (auto it = v.first; it != v.second; it++)
-obj.aliases.emplace_back(it->second.first.c_str());
+inline static void output(const zenith::vulkan::vDeviceQueueReqs &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_single(val.surfaceUID, it.append_value("surfaceUID"));
+zenith::util::ioconv::output_single(val.fGraphics, it.append_value("fGraphics"));
+zenith::util::ioconv::output_single(val.fCompute, it.append_value("fCompute"));
+zenith::util::ioconv::output_single(val.fTransfer, it.append_value("fTransfer"));
+zenith::util::ioconv::output_single(val.fSparse, it.append_value("fSparse"));
+zenith::util::ioconv::output_single(val.fPresent, it.append_value("fPresent"));
+zenith::util::ioconv::output_single(val.priority, it.append_value("priority"));
+zenith::util::ioconv::output_multiple(val.aliases, it, "aliases");
 }
-}
+};
 
 
 struct vDeviceReqs {
@@ -568,40 +209,27 @@ std::vector<vDeviceQueueReqs> queues;
 std::vector<vLayerConfig> enabledLayers;
 std::vector<std::string> requiredExtensions;
 };
-inline void to_objmap(const vDeviceReqs &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vDeviceReqs", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
- zenith::util::str_cast(obj.physicalType, buff, 128);
-om.addValue("physicalType", buff);
- zenith::util::str_cast(obj.memorySize, buff, 128);
-om.addValue("memorySize", buff);
-for (auto x : obj.queues)
-to_objmap(x, om.addObject("queues"));
-for (auto x : obj.enabledLayers)
-to_objmap(x, om.addObject("enabledLayers"));
-for (auto x : obj.requiredExtensions)
-om.addValue("requiredExtensions", x.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceReqs, It>{public:
+typedef zenith::vulkan::vDeviceReqs value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vDeviceReqs &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+zenith::util::ioconv::input_named_required(val.physicalType, it, "physicalType");
+val.memorySize = 536870912;
+zenith::util::ioconv::input_named_optional(val.memorySize, it, "memorySize");
+zenith::util::ioconv::input_named_multiple(val.queues, it, "queues");
+zenith::util::ioconv::input_named_multiple(val.enabledLayers, it, "enabledLayers");
+zenith::util::ioconv::input_named_multiple(val.requiredExtensions, it, "requiredExtensions");
 }
-inline void from_objmap(vDeviceReqs &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-OBJMAP_GET_ONE_VALUE(om, obj.physicalType, "physicalType");
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.memorySize, "memorySize", 536870912);
-{
-auto v = om.getObjects("queues");
-for (auto it = v.first; it != v.second; it++){
-obj.queues.resize(obj.queues.size()+1);
-from_objmap(obj.queues.back(), it->second);}}{
-auto v = om.getObjects("enabledLayers");
-for (auto it = v.first; it != v.second; it++){
-obj.enabledLayers.resize(obj.enabledLayers.size()+1);
-from_objmap(obj.enabledLayers.back(), it->second);}}{
-auto v = om.getValues("requiredExtensions");
-for (auto it = v.first; it != v.second; it++)
-obj.requiredExtensions.emplace_back(it->second.first.c_str());
+inline static void output(const zenith::vulkan::vDeviceReqs &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_single(val.physicalType, it.append_value("physicalType"));
+zenith::util::ioconv::output_single(val.memorySize, it.append_value("memorySize"));
+zenith::util::ioconv::output_multiple(val.queues, it, "queues");
+zenith::util::ioconv::output_multiple(val.enabledLayers, it, "enabledLayers");
+zenith::util::ioconv::output_multiple(val.requiredExtensions, it, "requiredExtensions");
 }
-}
+};
 
 
 struct vDeviceConfig {
@@ -609,33 +237,29 @@ zenith::util::nameid uid;
 std::vector<vDeviceReqs> deviceReqs;
 std::vector<std::string> deviceReqOrder;
 };
-inline void to_objmap(const vDeviceConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vDeviceConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
-for (auto x : obj.deviceReqs)
-to_objmap(x, om.addObject("deviceReqs"));
-for (auto x : obj.deviceReqOrder)
-om.addValue("deviceReqOrder", x.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceConfig, It>{public:
+typedef zenith::vulkan::vDeviceConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vDeviceConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+zenith::util::ioconv::input_named_multiple(val.deviceReqs, it, "deviceReqs");
+zenith::util::ioconv::input_named_multiple(val.deviceReqOrder, it, "deviceReqOrder");
 }
-inline void from_objmap(vDeviceConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-{
-auto v = om.getObjects("deviceReqs");
-for (auto it = v.first; it != v.second; it++){
-obj.deviceReqs.resize(obj.deviceReqs.size()+1);
-from_objmap(obj.deviceReqs.back(), it->second);}}{
-auto v = om.getValues("deviceReqOrder");
-for (auto it = v.first; it != v.second; it++)
-obj.deviceReqOrder.emplace_back(it->second.first.c_str());
+inline static void output(const zenith::vulkan::vDeviceConfig &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_multiple(val.deviceReqs, it, "deviceReqs");
+zenith::util::ioconv::output_multiple(val.deviceReqOrder, it, "deviceReqOrder");
 }
-}
+};
 
 
 struct vQueueFamilyProperties {
 VkQueueFamilyProperties generalProperties;
 zenith::util::nameid_seq supportedSurfaces;
+};
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vQueueFamilyProperties, It>{public:
+typedef zenith::vulkan::vQueueFamilyProperties value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 };
 
 
@@ -643,23 +267,18 @@ struct vSharingInfo {
 vSharingMode mode;
 std::vector<std::string> queues;
 };
-inline void to_objmap(const vSharingInfo &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vSharingInfo", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.mode, buff, 128);
-om.addValue("mode", buff);
-for (auto x : obj.queues)
-om.addValue("queues", x.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSharingInfo, It>{public:
+typedef zenith::vulkan::vSharingInfo value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vSharingInfo &val, const It &it){
+zenith::util::ioconv::input_named_required(val.mode, it, "mode");
+zenith::util::ioconv::input_named_multiple(val.queues, it, "queues");
 }
-inline void from_objmap(vSharingInfo &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.mode, "mode");
-{
-auto v = om.getValues("queues");
-for (auto it = v.first; it != v.second; it++)
-obj.queues.emplace_back(it->second.first.c_str());
+inline static void output(const zenith::vulkan::vSharingInfo &val, It &it){
+zenith::util::ioconv::output_single(val.mode, it.append_value("mode"));
+zenith::util::ioconv::output_multiple(val.queues, it, "queues");
 }
-}
+};
 
 
 struct vSwapchainReqs {
@@ -670,35 +289,26 @@ uint32_t imageCount;
 vImageFormat imageFormat;
 std::vector<vImageUsageBit> imageUsage;
 };
-inline void to_objmap(const vSwapchainReqs &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vSwapchainReqs", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
-to_objmap(obj.sharingInfo, om.addObject("sharingInfo"));
- zenith::util::str_cast(obj.presentMode, buff, 128);
-om.addValue("presentMode", buff);
- zenith::util::str_cast(obj.imageCount, buff, 128);
-om.addValue("imageCount", buff);
- zenith::util::str_cast(obj.imageFormat, buff, 128);
-om.addValue("imageFormat", buff);
-for (auto x : obj.imageUsage){
- zenith::util::str_cast(x, buff, 128);
-om.addValue("imageUsage", buff);}
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainReqs, It>{public:
+typedef zenith::vulkan::vSwapchainReqs value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vSwapchainReqs &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+zenith::util::ioconv::input_named_required(val.sharingInfo, it, "sharingInfo");
+zenith::util::ioconv::input_named_required(val.presentMode, it, "presentMode");
+zenith::util::ioconv::input_named_required(val.imageCount, it, "imageCount");
+zenith::util::ioconv::input_named_required(val.imageFormat, it, "imageFormat");
+zenith::util::ioconv::input_named_multiple(val.imageUsage, it, "imageUsage");
 }
-inline void from_objmap(vSwapchainReqs &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-from_objmap(obj.sharingInfo, om.getObjects("sharingInfo", zenith::util::ObjectMapPresence::ONE).first->second);
-OBJMAP_GET_ONE_VALUE(om, obj.presentMode, "presentMode");
-OBJMAP_GET_ONE_VALUE(om, obj.imageCount, "imageCount");
-OBJMAP_GET_ONE_VALUE(om, obj.imageFormat, "imageFormat");
-{
-auto v = om.getValues("imageUsage");
-for (auto it = v.first; it != v.second; it++){
-obj.imageUsage.resize(obj.imageUsage.size()+1);
-om.setValue(obj.imageUsage.back(), it);
-}}
+inline static void output(const zenith::vulkan::vSwapchainReqs &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_single(val.sharingInfo, it.append_complex("sharingInfo"));
+zenith::util::ioconv::output_single(val.presentMode, it.append_value("presentMode"));
+zenith::util::ioconv::output_single(val.imageCount, it.append_value("imageCount"));
+zenith::util::ioconv::output_single(val.imageFormat, it.append_value("imageFormat"));
+zenith::util::ioconv::output_multiple(val.imageUsage, it, "imageUsage");
 }
+};
 
 
 struct vSwapchainConfig {
@@ -708,49 +318,42 @@ zenith::util::nameid deviceUID;
 std::vector<vSwapchainReqs> swapchainReqs;
 std::vector<std::string> swapchainReqOrder;
 };
-inline void to_objmap(const vSwapchainConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vSwapchainConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
-om.addValue("surfaceUID", obj.surfaceUID.c_str());
-om.addValue("deviceUID", obj.deviceUID.c_str());
-for (auto x : obj.swapchainReqs)
-to_objmap(x, om.addObject("swapchainReqs"));
-for (auto x : obj.swapchainReqOrder)
-om.addValue("swapchainReqOrder", x.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainConfig, It>{public:
+typedef zenith::vulkan::vSwapchainConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vSwapchainConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+zenith::util::ioconv::input_named_required(val.surfaceUID, it, "surfaceUID");
+zenith::util::ioconv::input_named_required(val.deviceUID, it, "deviceUID");
+zenith::util::ioconv::input_named_multiple(val.swapchainReqs, it, "swapchainReqs");
+zenith::util::ioconv::input_named_multiple(val.swapchainReqOrder, it, "swapchainReqOrder");
 }
-inline void from_objmap(vSwapchainConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-OBJMAP_GET_ONE_VALUE(om, obj.surfaceUID, "surfaceUID");
-OBJMAP_GET_ONE_VALUE(om, obj.deviceUID, "deviceUID");
-{
-auto v = om.getObjects("swapchainReqs");
-for (auto it = v.first; it != v.second; it++){
-obj.swapchainReqs.resize(obj.swapchainReqs.size()+1);
-from_objmap(obj.swapchainReqs.back(), it->second);}}{
-auto v = om.getValues("swapchainReqOrder");
-for (auto it = v.first; it != v.second; it++)
-obj.swapchainReqOrder.emplace_back(it->second.first.c_str());
+inline static void output(const zenith::vulkan::vSwapchainConfig &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_single(val.surfaceUID, it.append_value("surfaceUID"));
+zenith::util::ioconv::output_single(val.deviceUID, it.append_value("deviceUID"));
+zenith::util::ioconv::output_multiple(val.swapchainReqs, it, "swapchainReqs");
+zenith::util::ioconv::output_multiple(val.swapchainReqOrder, it, "swapchainReqOrder");
 }
-}
+};
 
 
 struct vSurfaceConfig {
 zenith::util::nameid uid;
 zenith::util::nameid windowUID;
 };
-inline void to_objmap(const vSurfaceConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vSurfaceConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
-om.addValue("windowUID", obj.windowUID.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSurfaceConfig, It>{public:
+typedef zenith::vulkan::vSurfaceConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vSurfaceConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+zenith::util::ioconv::input_named_required(val.windowUID, it, "windowUID");
 }
-inline void from_objmap(vSurfaceConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-OBJMAP_GET_ONE_VALUE(om, obj.windowUID, "windowUID");
+inline static void output(const zenith::vulkan::vSurfaceConfig &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_single(val.windowUID, it.append_value("windowUID"));
 }
+};
 
 
 struct vMemoryPhysicalChunkConfig {
@@ -759,25 +362,22 @@ size_t maxChunkSize;
 size_t minChunkSize;
 size_t align;
 };
-inline void to_objmap(const vMemoryPhysicalChunkConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vMemoryPhysicalChunkConfig", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.minAllocSize, buff, 128);
-om.addValue("minAllocSize", buff);
- zenith::util::str_cast(obj.maxChunkSize, buff, 128);
-om.addValue("maxChunkSize", buff);
- zenith::util::str_cast(obj.minChunkSize, buff, 128);
-om.addValue("minChunkSize", buff);
- zenith::util::str_cast(obj.align, buff, 128);
-om.addValue("align", buff);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPhysicalChunkConfig, It>{public:
+typedef zenith::vulkan::vMemoryPhysicalChunkConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vMemoryPhysicalChunkConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.minAllocSize, it, "minAllocSize");
+zenith::util::ioconv::input_named_required(val.maxChunkSize, it, "maxChunkSize");
+zenith::util::ioconv::input_named_required(val.minChunkSize, it, "minChunkSize");
+zenith::util::ioconv::input_named_required(val.align, it, "align");
 }
-inline void from_objmap(vMemoryPhysicalChunkConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.minAllocSize, "minAllocSize");
-OBJMAP_GET_ONE_VALUE(om, obj.maxChunkSize, "maxChunkSize");
-OBJMAP_GET_ONE_VALUE(om, obj.minChunkSize, "minChunkSize");
-OBJMAP_GET_ONE_VALUE(om, obj.align, "align");
+inline static void output(const zenith::vulkan::vMemoryPhysicalChunkConfig &val, It &it){
+zenith::util::ioconv::output_single(val.minAllocSize, it.append_value("minAllocSize"));
+zenith::util::ioconv::output_single(val.maxChunkSize, it.append_value("maxChunkSize"));
+zenith::util::ioconv::output_single(val.minChunkSize, it.append_value("minChunkSize"));
+zenith::util::ioconv::output_single(val.align, it.append_value("align"));
 }
+};
 
 
 struct vMemoryLogicalChunkConfig {
@@ -787,28 +387,24 @@ size_t blockSize;
 size_t align;
 uint32_t subTypeMask;
 };
-inline void to_objmap(const vMemoryLogicalChunkConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vMemoryLogicalChunkConfig", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.maxAllocSize, buff, 128);
-om.addValue("maxAllocSize", buff);
- zenith::util::str_cast(obj.chunkSize, buff, 128);
-om.addValue("chunkSize", buff);
- zenith::util::str_cast(obj.blockSize, buff, 128);
-om.addValue("blockSize", buff);
- zenith::util::str_cast(obj.align, buff, 128);
-om.addValue("align", buff);
- zenith::util::str_cast(obj.subTypeMask, buff, 128);
-om.addValue("subTypeMask", buff);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryLogicalChunkConfig, It>{public:
+typedef zenith::vulkan::vMemoryLogicalChunkConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vMemoryLogicalChunkConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.maxAllocSize, it, "maxAllocSize");
+zenith::util::ioconv::input_named_required(val.chunkSize, it, "chunkSize");
+zenith::util::ioconv::input_named_required(val.blockSize, it, "blockSize");
+zenith::util::ioconv::input_named_required(val.align, it, "align");
+zenith::util::ioconv::input_named_required(val.subTypeMask, it, "subTypeMask");
 }
-inline void from_objmap(vMemoryLogicalChunkConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.maxAllocSize, "maxAllocSize");
-OBJMAP_GET_ONE_VALUE(om, obj.chunkSize, "chunkSize");
-OBJMAP_GET_ONE_VALUE(om, obj.blockSize, "blockSize");
-OBJMAP_GET_ONE_VALUE(om, obj.align, "align");
-OBJMAP_GET_ONE_VALUE(om, obj.subTypeMask, "subTypeMask");
+inline static void output(const zenith::vulkan::vMemoryLogicalChunkConfig &val, It &it){
+zenith::util::ioconv::output_single(val.maxAllocSize, it.append_value("maxAllocSize"));
+zenith::util::ioconv::output_single(val.chunkSize, it.append_value("chunkSize"));
+zenith::util::ioconv::output_single(val.blockSize, it.append_value("blockSize"));
+zenith::util::ioconv::output_single(val.align, it.append_value("align"));
+zenith::util::ioconv::output_single(val.subTypeMask, it.append_value("subTypeMask"));
 }
+};
 
 
 struct vMemoryPoolConfig {
@@ -816,23 +412,20 @@ zenith::util::nameid uid;
 vMemoryPhysicalChunkConfig physicalChunk;
 std::vector<vMemoryLogicalChunkConfig> logicalChunk;
 };
-inline void to_objmap(const vMemoryPoolConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vMemoryPoolConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
-to_objmap(obj.physicalChunk, om.addObject("physicalChunk"));
-for (auto x : obj.logicalChunk)
-to_objmap(x, om.addObject("logicalChunk"));
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPoolConfig, It>{public:
+typedef zenith::vulkan::vMemoryPoolConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vMemoryPoolConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+zenith::util::ioconv::input_named_required(val.physicalChunk, it, "physicalChunk");
+zenith::util::ioconv::input_named_multiple(val.logicalChunk, it, "logicalChunk");
 }
-inline void from_objmap(vMemoryPoolConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-from_objmap(obj.physicalChunk, om.getObjects("physicalChunk", zenith::util::ObjectMapPresence::ONE).first->second);
-{
-auto v = om.getObjects("logicalChunk");
-for (auto it = v.first; it != v.second; it++){
-obj.logicalChunk.resize(obj.logicalChunk.size()+1);
-from_objmap(obj.logicalChunk.back(), it->second);}}}
+inline static void output(const zenith::vulkan::vMemoryPoolConfig &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_single(val.physicalChunk, it.append_complex("physicalChunk"));
+zenith::util::ioconv::output_multiple(val.logicalChunk, it, "logicalChunk");
+}
+};
 
 
 struct vMemoryTypeConfig {
@@ -844,76 +437,67 @@ zenith::util::ExtendedBitMask isHostCached;
 zenith::util::ExtendedBitMask isLazy;
 zenith::util::nameid poolUID;
 };
-inline void to_objmap(const vMemoryTypeConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vMemoryTypeConfig", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.typeID, buff, 128);
-om.addValue("typeID", buff);
- zenith::util::str_cast(obj.isDeviceLocal, buff, 128);
-om.addValue("isDeviceLocal", buff);
- zenith::util::str_cast(obj.isHostVisible, buff, 128);
-om.addValue("isHostVisible", buff);
- zenith::util::str_cast(obj.isHostCoherent, buff, 128);
-om.addValue("isHostCoherent", buff);
- zenith::util::str_cast(obj.isHostCached, buff, 128);
-om.addValue("isHostCached", buff);
- zenith::util::str_cast(obj.isLazy, buff, 128);
-om.addValue("isLazy", buff);
-om.addValue("poolUID", obj.poolUID.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryTypeConfig, It>{public:
+typedef zenith::vulkan::vMemoryTypeConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vMemoryTypeConfig &val, const It &it){
+val.typeID = -1;
+zenith::util::ioconv::input_named_optional(val.typeID, it, "typeID");
+val.isDeviceLocal = zenith::util::ExtendedBitMask::ANY;
+zenith::util::ioconv::input_named_optional(val.isDeviceLocal, it, "isDeviceLocal");
+val.isHostVisible = zenith::util::ExtendedBitMask::ANY;
+zenith::util::ioconv::input_named_optional(val.isHostVisible, it, "isHostVisible");
+val.isHostCoherent = zenith::util::ExtendedBitMask::ANY;
+zenith::util::ioconv::input_named_optional(val.isHostCoherent, it, "isHostCoherent");
+val.isHostCached = zenith::util::ExtendedBitMask::ANY;
+zenith::util::ioconv::input_named_optional(val.isHostCached, it, "isHostCached");
+val.isLazy = zenith::util::ExtendedBitMask::ANY;
+zenith::util::ioconv::input_named_optional(val.isLazy, it, "isLazy");
+zenith::util::ioconv::input_named_required(val.poolUID, it, "poolUID");
 }
-inline void from_objmap(vMemoryTypeConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.typeID, "typeID", -1);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.isDeviceLocal, "isDeviceLocal", zenith::util::ExtendedBitMask::ANY);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.isHostVisible, "isHostVisible", zenith::util::ExtendedBitMask::ANY);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.isHostCoherent, "isHostCoherent", zenith::util::ExtendedBitMask::ANY);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.isHostCached, "isHostCached", zenith::util::ExtendedBitMask::ANY);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.isLazy, "isLazy", zenith::util::ExtendedBitMask::ANY);
-OBJMAP_GET_ONE_VALUE(om, obj.poolUID, "poolUID");
+inline static void output(const zenith::vulkan::vMemoryTypeConfig &val, It &it){
+zenith::util::ioconv::output_single(val.typeID, it.append_value("typeID"));
+zenith::util::ioconv::output_single(val.isDeviceLocal, it.append_value("isDeviceLocal"));
+zenith::util::ioconv::output_single(val.isHostVisible, it.append_value("isHostVisible"));
+zenith::util::ioconv::output_single(val.isHostCoherent, it.append_value("isHostCoherent"));
+zenith::util::ioconv::output_single(val.isHostCached, it.append_value("isHostCached"));
+zenith::util::ioconv::output_single(val.isLazy, it.append_value("isLazy"));
+zenith::util::ioconv::output_single(val.poolUID, it.append_value("poolUID"));
 }
+};
 
 
 struct vMemoryUsageOption {
 std::vector<vMemoryPropertyBit> memoryPropertyBit;
 };
-inline void to_objmap(const vMemoryUsageOption &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vMemoryUsageOption", zenith::util::ObjectMapValueHint::ATTR);
-
-for (auto x : obj.memoryPropertyBit){
- zenith::util::str_cast(x, buff, 128);
-om.addValue("memoryPropertyBit", buff);}
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageOption, It>{public:
+typedef zenith::vulkan::vMemoryUsageOption value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vMemoryUsageOption &val, const It &it){
+zenith::util::ioconv::input_named_multiple(val.memoryPropertyBit, it, "memoryPropertyBit");
 }
-inline void from_objmap(vMemoryUsageOption &obj, const zenith::util::ObjectMap<char, char> &om){
-{
-auto v = om.getValues("memoryPropertyBit");
-for (auto it = v.first; it != v.second; it++){
-obj.memoryPropertyBit.resize(obj.memoryPropertyBit.size()+1);
-om.setValue(obj.memoryPropertyBit.back(), it);
-}}
+inline static void output(const zenith::vulkan::vMemoryUsageOption &val, It &it){
+zenith::util::ioconv::output_multiple(val.memoryPropertyBit, it, "memoryPropertyBit");
 }
+};
 
 
 struct vMemoryUsageConfig {
 vMemoryUsage usage;
 std::vector<vMemoryUsageOption> memoryUsageOption;
 };
-inline void to_objmap(const vMemoryUsageConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vMemoryUsageConfig", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.usage, buff, 128);
-om.addValue("usage", buff);
-for (auto x : obj.memoryUsageOption)
-to_objmap(x, om.addObject("memoryUsageOption"));
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageConfig, It>{public:
+typedef zenith::vulkan::vMemoryUsageConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vMemoryUsageConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.usage, it, "usage");
+zenith::util::ioconv::input_named_multiple(val.memoryUsageOption, it, "memoryUsageOption");
 }
-inline void from_objmap(vMemoryUsageConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.usage, "usage");
-{
-auto v = om.getObjects("memoryUsageOption");
-for (auto it = v.first; it != v.second; it++){
-obj.memoryUsageOption.resize(obj.memoryUsageOption.size()+1);
-from_objmap(obj.memoryUsageOption.back(), it->second);}}}
+inline static void output(const zenith::vulkan::vMemoryUsageConfig &val, It &it){
+zenith::util::ioconv::output_single(val.usage, it.append_value("usage"));
+zenith::util::ioconv::output_multiple(val.memoryUsageOption, it, "memoryUsageOption");
+}
+};
 
 
 struct vMemoryManagerConfig {
@@ -921,27 +505,20 @@ zenith::util::nameid uid;
 std::vector<vMemoryTypeConfig> memoryType;
 std::vector<vMemoryUsageConfig> memoryUsage;
 };
-inline void to_objmap(const vMemoryManagerConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vMemoryManagerConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
-for (auto x : obj.memoryType)
-to_objmap(x, om.addObject("memoryType"));
-for (auto x : obj.memoryUsage)
-to_objmap(x, om.addObject("memoryUsage"));
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryManagerConfig, It>{public:
+typedef zenith::vulkan::vMemoryManagerConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vMemoryManagerConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+zenith::util::ioconv::input_named_multiple(val.memoryType, it, "memoryType");
+zenith::util::ioconv::input_named_multiple(val.memoryUsage, it, "memoryUsage");
 }
-inline void from_objmap(vMemoryManagerConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-{
-auto v = om.getObjects("memoryType");
-for (auto it = v.first; it != v.second; it++){
-obj.memoryType.resize(obj.memoryType.size()+1);
-from_objmap(obj.memoryType.back(), it->second);}}{
-auto v = om.getObjects("memoryUsage");
-for (auto it = v.first; it != v.second; it++){
-obj.memoryUsage.resize(obj.memoryUsage.size()+1);
-from_objmap(obj.memoryUsage.back(), it->second);}}}
+inline static void output(const zenith::vulkan::vMemoryManagerConfig &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_multiple(val.memoryType, it, "memoryType");
+zenith::util::ioconv::output_multiple(val.memoryUsage, it, "memoryUsage");
+}
+};
 
 
 struct vMemoryConfig {
@@ -951,36 +528,24 @@ std::vector<vMemoryPoolConfig> memoryPool;
 std::vector<vMemoryManagerConfig> memoryManager;
 std::vector<std::string> memoryManagerReqOrder;
 };
-inline void to_objmap(const vMemoryConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vMemoryConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("uid", obj.uid.c_str());
-om.addValue("deviceUID", obj.deviceUID.c_str());
-for (auto x : obj.memoryPool)
-to_objmap(x, om.addObject("memoryPool"));
-for (auto x : obj.memoryManager)
-to_objmap(x, om.addObject("memoryManager"));
-for (auto x : obj.memoryManagerReqOrder)
-om.addValue("memoryManagerReqOrder", x.c_str());
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryConfig, It>{public:
+typedef zenith::vulkan::vMemoryConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vMemoryConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.uid, it, "uid");
+zenith::util::ioconv::input_named_required(val.deviceUID, it, "deviceUID");
+zenith::util::ioconv::input_named_multiple(val.memoryPool, it, "memoryPool");
+zenith::util::ioconv::input_named_multiple(val.memoryManager, it, "memoryManager");
+zenith::util::ioconv::input_named_multiple(val.memoryManagerReqOrder, it, "memoryManagerReqOrder");
 }
-inline void from_objmap(vMemoryConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.uid, "uid");
-OBJMAP_GET_ONE_VALUE(om, obj.deviceUID, "deviceUID");
-{
-auto v = om.getObjects("memoryPool");
-for (auto it = v.first; it != v.second; it++){
-obj.memoryPool.resize(obj.memoryPool.size()+1);
-from_objmap(obj.memoryPool.back(), it->second);}}{
-auto v = om.getObjects("memoryManager");
-for (auto it = v.first; it != v.second; it++){
-obj.memoryManager.resize(obj.memoryManager.size()+1);
-from_objmap(obj.memoryManager.back(), it->second);}}{
-auto v = om.getValues("memoryManagerReqOrder");
-for (auto it = v.first; it != v.second; it++)
-obj.memoryManagerReqOrder.emplace_back(it->second.first.c_str());
+inline static void output(const zenith::vulkan::vMemoryConfig &val, It &it){
+zenith::util::ioconv::output_single(val.uid, it.append_value("uid"));
+zenith::util::ioconv::output_single(val.deviceUID, it.append_value("deviceUID"));
+zenith::util::ioconv::output_multiple(val.memoryPool, it, "memoryPool");
+zenith::util::ioconv::output_multiple(val.memoryManager, it, "memoryManager");
+zenith::util::ioconv::output_multiple(val.memoryManagerReqOrder, it, "memoryManagerReqOrder");
 }
-}
+};
 
 
 struct vSystemConfig {
@@ -990,39 +555,24 @@ std::vector<vMemoryConfig> memory;
 std::vector<vSurfaceConfig> surface;
 std::vector<vSwapchainConfig> swapchain;
 };
-inline void to_objmap(const vSystemConfig &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "vSystemConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-to_objmap(obj.instance, om.addObject("instance"));
-for (auto x : obj.device)
-to_objmap(x, om.addObject("device"));
-for (auto x : obj.memory)
-to_objmap(x, om.addObject("memory"));
-for (auto x : obj.surface)
-to_objmap(x, om.addObject("surface"));
-for (auto x : obj.swapchain)
-to_objmap(x, om.addObject("swapchain"));
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSystemConfig, It>{public:
+typedef zenith::vulkan::vSystemConfig value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::vulkan::vSystemConfig &val, const It &it){
+zenith::util::ioconv::input_named_required(val.instance, it, "instance");
+zenith::util::ioconv::input_named_multiple(val.device, it, "device");
+zenith::util::ioconv::input_named_multiple(val.memory, it, "memory");
+zenith::util::ioconv::input_named_multiple(val.surface, it, "surface");
+zenith::util::ioconv::input_named_multiple(val.swapchain, it, "swapchain");
 }
-inline void from_objmap(vSystemConfig &obj, const zenith::util::ObjectMap<char, char> &om){
-from_objmap(obj.instance, om.getObjects("instance", zenith::util::ObjectMapPresence::ONE).first->second);
-{
-auto v = om.getObjects("device");
-for (auto it = v.first; it != v.second; it++){
-obj.device.resize(obj.device.size()+1);
-from_objmap(obj.device.back(), it->second);}}{
-auto v = om.getObjects("memory");
-for (auto it = v.first; it != v.second; it++){
-obj.memory.resize(obj.memory.size()+1);
-from_objmap(obj.memory.back(), it->second);}}{
-auto v = om.getObjects("surface");
-for (auto it = v.first; it != v.second; it++){
-obj.surface.resize(obj.surface.size()+1);
-from_objmap(obj.surface.back(), it->second);}}{
-auto v = om.getObjects("swapchain");
-for (auto it = v.first; it != v.second; it++){
-obj.swapchain.resize(obj.swapchain.size()+1);
-from_objmap(obj.swapchain.back(), it->second);}}}
+inline static void output(const zenith::vulkan::vSystemConfig &val, It &it){
+zenith::util::ioconv::output_single(val.instance, it.append_complex("instance"));
+zenith::util::ioconv::output_multiple(val.device, it, "device");
+zenith::util::ioconv::output_multiple(val.memory, it, "memory");
+zenith::util::ioconv::output_multiple(val.surface, it, "surface");
+zenith::util::ioconv::output_multiple(val.swapchain, it, "swapchain");
+}
+};
 
 }
 }

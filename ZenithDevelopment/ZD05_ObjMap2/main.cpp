@@ -62,7 +62,6 @@ class zenith::util::ioconv::io_handler<TestPolygon>
 public:
 	typedef TestPolygon value_type;
 	static const NodeType node_type = NodeType::COMPLEX; //value by default
-
 	template<class It>
 	inline static void input(TestPolygon &val, const It &it)
 	{

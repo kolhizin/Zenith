@@ -146,10 +146,12 @@ namespace zenith
 			};
 
 			class input_xml_unnamed;
+			class input_xml_root;
 
 			class input_xml_named
 			{
 				friend class input_xml_unnamed;
+				friend class input_xml_root;
 				input_xml_wrap_named_ impl_;
 				inline const input_xml_wrap_named_ &checked_() const
 				{
@@ -212,6 +214,7 @@ namespace zenith
 			class input_xml_unnamed
 			{
 				friend class input_xml_named;
+				friend class input_xml_root;
 				input_xml_wrap_unnamed_ impl_;
 				inline const input_xml_wrap_unnamed_ &checked_() const
 				{
@@ -266,6 +269,71 @@ namespace zenith
 				inline const char * value() const { return impl_.value(); }
 				inline const char * key() const { return impl_.key(); }
 			};
+
+			class input_xml_root
+			{
+				pugi::xml_node impl_;
+			public:
+				typedef input_xml_unnamed unnamed_iterator;
+				typedef input_xml_named named_iterator;
+				static const IteratorType iterator_type = IteratorType::INPUT;
+				static const IteratorCategory iterator_cat = IteratorCategory::UNNAMED;
+
+				input_xml_root(const pugi::xml_node &n) : impl_(n) {}
+				input_xml_root() {}
+				//input_xml_unnamed(const input_xml_named &i);
+
+				inline bool empty() const { return impl_.empty(); }
+				inline NodeType type() const
+				{
+					if (empty())
+						return NodeType::NONE;
+					return NodeType::COMPLEX;
+				}
+				inline NodeValueHint value_hint() const
+				{
+					return NodeValueHint::NONE;
+				}
+				inline NodeComplexHint complex_hint() const { return NodeComplexHint::NONE; }
+
+				inline input_xml_root next() const { return input_xml_root(); }
+				inline input_xml_root &operator++() { pugi::xml_node n; impl_ = n; return *this; }
+				inline input_xml_root operator++(int) { pugi::xml_node n; auto tmp = *this; impl_ = n; return tmp; }
+				inline bool operator ==(const input_xml_root &i) const { return impl_ == i.impl_; }
+				inline bool operator !=(const input_xml_root &i) const { return !(impl_ == i.impl_); }
+
+				inline std::pair<input_xml_named, input_xml_named> children(const char * key) const;
+				inline std::pair<input_xml_unnamed, input_xml_unnamed> children() const;
+
+
+				inline const char * value() const { return impl_.value(); }
+				inline const char * key() const { return impl_.name(); }
+			};
+
+			inline std::pair<input_xml_named, input_xml_named> input_xml_root::children(const char * key) const
+			{
+				auto x = impl_.children(key);
+				if (x.begin() == x.end())
+				{
+					const auto &a = impl_.attribute(key);
+					input_xml_wrap_named_ begin(a);
+					return std::make_pair(input_xml_named(begin), input_xml_named(input_xml_wrap_named_::end()));
+				}
+				input_xml_wrap_named_ begin(x.begin(), x.end());
+				return std::make_pair(input_xml_named(begin), input_xml_named(input_xml_wrap_named_::end()));
+			}
+			inline std::pair<input_xml_unnamed, input_xml_unnamed> input_xml_root::children() const
+			{
+				auto x = impl_.children();
+				if (x.begin() == x.end())
+				{
+					const auto &a = impl_.first_attribute();
+					input_xml_wrap_unnamed_ begin(a);
+					return std::make_pair(input_xml_unnamed(begin), input_xml_unnamed(input_xml_wrap_unnamed_::end()));
+				}
+				input_xml_wrap_unnamed_ begin(x.begin(), x.end());
+				return std::make_pair(input_xml_unnamed(begin), input_xml_unnamed(input_xml_wrap_unnamed_::end()));
+			}
 
 			inline std::pair<input_xml_named, input_xml_named> input_xml_unnamed::children(const char * key) const
 			{

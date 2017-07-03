@@ -2,7 +2,7 @@
 
 #include "vulkan_general.h"
 #include "vUtil.h"
-
+#include <Utils\Memory\alloc_base.h>
 
 
 namespace zenith
@@ -117,8 +117,8 @@ namespace zenith
 
 			vMemoryChunkImpl_ * physicalChunk_;
 			vMemoryPool_ * memoryPool_;
-			util::memory::MemAllocBlock memBlk_;
-			inline vMemoryBlock(vMemoryPool_ * memPool, vMemoryChunkImpl_ * p, const util::memory::MemAllocBlock &b) : memBlk_(b), physicalChunk_(p), memoryPool_(memPool) {};
+			zenith::util::memory::MemAllocBlock memBlk_;
+			inline vMemoryBlock(vMemoryPool_ * memPool, vMemoryChunkImpl_ * p, const zenith::util::memory::MemAllocBlock &b) : memBlk_(b), physicalChunk_(p), memoryPool_(memPool) {};
 		public:
 			inline vMemoryBlock(const vMemoryBlock&oth) : physicalChunk_(oth.physicalChunk_), memBlk_(oth.memBlk_), memoryPool_(oth.memoryPool_) {}
 			inline vMemoryBlock &operator=(const vMemoryBlock&oth)
@@ -146,7 +146,7 @@ namespace zenith
 
 			vMemoryChunkImpl_ * physicalChunk_;
 			vMemoryPool_ * memoryPool_;
-			util::memory::MemAllocBlock memBlk_;
+			zenith::util::memory::MemAllocBlock memBlk_;
 			void free_();
 			vMemoryBlockAuto(const vMemoryBlockAuto &) = delete;
 			vMemoryBlockAuto &operator =(const vMemoryBlockAuto &) = delete;

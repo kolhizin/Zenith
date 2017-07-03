@@ -23,6 +23,12 @@
     <Xml Include="test.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="..\..\Source\Utils\CodeGeneration\ObjectMap_CodeGen.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="..\..\Source\Utils\CodeGeneration\ioconv_CodeGen.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Utils\ioconv\input_xml.h">

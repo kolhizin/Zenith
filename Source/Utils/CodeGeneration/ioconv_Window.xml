@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root astyle_options="--style=allman -t -N">
+  <file name="../../Source/Utils/wndUtil.h">
+    <prefix>
+      #pragma once      
+      #include &lt;Utils\ioconv\io_config.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;vector&gt;
+      #include &lt;list&gt;
+      #include &lt;map&gt;
+    </prefix>
+    
+    <namespace name="zenith">
+      <namespace name="util">
+        
+        <class name="WndSize" qual="zenith::util" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="width" type="uint16_t" hint="ATTRIBUTE" grp-in="simple" default="800"/>
+          <var name="height" type="uint16_t" hint="ATTRIBUTE" grp-in="simple" default="600"/>
+        </class>
+        <class name="WndPos" qual="zenith::util" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="x" type="uint16_t" hint="ATTRIBUTE" grp-in="simple" default="200"/>
+          <var name="y" type="uint16_t" hint="ATTRIBUTE" grp-in="simple" default="200"/>
+        </class>
+        <class name="WndConfig" qual="zenith::util" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="size" type="WndSize" grp-in="complex"/>
+          <var name="pos" type="WndPos" grp-in="complex"/>
+          <var name="fullscreen" type="bool" grp-in="simple" default="false"/>
+          <var name="showCursor" type="bool" grp-in="simple" default="true"/>
+          <var name="title" type="std::string" grp-in="simple"/>
+          <var name="iconFilename" type="std::string" grp-in="simple" default="&quot;&quot;"/>
+        </class>
+      </namespace>
+    </namespace>
+  </file>
+</root>

@@ -11,7 +11,7 @@ void init()
 	//const char * vulkanConf = "../../Resource/Vulkan/VulkanConfig.xml";
 	const char * appConf = "ZIMGViewer_Config.xml";
 	std::string appConfFilename = moduleDir + appConf;
-	//const char * texFilename = "../Test12e_TerrainGen1/initialGrid.zimg";
+	//texFilename = "../ZD02_TerrainFeatureGeneration01/initialGrid.zimg";
 	const size_t BUFF_SIZE_XML = 16384;
 	char buff1[BUFF_SIZE_XML], buff2[BUFF_SIZE_XML];
 
@@ -77,16 +77,12 @@ void init()
 
 
 	zenith::util::WndConfig wndConf;
-
-	{
-		zenith::util::ObjectMap<char, char> omW;
-		zenith::util::xml::xml2objmap(xWindow, omW);
-		zenith::util::from_objmap(wndConf, omW);
-	}
-
+	zenith::util::ioconv::input(wndConf, zenith::util::ioconv::input_xml_root(xWindow));
+	
 
 	zenith::vulkan::vSystemConfig vConf;
-
+	zenith::util::ioconv::input(vConf, zenith::util::ioconv::input_xml_root(xVulkan));
+/*
 	{
 		zenith::util::ObjectMap<char, char> omV;
 
@@ -94,7 +90,7 @@ void init()
 		zenith::vulkan::from_objmap(vConf, omV);
 	}
 
-
+	*/
 
 	wnd = std::make_unique<zenith::util::Window>(wndConf);
 

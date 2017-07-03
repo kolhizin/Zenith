@@ -492,31 +492,25 @@ void cmdTransitionImageLayout(VkCommandBuffer buff, VkImage img, VkFormat format
 void initTexture(const zenith::util::zfile_format::zImgDescription &img)
 {
 	VkFormat format = VK_FORMAT_UNDEFINED;
-	size_t actNumChan = 0, actChanSize = 0;
+	size_t actNumChan = zenith::util::zfile_format::getNumChannels(img.imageFormat);
+	size_t actChanSize = zenith::util::zfile_format::getChannelSize(img.imageFormat) >> 3;
 	bool needFormatTransform = false;
+	
 	if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R8G8B8A8)
 	{
 		format = VK_FORMAT_R8G8B8A8_UNORM;
-		actNumChan = 4;
-		actChanSize = 1;
 	}
 	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R8)
 	{
 		format = VK_FORMAT_R8_UNORM;
-		actNumChan = 1;
-		actChanSize = 1;
 	}
 	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R32F)
 	{
 		format = VK_FORMAT_R32_SFLOAT;
-		actNumChan = 1;
-		actChanSize = 4;
 	}
 	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R32G32B32F)
 	{
 		format = VK_FORMAT_R32G32B32_SFLOAT;
-		actNumChan = 3;
-		actChanSize = 4;
 	}
 	else throw std::runtime_error("initTexture: unsupported texture format!");
 

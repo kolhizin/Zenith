@@ -148,24 +148,10 @@ void init()
 
 
 	zenith::util::WndConfig wndConf;
-
-	{
-		zenith::util::ObjectMap<char, char> omW;
-		zenith::util::xml::xml2objmap(xWindow, omW);
-		zenith::util::from_objmap(wndConf, omW);
-	}
-
+	zenith::util::ioconv::input(wndConf, zenith::util::ioconv::input_xml_root(xWindow));
 
 	zenith::vulkan::vSystemConfig vConf;
-
-	{
-		zenith::util::ObjectMap<char, char> omV;
-
-		zenith::util::xml::xml2objmap(xVulkan, omV);
-		zenith::vulkan::from_objmap(vConf, omV);
-	}
-
-
+	zenith::util::ioconv::input(vConf, zenith::util::ioconv::input_xml_root(xVulkan));
 
 	wnd = std::make_unique<zenith::util::Window>(wndConf);
 

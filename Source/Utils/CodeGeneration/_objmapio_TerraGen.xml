@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root astyle_options="--style=allman -t -N">
+  <file name="../../Source/TerrainGeneration/Params/Config.h">
+    <prefix>
+      #pragma once
+      #include "MountainsParams.h"
+    </prefix>
+  </file>
+  <file name="../../Source/TerrainGeneration/Params/Common.h">
+    <prefix>
+      #pragma once
+      #include &lt;Utils\ioconv\io_config.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;Utils\nameid.h&gt;
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+
+    </prefix>
+    <namespace name="zenith">
+      <namespace name="terragen">
+        <class name="TerraGenParam_Box2D" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="x0" type="double" hint="ATTR" grp-in="simple"/>
+          <var name="x1" type="double" hint="ATTR" grp-in="simple"/>
+          <var name="y0" type="double" hint="ATTR" grp-in="simple"/>
+          <var name="y1" type="double" hint="ATTR" grp-in="simple"/>
+        </class>
+        <class name="TerraGenParam_Box1D" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="x0" type="double" hint="ATTR" grp-in="simple"/>
+          <var name="x1" type="double" hint="ATTR" grp-in="simple"/>
+        </class>
+        <class name="TerraGenParam_MuSigma" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="mu" type="double" hint="ATTR" grp-in="simple" default="0.0"/>
+          <var name="sigma" type="double" hint="ATTR" grp-in="simple" default="1.0"/>
+        </class>
+        <class name="TerraGenParam_CatDistrDouble"  genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="value" type="double" hint="ATTR" grp-in="simple"/>
+          <var name="prob" type="double" hint="ATTR" grp-in="simple"/>
+        </class>
+        <class name="TerraGenParam_CatDistrInt"  genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="value" type="int64_t" hint="ATTR" grp-in="simple"/>
+          <var name="prob" type="double" hint="ATTR" grp-in="simple"/>
+        </class>
+        <class name="TerraGenParam_CatDistrString"  genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="value" type="std::string" hint="ATTR" grp-in="str"/>
+          <var name="prob" type="double" hint="ATTR" grp-in="simple"/>
+        </class>
+      </namespace>
+    </namespace>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>
+  </file>
+  <file name="../../Source/TerrainGeneration/Params/MountainsParams.h">
+    <prefix>
+      #pragma once
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+      #include "Common.h"
+    </prefix>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>
+    <namespace name="zenith">
+      <namespace name="terragen">
+        <class name="MountainMetaGenerator1_Params" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" hint="ATTR" grp-in="str"/>
+          <var name="type" type="std::string" hint="ATTR" grp-in="str"/>
+          <var name="general" type="std::vector&lt;TerraGenParam_CatDistrString&gt;"  grp-in="complex" grp-out="seq"/>
+          <var name="afterNull" type="std::vector&lt;TerraGenParam_CatDistrString&gt;"  grp-in="complex" grp-out="seq"/>
+          <var name="afterTop" type="std::vector&lt;TerraGenParam_CatDistrString&gt;"  grp-in="complex" grp-out="seq"/>
+        </class>
+        <class name="MountainTopGenerator1_Params" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" hint="ATTR" grp-in="str"/>
+          <var name="type" type="std::string" hint="ATTR" grp-in="str"/>
+          <var name="boundingBox" type="TerraGenParam_Box2D" grp-in="complex"/>
+          <var name="heightLambda" type="double" grp-in="simple" default="100.0"/>
+          <var name="sizeLambda" type="double" grp-in="simple" default="100.0"/>
+          <var name="numTops" type="std::vector&lt;TerraGenParam_CatDistrInt&gt;"  grp-in="complex" grp-out="seq"/>
+          <var name="minNodeDistance" type="double" grp-in="simple" default="10.0"/>
+          <var name="minMountainTopDistance" type="double" grp-in="simple" default="50.0"/>
+          <var name="numTries" type="uint32_t" grp-in="simple" default="1"/>
+        </class>
+        <class name="MountainTopRidgeGenerator1_Params" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" hint="ATTR" grp-in="str"/>
+          <var name="type" type="std::string" hint="ATTR" grp-in="str"/>
+          <var name="alpha" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="beta" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="betaBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="len" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="lenBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="numRidges" type="std::vector&lt;TerraGenParam_CatDistrInt&gt;"  grp-in="complex" grp-out="seq"/>
+          <var name="minNodeDistance" type="double" grp-in="simple" default="10.0"/>
+          <var name="numTries" type="uint32_t" grp-in="simple" default="1"/>
+        </class>
+        <class name="MountainContGenerator1_Params" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" hint="ATTR" grp-in="str"/>
+          <var name="type" type="std::string" hint="ATTR" grp-in="str"/>
+          <var name="alpha" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="alphaBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="beta" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="betaBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="mix" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="mixBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="len" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="lenBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="minNodeDistance" type="double" grp-in="simple" default="10.0"/>
+          <var name="numTries" type="uint32_t" grp-in="simple" default="1"/>
+        </class>
+        <class name="MountainForkGenerator1_Params" genToObjMap="1" genFromObjMap="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" hint="ATTR" grp-in="str"/>
+          <var name="type" type="std::string" hint="ATTR" grp-in="str"/>
+          <var name="alpha0" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="alpha0Box" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="alpha1" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="alpha1Box" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="beta" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="betaBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="mix" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="mixBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="len" type="TerraGenParam_MuSigma" grp-in="complex"/>
+          <var name="lenBox" type="TerraGenParam_Box1D" grp-in="complex"/>
+          <var name="minNodeDistance" type="double" grp-in="simple" default="10.0"/>
+          <var name="numTries" type="uint32_t" grp-in="simple" default="1"/>
+        </class>
+      </namespace>
+    </namespace>
+  </file>
+</root>
+

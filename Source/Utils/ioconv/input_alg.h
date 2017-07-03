@@ -115,7 +115,11 @@ namespace zenith
 				auto p = iter.children(key);
 				return ensure_multiple(std::move(p.first), std::move(p.second), type);
 			}
-
+			template<class It, class T>
+			inline void input(T &val, const It &iter)
+			{
+				io_handler<T>::input(val, iter);
+			}
 			template<class It, class T>
 			inline void input_named_required(T &val, const It &iter, const char * key)
 			{

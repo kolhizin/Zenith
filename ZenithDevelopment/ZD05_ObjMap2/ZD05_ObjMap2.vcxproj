@@ -118,6 +118,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\..\Source\Utils\CodeGeneration\ioconv_CodeGen.xml" />
+    <Xml Include="..\..\Source\Utils\CodeGeneration\ObjectMap_CodeGen.xml" />
     <Xml Include="test.xml">
       <SubType>Designer</SubType>
     </Xml>

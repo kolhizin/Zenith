@@ -19,7 +19,7 @@ namespace zenith
 				typedef typename Cont::value_type val_type;
 				
 				for(auto it = cont.begin(); it != cont.end(); ++it)
-					io_handler<val_type>::output(*it, io_add_node<io_handler<val_type>::node_type>::add(iter, name));
+					io_handler<val_type>::output(*it, io_add_node<io_handler_impl<val_type, It>::node_type>::add(iter, name));
 			}
 			template<NodeType n>
 			class output_multiple_map_
@@ -40,7 +40,7 @@ namespace zenith
 					for (auto it = cont.begin(); it != cont.end(); ++it)
 					{
 						auto iter0 = io_add_node<io_handler<val_type>::node_type>::add(iter, name);
-						io_handler<key_type>::output(it->first, io_add_node<io_handler<key_type>::node_type>::add(iter0, key));
+						io_handler<key_type>::output(it->first, io_add_node<io_handler_impl<key_type, It>::node_type>::add(iter0, key));
 						io_handler<val_type>::output(it->second, iter0.append_value(value));
 					}
 				}
@@ -57,7 +57,7 @@ namespace zenith
 					for (auto it = cont.begin(); it != cont.end(); ++it)
 					{
 						auto iter0 = io_add_node<io_handler<val_type>::node_type>::add(iter, name);
-						io_handler<key_type>::output(it->first, io_add_node<io_handler<key_type>::node_type>::add(iter0, key));
+						io_handler<key_type>::output(it->first, io_add_node<io_handler_impl<val_type, It>::node_type>::add(iter0, key));
 						io_handler<val_type>::output(it->second, iter0);
 					}
 				}

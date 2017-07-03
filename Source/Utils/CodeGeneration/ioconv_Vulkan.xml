@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root astyle_options="--style=allman -t -N">
+  <file name="../../Source/Graphics/Vulkan/vUtil_Enums.h">
+    <prefix>
+      #pragma once      
+      #include &lt;Utils\ioconv\io_config.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;Utils\nameid.h&gt;
+      #include &lt;Graphics\Vulkan\vulkan_config.h&gt;
+      #include &lt;vector&gt;
+      #include &lt;list&gt;
+      
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+    </prefix>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>    
+    <namespace name="zenith">
+      <namespace name="vulkan">
+        <enum name="vSwapchainResult" qual="zenith::vulkan">
+          <val name="SUCCESS" value="0"/>
+          <val name="TIMEOUT" value="VK_TIMEOUT"/>
+          <val name="NOT_READY" value="VK_NOT_READY"/>
+          <val name="SUBOPTIMAL" value="VK_SUBOPTIMAL_KHR"/>
+        </enum>
+
+        <enum name="vSamplerAddress" qual="zenith::vulkan">
+          <val name="REPEAT" value="VK_SAMPLER_ADDRESS_MODE_REPEAT"/>
+          <val name="REPEAT_MIRROR" value="VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT"/>
+          <val name="CLAMP" value="VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE"/>
+          <val name="CLAMP_BORDER" value="VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER"/>
+        </enum>
+        
+        <enum name="vSamplerBorderColor" qual="zenith::vulkan">
+          <val name="UNDEF" value="0"/>
+          <val name="TRANSPARENT_BLACK" />
+          <val name="OPAQUE_BLACK" />
+          <val name="OPAQUE_WHITE" />
+        </enum>
+        <enum name="vSamplerBorderType" qual="zenith::vulkan">
+          <val name="UNDEF" value="0"/>
+          <val name="INT" />
+          <val name="FLOAT" />
+        </enum>
+
+        <enum name="vSamplerFilter" qual="zenith::vulkan">
+          <val name="NEAREST" value="0"/>
+          <val name="LINEAR" value="1"/>
+        </enum>
+
+        <enum name="vPhysicalDeviceType" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="INTEGRATED_GPU" value="VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU"/>
+          <val name="DISCRETE_GPU" value="VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU"/>
+          <val name="VIRTUAL_GPU" value="VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU"/>
+          <val name="CPU" value="VK_PHYSICAL_DEVICE_TYPE_CPU"/>
+        </enum>
+        <enum name="vImageFormat" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="R8G8B8A8_UNORM" value="VK_FORMAT_R8G8B8A8_UNORM"/>
+          <val name="B8G8R8A8_UNORM" value="VK_FORMAT_B8G8R8A8_UNORM"/>
+          <val name="B8G8R8A8_SRGB" value="VK_FORMAT_B8G8R8A8_SRGB"/>
+        </enum>
+
+        <enum name="vImageUsageBit" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="TRANSFER_SRC" value="VK_IMAGE_USAGE_TRANSFER_SRC_BIT"/>
+          <val name="TRANSFER_DST" value="VK_IMAGE_USAGE_TRANSFER_DST_BIT"/>
+          <val name="SAMPLED" value="VK_IMAGE_USAGE_SAMPLED_BIT"/>
+          <val name="STORAGE" value="VK_IMAGE_USAGE_STORAGE_BIT"/>
+          <val name="ATTACHMENT_COLOR" value="VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT"/>
+          <val name="ATTACHMENT_DEPTHSTENCIL" value="VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT"/>
+          <val name="ATTACHMENT_TRANSIENT" value="VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT"/>
+          <val name="ATTACHMENT_INPUT" value="VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT"/>
+        </enum>
+
+        <enum name="vMemoryUsage" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="GPU_STATIC"/>
+          <val name="STAGING"/>
+          <val name="MAX"/>
+        </enum>
+
+        <enum name="vMemoryLayout" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="LINEAR" value="1"/>
+          <val name="OPTIMAL" value="2"/>
+        </enum>
+
+        <enum name="vMemoryPropertyBit" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="DEVICE_LOCAL" value="VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT"/>
+          <val name="HOST_VISIBLE" value="VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT"/>
+          <val name="HOST_COHERENT" value="VK_MEMORY_PROPERTY_HOST_COHERENT_BIT"/>
+          <val name="HOST_CACHED" value="VK_MEMORY_PROPERTY_HOST_CACHED_BIT"/>
+          <val name="LAZY" value="VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT"/>
+        </enum>
+        
+
+        <enum name="vPresentMode" qual="zenith::vulkan">
+          <val name="UNDEF" value="0" />
+          <val name="IMMEDIATE" value="VK_PRESENT_MODE_IMMEDIATE_KHR"/>
+          <val name="FIFO" value="VK_PRESENT_MODE_FIFO_KHR"/>
+          <val name="FIFO_RELAXED" value="VK_PRESENT_MODE_FIFO_RELAXED_KHR"/>
+          <val name="MAILBOX" value="VK_PRESENT_MODE_MAILBOX_KHR"/>
+        </enum>
+        <enum name="vSharingMode" qual="zenith::vulkan">
+          <val name="EXCLUSIVE" value="VK_SHARING_MODE_EXCLUSIVE" />
+          <val name="CONCURRENT" value="VK_SHARING_MODE_CONCURRENT"/>
+        </enum>
+      </namespace>
+    </namespace>
+  </file>
+  <file name="../../Source/Graphics/Vulkan/vUtil.h">
+    <prefix>
+      #pragma once
+      #include &lt;Utils\ioconv\io_config.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;Utils\nameid.h&gt;
+      #include &lt;Graphics\Vulkan\vulkan_config.h&gt;
+      #include &lt;vector&gt;
+      #include &lt;list&gt;
+      #include "vUtil_Enums.h"
+
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+    </prefix>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>
+    <namespace name="zenith">
+      <namespace name="vulkan">
+        <class name="vLayerConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="name" type="std::string" hint="ATTRIBUTE" grp-in="simple"/>
+          <var name="requiredExtensions" type="std::vector&lt;std::string&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vInstanceConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="enabledLayers" type="std::vector&lt;vLayerConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="requiredExtensions" type="std::vector&lt;std::string&gt;" grp-in="simple" grp-out="seq"/>
+          <var name="appName" type="std::string" grp-in="simple"/>
+          <var name="engineName" type="std::string" grp-in="simple"/>
+          <var name="debug" type="bool" grp-in="simple"/>
+          <var name="appVersion" type="zenith::version32_t" grp-in="complex"/>
+          <var name="engineVersion" type="zenith::version32_t" grp-in="complex"/>
+          <var name="apiVersion" type="zenith::version32_t" grp-in="complex"/>
+        </class>
+
+        <class name="vSamplerFilteringConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="minFilter" type="vSamplerFilter" grp-in="simple" default="zenith::vulkan::vSamplerFilter::LINEAR"/>
+          <var name="magFilter" type="vSamplerFilter" grp-in="simple" default="zenith::vulkan::vSamplerFilter::LINEAR"/>
+          <var name="mipFilter" type="vSamplerFilter" grp-in="simple" default="zenith::vulkan::vSamplerFilter::LINEAR"/>
+          <var name="maxAnisotropy" type="float" grp-in="simple" default="0.0f"/>
+        </class>
+        <class name="vSamplerAddressingConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="u" type="vSamplerAddress" grp-in="simple" default="zenith::vulkan::vSamplerAddress::CLAMP"/>
+          <var name="v" type="vSamplerAddress" grp-in="simple" default="zenith::vulkan::vSamplerAddress::CLAMP"/>
+          <var name="w" type="vSamplerAddress" grp-in="simple" default="zenith::vulkan::vSamplerAddress::CLAMP"/>
+          <var name="borderColor" type="vSamplerBorderColor" grp-in="simple" default="zenith::vulkan::vSamplerBorderColor::OPAQUE_BLACK"/>
+          <var name="borderType" type="vSamplerBorderType" grp-in="simple" default="zenith::vulkan::vSamplerBorderType::FLOAT"/>
+          <var name="normalizedCoord" type="bool" grp-in="simple" default="true"/>
+        </class>
+        <class name="vSamplerLODConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="minLOD" type="float" grp-in="simple" default="0.0f"/>
+          <var name="maxLOD" type="float" grp-in="simple" default="1024.0f"/>
+          <var name="biasLOD" type="float" grp-in="simple" default="0.0f"/>
+        </class>
+        <class name="vDeviceQueueReqs" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="surfaceUID" type="zenith::util::nameid" grp-in="simple" default="&quot;UNDEF&quot;"/>
+          <var name="fGraphics" type="bool" grp-in="simple" default="false"/>
+          <var name="fCompute" type="bool" grp-in="simple" default="false"/>
+          <var name="fTransfer" type="bool" grp-in="simple" default="false"/>
+          <var name="fSparse" type="bool" grp-in="simple" default="false"/>
+          <var name="fPresent" type="bool" grp-in="simple" default="false"/>
+          <var name="priority" type="float" grp-in="simple" default="1.0f"/>
+          <var name="aliases" type="std::vector&lt;zenith::util::nameid&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vDeviceReqs" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="physicalType" type="vPhysicalDeviceType" grp-in="simple"/>
+          <var name="memorySize" type="uint64_t" grp-in="simple" default="536870912"/>
+          <var name="queues" type="std::vector&lt;vDeviceQueueReqs&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="enabledLayers" type="std::vector&lt;vLayerConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="requiredExtensions" type="std::vector&lt;std::string&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vDeviceConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="deviceReqs" type="std::vector&lt;vDeviceReqs&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="deviceReqOrder" type="std::vector&lt;std::string&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vQueueFamilyProperties" qual="zenith::vulkan" genDef="1" classType="struct">
+          <var name="generalProperties" type="VkQueueFamilyProperties"/>
+          <var name="supportedSurfaces" type="zenith::util::nameid_seq"/>
+        </class>
+
+        <class name="vSharingInfo" qual="zenith::vulkan" genDef="1" genOutput="1" genInput="1" classType="struct">
+          <var name="mode" type="vSharingMode" grp-in="simple"/>
+          <var name="queues" type="std::vector&lt;std::string&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+
+        <class name="vSwapchainReqs" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="sharingInfo" type="vSharingInfo" grp-in="complex"/>
+          <var name="presentMode" type="vPresentMode" grp-in="simple"/>
+          <var name="imageCount" type="uint32_t" grp-in="simple"/>
+          <var name="imageFormat" type="vImageFormat" grp-in="simple"/>
+          <var name="imageUsage" type="std::vector&lt;vImageUsageBit&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vSwapchainConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="surfaceUID" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="deviceUID" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="swapchainReqs" type="std::vector&lt;vSwapchainReqs&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="swapchainReqOrder" type="std::vector&lt;std::string&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vSurfaceConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="windowUID" type="zenith::util::nameid" grp-in="simple"/>
+        </class>
+
+        <class name="vMemoryPhysicalChunkConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="minAllocSize" type="size_t" grp-in="simple"/>
+          <var name="maxChunkSize" type="size_t" grp-in="simple"/>
+          <var name="minChunkSize" type="size_t" grp-in="simple"/>
+          <var name="align" type="size_t" grp-in="simple"/>
+        </class>
+        <class name="vMemoryLogicalChunkConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="maxAllocSize" type="size_t" grp-in="simple"/>
+          <var name="chunkSize" type="size_t" grp-in="simple"/>
+          <var name="blockSize" type="size_t" grp-in="simple"/>
+          <var name="align" type="size_t" grp-in="simple"/>
+          <var name="subTypeMask" type="uint32_t" grp-in="simple"/>
+        </class>
+        <class name="vMemoryPoolConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="physicalChunk" type="vMemoryPhysicalChunkConfig" grp-in="complex"/>
+          <var name="logicalChunk" type="std::vector&lt;vMemoryLogicalChunkConfig&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+        <class name="vMemoryTypeConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="typeID" type="int8_t" grp-in="simple" default="-1"/>
+          <var name="isDeviceLocal" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="isHostVisible" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="isHostCoherent" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="isHostCached" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="isLazy" type="zenith::util::ExtendedBitMask" grp-in="simple" default="zenith::util::ExtendedBitMask::ANY"/>
+          <var name="poolUID" type="zenith::util::nameid" grp-in="simple"/>
+        </class>
+
+        <class name="vMemoryUsageOption" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="memoryPropertyBit" type="std::vector&lt;vMemoryPropertyBit&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+        <class name="vMemoryUsageConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="usage" type="vMemoryUsage" grp-in="simple"/>
+          <var name="memoryUsageOption" type="std::vector&lt;vMemoryUsageOption&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+
+
+        <class name="vMemoryManagerConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="memoryType" type="std::vector&lt;vMemoryTypeConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="memoryUsage" type="std::vector&lt;vMemoryUsageConfig&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+        <class name="vMemoryConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="uid" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="deviceUID" type="zenith::util::nameid" grp-in="simple"/>
+          <var name="memoryPool" type="std::vector&lt;vMemoryPoolConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="memoryManager" type="std::vector&lt;vMemoryManagerConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="memoryManagerReqOrder" type="std::vector&lt;std::string&gt;" grp-in="simple" grp-out="seq"/>
+        </class>
+
+        <class name="vSystemConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="instance" type="vInstanceConfig" grp-in="complex"/>
+          <var name="device" type="std::vector&lt;vDeviceConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="memory" type="std::vector&lt;vMemoryConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="surface" type="std::vector&lt;vSurfaceConfig&gt;" grp-in="complex" grp-out="seq"/>
+          <var name="swapchain" type="std::vector&lt;vSwapchainConfig&gt;" grp-in="complex" grp-out="seq"/>
+        </class>
+      </namespace>
+    </namespace>
+  </file>
+</root>
+

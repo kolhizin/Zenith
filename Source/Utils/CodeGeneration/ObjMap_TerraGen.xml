@@ -9,7 +9,7 @@
   <file name="../../Source/TerrainGeneration/Params/Common.h">
     <prefix>
       #pragma once
-      #include &lt;Utils\object_map.h&gt;
+      #include &lt;Utils\ioconv\io_config.h&gt;
       #include &lt;Utils\macro_version.h&gt;
       #include &lt;Utils\nameid.h&gt;
       #pragma warning(push)

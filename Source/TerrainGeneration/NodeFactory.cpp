@@ -1,5 +1,8 @@
 #include "NodeFactory.h"
 #include "MountainNode.h"
+#include <Utils\ioconv\io_config.h>
+#include <Utils\ioconv\output_objmap.h>
+#include <Utils\ioconv\input_objmap.h>
 
 using namespace zenith::terragen;
 
@@ -7,14 +10,16 @@ template<class Gen, class GenParam>
 Gen * constructGenerator_(const zenith::util::ObjectMap<char, char> &descr)
 {
 	GenParam gp;
-	from_objmap(gp, descr);
+	zenith::util::ioconv::input_objmap_root om_it0(descr);
+	zenith::util::ioconv::input(gp, om_it0);
 	return constructGenerator<Gen, GenParam>(gp);
 }
 template<class Gen, class GenParam>
 size_t constructGenerator_(const zenith::util::ObjectMap<char, char> &descr, void * buffPtr, size_t buffSize)
 {
 	GenParam gp;
-	from_objmap(gp, descr);
+	zenith::util::ioconv::input_objmap_root om_it0(descr);
+	zenith::util::ioconv::input(gp, om_it0);
 	return constructGenerator<Gen, GenParam>(gp, buffPtr, buffSize);
 }
 
@@ -23,14 +28,16 @@ template<class Gen, class GenParam>
 Gen * constructMetaGenerator_(const zenith::util::ObjectMap<char, char> &descr)
 {
 	GenParam gp;
-	from_objmap(gp, descr);
+	zenith::util::ioconv::input_objmap_root om_it0(descr);
+	zenith::util::ioconv::input(gp, om_it0);
 	return constructMetaGenerator<Gen, GenParam>(gp);
 }
 template<class Gen, class GenParam>
 size_t constructMetaGenerator_(const zenith::util::ObjectMap<char, char> &descr, void * buffPtr, size_t buffSize)
 {
 	GenParam gp;
-	from_objmap(gp, descr);
+	zenith::util::ioconv::input_objmap_root om_it0(descr);
+	zenith::util::ioconv::input(gp, om_it0);
 	return constructMetaGenerator<Gen, GenParam>(gp, buffPtr, buffSize);
 }
 

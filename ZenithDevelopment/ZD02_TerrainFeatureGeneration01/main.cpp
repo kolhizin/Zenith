@@ -4,9 +4,12 @@
 #include <TerrainGeneration\Params\Config.h>
 #include <TerrainGeneration\NodeTransform\NodeTransform.h>
 #include <Utils\FileFormat\ff_img.h>
-#include <Utils\IO\filesystem.h>
-#include <Utils\xml_tools.h>
 #include <Utils\Math\SolverMultigrid.h>
+#include <Utils\IO\filesystem.h>
+
+#include <Utils\xml_tools.h>
+#include <Utils\ioconv\io_config.h>
+#include <Utils\ioconv\input_xml.h>
 
 zenith::util::io::FileSystem * fs = nullptr;
 

@@ -89,7 +89,7 @@
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="2"/>
       </memoryPool>
       <memoryPool type="vMemoryPoolConfig" uid="vmempool-backup">
-        <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" maxChunkSize="8388608" minChunkSize="2097152" align="131072"/>
+        <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" maxChunkSize="67108864" minChunkSize="2097152" align="131072"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="4095"   blockSize="512"   chunkSize="131072"  align="512" subTypeMask="1"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="4095"   blockSize="512"   chunkSize="131072"  align="512" subTypeMask="2"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="1"/>
