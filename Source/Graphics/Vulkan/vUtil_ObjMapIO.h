@@ -747,6 +747,8 @@ namespace zenith
 			om.addValue("minAllocSize", buff);
 			zenith::util::str_cast(obj.maxChunkSize, buff, 128);
 			om.addValue("maxChunkSize", buff);
+			zenith::util::str_cast(obj.defChunkSize, buff, 128);
+			om.addValue("defChunkSize", buff);
 			zenith::util::str_cast(obj.minChunkSize, buff, 128);
 			om.addValue("minChunkSize", buff);
 			zenith::util::str_cast(obj.align, buff, 128);
@@ -756,6 +758,7 @@ namespace zenith
 		{
 			OBJMAP_GET_ONE_VALUE(om, obj.minAllocSize, "minAllocSize");
 			OBJMAP_GET_ONE_VALUE(om, obj.maxChunkSize, "maxChunkSize");
+			OBJMAP_GET_ONE_VALUE(om, obj.defChunkSize, "defChunkSize");
 			OBJMAP_GET_ONE_VALUE(om, obj.minChunkSize, "minChunkSize");
 			OBJMAP_GET_ONE_VALUE(om, obj.align, "align");
 		}

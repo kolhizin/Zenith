@@ -222,6 +222,7 @@
         <class name="vMemoryPhysicalChunkConfig" qual="zenith::vulkan" genOutput="1" genInput="1" genDef="1" classType="struct">
           <var name="minAllocSize" type="size_t" grp-in="simple"/>
           <var name="maxChunkSize" type="size_t" grp-in="simple"/>
+          <var name="defChunkSize" type="size_t" grp-in="simple"/>
           <var name="minChunkSize" type="size_t" grp-in="simple"/>
           <var name="align" type="size_t" grp-in="simple"/>
         </class>

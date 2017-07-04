@@ -425,6 +425,7 @@ namespace zenith
 		{
 			size_t minAllocSize;
 			size_t maxChunkSize;
+			size_t defChunkSize;
 			size_t minChunkSize;
 			size_t align;
 		};
@@ -437,6 +438,7 @@ namespace zenith
 			{
 				zenith::util::ioconv::input_named_required(val.minAllocSize, it, "minAllocSize");
 				zenith::util::ioconv::input_named_required(val.maxChunkSize, it, "maxChunkSize");
+				zenith::util::ioconv::input_named_required(val.defChunkSize, it, "defChunkSize");
 				zenith::util::ioconv::input_named_required(val.minChunkSize, it, "minChunkSize");
 				zenith::util::ioconv::input_named_required(val.align, it, "align");
 			}
@@ -444,6 +446,7 @@ namespace zenith
 			{
 				zenith::util::ioconv::output_single(val.minAllocSize, it.append_value("minAllocSize"));
 				zenith::util::ioconv::output_single(val.maxChunkSize, it.append_value("maxChunkSize"));
+				zenith::util::ioconv::output_single(val.defChunkSize, it.append_value("defChunkSize"));
 				zenith::util::ioconv::output_single(val.minChunkSize, it.append_value("minChunkSize"));
 				zenith::util::ioconv::output_single(val.align, it.append_value("align"));
 			}

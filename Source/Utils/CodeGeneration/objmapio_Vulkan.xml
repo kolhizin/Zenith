@@ -279,6 +279,7 @@
         <class name="vMemoryPhysicalChunkConfig" genToObjMap="1" genFromObjMap="1" genDef="0" classType="struct">
           <var name="minAllocSize" type="size_t" grp-in="simple"/>
           <var name="maxChunkSize" type="size_t" grp-in="simple"/>
+          <var name="defChunkSize" type="size_t" grp-in="simple"/>
           <var name="minChunkSize" type="size_t" grp-in="simple"/>
           <var name="align" type="size_t" grp-in="simple"/>
         </class>

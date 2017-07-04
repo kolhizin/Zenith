@@ -359,6 +359,7 @@ zenith::util::ioconv::output_single(val.windowUID, it.append_value("windowUID"))
 struct vMemoryPhysicalChunkConfig {
 size_t minAllocSize;
 size_t maxChunkSize;
+size_t defChunkSize;
 size_t minChunkSize;
 size_t align;
 };
@@ -368,12 +369,14 @@ static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::No
 inline static void input(zenith::vulkan::vMemoryPhysicalChunkConfig &val, const It &it){
 zenith::util::ioconv::input_named_required(val.minAllocSize, it, "minAllocSize");
 zenith::util::ioconv::input_named_required(val.maxChunkSize, it, "maxChunkSize");
+zenith::util::ioconv::input_named_required(val.defChunkSize, it, "defChunkSize");
 zenith::util::ioconv::input_named_required(val.minChunkSize, it, "minChunkSize");
 zenith::util::ioconv::input_named_required(val.align, it, "align");
 }
 inline static void output(const zenith::vulkan::vMemoryPhysicalChunkConfig &val, It &it){
 zenith::util::ioconv::output_single(val.minAllocSize, it.append_value("minAllocSize"));
 zenith::util::ioconv::output_single(val.maxChunkSize, it.append_value("maxChunkSize"));
+zenith::util::ioconv::output_single(val.defChunkSize, it.append_value("defChunkSize"));
 zenith::util::ioconv::output_single(val.minChunkSize, it.append_value("minChunkSize"));
 zenith::util::ioconv::output_single(val.align, it.append_value("align"));
 }

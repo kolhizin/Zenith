@@ -10,7 +10,32 @@ namespace zenith
 {
 	namespace vulkan
 	{
-		
+		/*
+		1. vMemoryChunkImpl_ - basic independent building block.
+			It wraps memory mechanisms of Vulkan:
+			- map/unmap
+			- memory types
+			- internal memory allocation (for needs of memory block allocator) is handled by <AllocatorLocalImpl_>
+			- inblock allocator uses allocation list
+			? what is memory usage for main use-cases: 1 block, several tiny blocks, etc.
+
+		2. vMemorySubPoolChunk_ - wraps MemoryChunkImpl with user-defined granularity allocator.
+			- it does not manage MemoryChunkImpl
+			- uses dynamic bitmap allocator
+			- for internal memory allocation uses MemoryChunkImpl's allocator
+
+		3. vMemorySubPool_ - is a collection of subpools with different parameters.
+			- it does not manage MemoryChunkImpl
+			- it manages different MemorySubPoolChunk
+			- uses first successful MemorySubPoolChunk for allocation
+
+		4. vMemoryPool_ - wraps all logic around memory pools and memory chunks for specified memory heap / memory type
+			- it manages multiple chunks (both user and for subpools)
+			- it manages multiple subpools
+
+		5. vMemoryManagerImpl_ - wraps all logic for all memory types / memory heaps
+			- it has link for which memory type / memory heap which memory pool to use
+		*/
 		
 		/*
 		using MainAllocator = util::memory::MemAlloc_DynamicSegregator<
@@ -25,14 +50,19 @@ namespace zenith
 				
 		class vMemoryChunkImpl_
 		{
-			using AllocatorLocalImpl_ =
-				util::memory::MemAlloc_Fallback<
-					util::memory::MemAlloc_Combine<util::memory::MemAllocVirtual_StaticSize<util::zstdAllocatorBase<util::memory::MemAlloc_BASE>, 1, 64, 1024>, util::memory::MemAllocPool_Stack<64 * 1024, 16>>,
-					util::memory::MemAlloc_MAlloc<util::zstdAllocatorBase<util::memory::MemAlloc_BASE>>
-				>;
 
 			using AllocBase = util::memory::MemAlloc_FnExt_ErrThrow<util::memory::MemAlloc_BASE>;
 			using AllocFnBase = util::memory::MemAlloc_FnExt_ErrThrow<util::memory::MemAllocFn_BASE>;
+
+			using AllocatorLocalImpl_ =
+				util::memory::MemAlloc_Fallback<
+					util::memory::MemAlloc_Combine<
+						util::memory::MemAllocVirtual_StaticSize<util::zstdAllocatorBase<util::memory::MemAlloc_BASE>, 1, 64, 1024>,
+						util::memory::MemAllocPool_Stack<64 * 1024, 16>
+					>,
+					util::memory::MemAlloc_MAlloc<util::zstdAllocatorBase<util::memory::MemAlloc_BASE>>
+				>;
+
 
 			using MainAllocator = util::memory::MemAlloc_Combine<util::memory::MemAllocVirtual_ListAlloc<AllocBase>, util::memory::MemAllocPool_DynamicVirtual>;
 
