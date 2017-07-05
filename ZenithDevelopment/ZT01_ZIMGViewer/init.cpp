@@ -1,6 +1,7 @@
 #include "init.h"
 #define STB_IMAGE_IMPLEMENTATION 1
 #include <stb\stb_image.h>
+#include <Utils\FileFormat\ff_util_vulkan.h>
 
 std::unique_ptr<zenith::util::Window> wnd;
 zenith::vulkan::vSystem * vSys = nullptr;
@@ -491,28 +492,13 @@ void cmdTransitionImageLayout(VkCommandBuffer buff, VkImage img, VkFormat format
 
 void initTexture(const zenith::util::zfile_format::zImgDescription &img)
 {
-	VkFormat format = VK_FORMAT_UNDEFINED;
+	VkFormat format = zenith::util::zfile_format::ImageFormat2Vulkan(img.imageFormat);
 	size_t actNumChan = zenith::util::zfile_format::getNumChannels(img.imageFormat);
 	size_t actChanSize = zenith::util::zfile_format::getChannelSize(img.imageFormat) >> 3;
 	bool needFormatTransform = false;
 	
-	if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R8G8B8A8)
-	{
-		format = VK_FORMAT_R8G8B8A8_UNORM;
-	}
-	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R8)
-	{
-		format = VK_FORMAT_R8_UNORM;
-	}
-	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R32F)
-	{
-		format = VK_FORMAT_R32_SFLOAT;
-	}
-	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R32G32B32F)
-	{
-		format = VK_FORMAT_R32G32B32_SFLOAT;
-	}
-	else throw std::runtime_error("initTexture: unsupported texture format!");
+	if(format == VK_FORMAT_UNDEFINED)
+		throw std::runtime_error("initTexture: unsupported texture format!");
 
 
 	texture = new zenith::vulkan::vTextureAutoImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),

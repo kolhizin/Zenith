@@ -73,12 +73,40 @@ zFontDescription zenith::util::zfile_format::zfont_from_zimg(const zImgDescripti
 	res.intAtlasImage = d;
 	return res;
 }
+
+zFontDescription zenith::util::zfile_format::zfont_clone(const zFontDescription &src)
+{
+	zFontDescription res = src;
+	res.intAtlasImage = zimg_clone(src.intAtlasImage);
+	res.extAtlasFileName = nullptr;
+	if (zstrlen(src.extAtlasFileName) > 0)
+	{
+		uint32_t len = zstrlen(src.extAtlasFileName);
+		res.extAtlasFileName = new char[len + 1];
+		zstrcpy(res.extAtlasFileName, src.extAtlasFileName);
+	}
+	res.extAtlasFormat = nullptr;
+	if (zstrlen(src.extAtlasFormat) > 0)
+	{
+		uint32_t len = zstrlen(src.extAtlasFormat);
+		res.extAtlasFormat = new char[len + 1];
+		zstrcpy(res.extAtlasFormat, src.extAtlasFormat);
+	}
+	zFontGlyphDescription * gptr = new zFontGlyphDescription[src.numGlyphs()];
+	for (uint32_t i = 0; i < src.numGlyphs(); i++)
+		gptr[i] = src.getGlyph(i);
+	res.setGlyphs(gptr, src.numGlyphs());
+
+	return res;
+}
 void zenith::util::zfile_format::zfont_free(zFontDescription &d)
 {
 	if(d.intAtlasImage.imageType != ImageType::UNDEF)
 		zimg_free(d.intAtlasImage);
 	if(d.extAtlasFileName)
 		delete[] d.extAtlasFileName;
+	if (d.extAtlasFormat)
+		delete[] d.extAtlasFormat;
 	if(d.glyphsPtr())
 		delete[] d.glyphsPtr();
 }

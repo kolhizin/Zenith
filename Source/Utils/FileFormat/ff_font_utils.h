@@ -9,6 +9,7 @@ namespace zenith
 			zFontDescription zfont_from_xml(void * src, uint64_t size); /*should be freed by zfont_free*/
 			zFontDescription zfont_from_zimg(const zImgDescription &d); /*moves image to font, image should not be freed, font should be freed*/
 			void zfont_free(zFontDescription &d);
+			zFontDescription zfont_clone(const zFontDescription &src);
 			
 			zf_memregion2d_t zfont_extract_glyph(const zFontDescription &d, uint32_t glyphId);
 

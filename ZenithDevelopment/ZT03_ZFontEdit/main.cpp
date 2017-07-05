@@ -96,7 +96,7 @@ std::vector<zenith::util::zfile_format::zFontDescription> loadFontData(const std
 		auto r = srcs[i].first.get();
 		std::transform(formats[i].second.begin(), formats[i].second.end(), formats[i].second.begin(), ::tolower);
 		if (formats[i].first == "font" && formats[i].second == "zfnt")
-			;//res.push_back(zenith::util::zfile_format::zfont_from_xml(r.data, r.size));
+			res.push_back(zenith::util::zfile_format::zfont_clone(zenith::util::zfile_format::zfont_from_mem(r.data, r.size)));
 		else if (formats[i].first == "font" && formats[i].second != "zfnt")
 			res.push_back(zenith::util::zfile_format::zfont_from_xml(r.data, r.size));
 		else if (formats[i].first == "atlas" && formats[i].second == "zimg")
@@ -171,6 +171,18 @@ void performOutAtlas(const zenith::util::zfile_format::zFontDescription &font, c
 	delete[] fData;
 }
 
+void performOutFont(const zenith::util::zfile_format::zFontDescription &font, const std::string &fname)
+{
+	uint64_t fSize = font.getFullSize();
+	uint8_t * fData = new uint8_t[fSize];
+	zenith::util::zfile_format::zfont_to_mem(font, fData, fSize);
+
+	auto futW = writeFile(fname.c_str(), fData, fSize);
+	futW.get();
+
+	delete[] fData;
+}
+
 void transformSigDist(const std::vector<NamedParameter> &params, zenith::util::zfile_format::zFontDescription &font)
 {
 	uint32_t pExtDist = 8;
@@ -217,10 +229,19 @@ void performOperations(const std::vector<NamedParameter> &params, zenith::util::
 
 	if (np = findParam(params, "out_atlas"))
 		performOutAtlas(font, np->paramValue);
+	if (np = findParam(params, "out"))
+		performOutFont(font, np->paramValue);
 }
 
 int main(int argc, const char *argv[])
 {
+	/*
+	command line argument:
+	1) font=testFont.xml atlas=testFont.png transform=sigdist out_atlas=testAtlas.zimg out=test.zfnt
+	2) font=test.zfnt out_atlas=testAtlasF.zimg
+	3) font=testFont.xml atlas=testFont.png out=test_orig.zfnt
+	4) font=test_orig.zfnt out_atlas=testAtlasFO.zimg
+	*/
 	//0. initialize
 	fs = new zenith::util::io::FileSystem(2); //two streams for loading
 	//1. load font image & font description
@@ -232,9 +253,9 @@ int main(int argc, const char *argv[])
 
 	performOperations(pArgs, srcFont);
 
-	std::cout << sizeof(zenith::util::zfile_format::FontTraits) << " - " << alignof(zenith::util::zfile_format::FontTraits) << std::endl;
-	std::cout << sizeof(zenith::util::zfile_format::ZChunk16B_FontHeader) << " - " << alignof(zenith::util::zfile_format::ZChunk16B_FontHeader) << std::endl;
-	std::cout << sizeof(zenith::util::zfile_format::ZChunk64B_FontData_Glyph) << " - " << alignof(zenith::util::zfile_format::ZChunk64B_FontData_Glyph) << std::endl;
+	//std::cout << sizeof(zenith::util::zfile_format::FontTraits) << " - " << alignof(zenith::util::zfile_format::FontTraits) << std::endl;
+	//std::cout << sizeof(zenith::util::zfile_format::ZChunk16B_FontHeader) << " - " << alignof(zenith::util::zfile_format::ZChunk16B_FontHeader) << std::endl;
+	//std::cout << sizeof(zenith::util::zfile_format::ZChunk64B_FontData_Glyph) << " - " << alignof(zenith::util::zfile_format::ZChunk64B_FontData_Glyph) << std::endl;
 	
 	return 0;
 }
