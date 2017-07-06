@@ -78,6 +78,18 @@
     <ClInclude Include="..\..\Source\Utils\FileFormat\ff_img.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Graphics\General\ggraphics_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Graphics\General\ggPipelineResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utils\bitenum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utils\dynamic_pdag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -129,7 +141,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="AppConfig.xml">
+    <Xml Include="SystemFont_Config.xml">
       <Filter>Resource Files</Filter>
     </Xml>
   </ItemGroup>

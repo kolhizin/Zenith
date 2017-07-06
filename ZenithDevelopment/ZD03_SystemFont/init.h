@@ -10,11 +10,14 @@
 #include <Utils\nameid.h>
 #include <Utils\window.h>
 #include <Utils\IO\filesystem.h>
-#include <Utils/FileFormat/ff_img.h>
 #include <Utils\Manager\manager_unique.h>
+#include <Utils/FileFormat/ff_img.h>
+#include <Utils\ioconv\io_config.h>
+#include <Utils\ioconv\input_xml.h>
+#include <Graphics\General\ggPipelineResource.h>
 #include <chrono>
 #include <thread>
-
+#include <string>
 
 class SCamera
 {
@@ -64,7 +67,7 @@ public:
 	}
 };
 
-
+extern std::string fnameVShader, fnameFShader;
 
 extern std::unique_ptr<zenith::util::Window> wnd;
 extern zenith::vulkan::vSystem * vSys;
@@ -82,7 +85,7 @@ extern VkSemaphore imageAvailableSemaphore, renderFinishedSemaphore;
 
 extern zenith::vulkan::vBufferAutoImpl_ * vertexBuffer, *indexBuffer, *cameraUniformBuffer;
 
-extern zenith::vulkan::vTextureAutoImpl_ * texture;
+extern std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> texture, depthMap;
 extern zenith::vulkan::vSamplerImpl_ * sampler;
 
 extern SCamera mainCamera;
@@ -91,10 +94,12 @@ extern VkDescriptorPool descrPool;
 extern VkDescriptorSet descrSet;
 
 
+
+
 struct Vertex
 {
 	glm::vec4 pos;
-	glm::vec3 color;
+	glm::vec3 norm;
 	glm::vec2 texcoord;
 
 	static VkVertexInputBindingDescription getBindingDescription()
@@ -115,7 +120,7 @@ struct Vertex
 
 		res[1].binding = 0;
 		res[1].location = 1;
-		res[1].offset = offsetof(Vertex, color);
+		res[1].offset = offsetof(Vertex, norm);
 		res[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 
 		res[2].binding = 0;
@@ -127,7 +132,7 @@ struct Vertex
 };
 
 extern std::vector<Vertex> vertices;
-
+extern std::vector<uint32_t> indices;
 
 inline std::future<zenith::util::io::FileResult> readFile(const char * fname, uint8_t * data, size_t maxSize, float priority = 1.0f)
 {
@@ -153,7 +158,8 @@ inline std::pair<std::future<zenith::util::io::FileResult>, std::unique_ptr<unsi
 
 uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 void createSemaphore(VkSemaphore &s);
-void createCommandBuffers(VkCommandPool &cp, VkCommandBuffer * cbs, uint32_t numBuff, uint32_t qFamilyIndex);
+void createCommandPool(VkCommandPool & cp, uint32_t qFamilyIndex);
+void createCommandBuffers(VkCommandPool &cp, VkCommandBuffer * cbs, size_t numBuff);
 void createDescriptorPool();
 void createVertexBuffer();
 void createIndexBuffer();
@@ -166,7 +172,7 @@ void createRasterization(VkPipelineRasterizationStateCreateInfo &prs, VkPipeline
 void createPipelineLayout(VkPipelineLayout &pl);
 void createColorBlend(VkPipelineColorBlendAttachmentState &pcbas, VkPipelineColorBlendStateCreateInfo &pcbs_ci);
 void createRenderPass(VkRenderPass &rp);
-void init_vulkan_app(const char * fnameVShader, const char * fnameFShader);
+void init_vulkan();
 void stop_vulkan();
 
 VkCommandBuffer beginOneTimeCmdBuffer(VkDevice dev, VkCommandPool pool);
@@ -174,13 +180,15 @@ void endOneTimeCmdBuffer(VkCommandBuffer buff);
 void submitOneTimeCmdBuffer(VkDevice dev, VkQueue q, VkCommandPool pool, VkCommandBuffer buff);
 
 void cmdTransitionImageLayout(VkCommandBuffer buff, VkImage img, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkAccessFlags srcAccess, VkAccessFlags dstAccess);
-void init_texture(const zenith::util::zfile_format::zImgDescription &img);
 
-void init_camera();
+std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> initTexture(const zenith::util::zfile_format::zImgDescription &img);
+
 void init_input();
 
-void update_camera();
 
 void process_input_key_up(zenith::util::Window * wnd, WPARAM wparam, LPARAM lparam);
 void process_input_key_down(zenith::util::Window * wnd, WPARAM wparam, LPARAM lparam);
 
+
+void init_camera();
+void update_camera();

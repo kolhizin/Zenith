@@ -1,8 +1,11 @@
 #include "init.h"
+#include <Utils\FileFormat\ff_util_vulkan.h>
 
 std::unique_ptr<zenith::util::Window> wnd;
 zenith::vulkan::vSystem * vSys = nullptr;
 zenith::util::io::FileSystem * fs = nullptr;
+
+std::string fnameVShader, fnameFShader;
 
 VkShaderModule vertShader, fragShader;
 VkPipelineShaderStageCreateInfo shaderStages[2];
@@ -19,7 +22,7 @@ VkDescriptorPool descrPool;
 VkDescriptorSet descrSet;
 VkDescriptorSetLayout descriptorSetLayout;
 SCamera mainCamera;
-zenith::vulkan::vTextureAutoImpl_ * texture;
+std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> texture, depthMap;
 zenith::vulkan::vSamplerImpl_ * sampler;
 zenith::vulkan::vTextureViewRawImpl_ * textureView;
 
@@ -66,16 +69,6 @@ std::vector<uint32_t> indices = {
 	20, 21, 22, 20, 22, 23
 };
 
-uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
-{
-	VkPhysicalDeviceMemoryProperties memProps;
-	vkGetPhysicalDeviceMemoryProperties(vSys->getDevice("vdevice-main").getPhysicalDevice(), &memProps);
-
-	for (uint32_t i = 0; i < memProps.memoryTypeCount; i++)
-		if ((typeFilter & (1 << i)) && ((memProps.memoryTypes[i].propertyFlags & properties) == properties))
-			return i;
-	throw std::runtime_error("failed to find suitable memory type!");
-}
 
 void createSemaphore(VkSemaphore &s)
 {
@@ -86,7 +79,7 @@ void createSemaphore(VkSemaphore &s)
 	if (vkCreateSemaphore(vSys->getDevice("vdevice-main").getDevice(), &ci, nullptr, &s) != VK_SUCCESS)
 		throw std::runtime_error("Failed to create semaphore!");
 }
-void createCommandBuffers(VkCommandPool &cp, VkCommandBuffer * cbs, uint32_t numBuff, uint32_t qFamilyIndex)
+void createCommandPool(VkCommandPool & cp, uint32_t qFamilyIndex)
 {
 	VkCommandPoolCreateInfo ci = {};
 	ci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -96,7 +89,9 @@ void createCommandBuffers(VkCommandPool &cp, VkCommandBuffer * cbs, uint32_t num
 
 	if (vkCreateCommandPool(vSys->getDevice("vdevice-main").getDevice(), &ci, nullptr, &cp) != VK_SUCCESS)
 		throw std::runtime_error("Failed to create command pool!");
-
+}
+void createCommandBuffers(VkCommandPool &cp, VkCommandBuffer * cbs, size_t numBuff)
+{
 	VkCommandBufferAllocateInfo ai = {};
 	ai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	ai.pNext = nullptr;
@@ -120,7 +115,7 @@ void createDescriptorPool()
 	psz[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	psz[1].descriptorCount = 1;
 
-	ci.maxSets = 1;
+	ci.maxSets = 2;
 	ci.poolSizeCount = 2;
 	ci.pPoolSizes = &psz[0];
 
@@ -165,13 +160,15 @@ void writeCommandBuffer(VkCommandBuffer &cb, VkFramebuffer &fb)
 	if (vkBeginCommandBuffer(cb, &s_begin) != VK_SUCCESS)
 		throw std::runtime_error("Failed to begin recording command buffer!");
 
-	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	VkClearValue clearValues[2];
+	clearValues[0].color = { 0.7f,0.7f,0.7f,1.0f };
+	clearValues[1].depthStencil = { 1.0f,0 };
 	VkRenderPassBeginInfo s_renderpass = {}; s_renderpass.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO; s_renderpass.pNext = nullptr;
 	s_renderpass.renderPass = renderPass;
 	s_renderpass.framebuffer = fb;
 
-	s_renderpass.clearValueCount = 1;
-	s_renderpass.pClearValues = &clearColor;
+	s_renderpass.clearValueCount = 2;
+	s_renderpass.pClearValues = &clearValues[0];
 
 	s_renderpass.renderArea.offset = { 0, 0 };
 	s_renderpass.renderArea.extent.width = wnd->getSize().width;
@@ -185,7 +182,7 @@ void writeCommandBuffer(VkCommandBuffer &cb, VkFramebuffer &fb)
 		VkBuffer bf = vertexBuffer->handle();
 		vkCmdBindVertexBuffers(cb, 0, 1, &bf, &offset);
 		vkCmdBindIndexBuffer(cb, indexBuffer->handle(), 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(cb, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+		vkCmdDrawIndexed(cb, indices.size(), 1, 0, 0, 0);
 		//vkCmdDraw(cb, vertices.size(), 1, 0, 0);
 	}
 	vkCmdEndRenderPass(cb);
@@ -196,7 +193,7 @@ void writeCommandBuffer(VkCommandBuffer &cb, VkFramebuffer &fb)
 
 void createFramebuffer(VkImageView v, VkFramebuffer &fb)
 {
-	VkImageView iv = v;
+	VkImageView ivs[] = { v, depthMap->mainView().handle() };
 
 	VkFramebufferCreateInfo ci = {};
 	ci.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -204,8 +201,8 @@ void createFramebuffer(VkImageView v, VkFramebuffer &fb)
 	ci.pNext = nullptr;
 
 	ci.renderPass = renderPass;
-	ci.attachmentCount = 1;
-	ci.pAttachments = &iv;
+	ci.attachmentCount = 2;
+	ci.pAttachments = ivs;
 	ci.width = wnd->getSize().width;
 	ci.height = wnd->getSize().height;
 	ci.layers = 1;
@@ -252,7 +249,7 @@ void createInputAssembly(VkPipelineVertexInputStateCreateInfo &vis, VkPipelineIn
 	ias.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	ias.flags = 0;
 	ias.pNext = nullptr;
-	ias.primitiveRestartEnable = VK_FALSE;
+	ias.primitiveRestartEnable = VK_TRUE;//VK_FALSE;
 	ias.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 }
 void createViewport(VkPipelineViewportStateCreateInfo &pvs, VkViewport &viewport, VkRect2D &scissor)
@@ -276,6 +273,22 @@ void createViewport(VkPipelineViewportStateCreateInfo &pvs, VkViewport &viewport
 	pvs.pViewports = &viewport;
 	pvs.scissorCount = 1;
 	pvs.pScissors = &scissor;
+}
+void createDepthStencilState(VkPipelineDepthStencilStateCreateInfo &ci)
+{
+	ci.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	ci.pNext = nullptr;
+	ci.flags = 0;
+	ci.depthTestEnable = VK_TRUE;
+	ci.depthWriteEnable = VK_TRUE;
+	ci.depthCompareOp = VK_COMPARE_OP_LESS;
+	ci.depthBoundsTestEnable = VK_FALSE;
+	ci.minDepthBounds = 0.0f;
+	ci.maxDepthBounds = 1.0f;
+
+	ci.stencilTestEnable = VK_FALSE;
+	ci.front = {};
+	ci.back = {};
 }
 void createRasterization(VkPipelineRasterizationStateCreateInfo &prs, VkPipelineMultisampleStateCreateInfo &pms)
 {
@@ -317,7 +330,7 @@ void createPipelineLayout(VkPipelineLayout &pl)
 	samplerLayoutBinding.descriptorCount = 1;
 	samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	samplerLayoutBinding.pImmutableSamplers = nullptr;
-	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
 
 	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
 	uboLayoutBinding.binding = 0;
@@ -326,7 +339,8 @@ void createPipelineLayout(VkPipelineLayout &pl)
 	uboLayoutBinding.pImmutableSamplers = nullptr;
 	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-	VkDescriptorSetLayoutBinding binds[2] = { uboLayoutBinding, samplerLayoutBinding };
+
+	VkDescriptorSetLayoutBinding binds[] = { samplerLayoutBinding, uboLayoutBinding };
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -382,20 +396,34 @@ void createColorBlend(VkPipelineColorBlendAttachmentState &pcbas, VkPipelineColo
 
 void createRenderPass(VkRenderPass &rp)
 {
-	VkAttachmentDescription ad = {};
-	ad.format = static_cast<VkFormat>(vSys->getDevice("vdevice-main").getSwapchain("vswapchain-main").getFormat());
-	ad.samples = VK_SAMPLE_COUNT_1_BIT;
-	ad.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	ad.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	std::array<VkAttachmentDescription, 2> ads;
+	ads[0].flags = 0;
+	ads[0].format = static_cast<VkFormat>(vSys->getDevice("vdevice-main").getSwapchain("vswapchain-main").getFormat());
+	ads[0].samples = VK_SAMPLE_COUNT_1_BIT;
+	ads[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	ads[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	ads[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	ads[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	ads[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	ads[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-	ad.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	ad.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	ad.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	ad.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	ads[1].flags = 0;
+	ads[1].format = VK_FORMAT_D32_SFLOAT;
+	ads[1].samples = VK_SAMPLE_COUNT_1_BIT;
+	ads[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	ads[1].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	ads[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	ads[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	ads[1].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	ads[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkAttachmentReference ar = {};
 	ar.attachment = 0;
 	ar.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference arDepth = {};
+	arDepth.attachment = 1;
+	arDepth.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription sd = {};
 	sd.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -403,7 +431,7 @@ void createRenderPass(VkRenderPass &rp)
 	sd.pColorAttachments = &ar;
 	sd.inputAttachmentCount = 0;
 	sd.preserveAttachmentCount = 0;
-	sd.pDepthStencilAttachment = nullptr;
+	sd.pDepthStencilAttachment = &arDepth;
 
 	VkSubpassDependency dep = {};
 	dep.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -417,8 +445,8 @@ void createRenderPass(VkRenderPass &rp)
 	ci.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	ci.flags = 0;
 	ci.pNext = nullptr;
-	ci.attachmentCount = 1;
-	ci.pAttachments = &ad;
+	ci.attachmentCount = ads.size();
+	ci.pAttachments = ads.data();
 	ci.subpassCount = 1;
 	ci.pSubpasses = &sd;
 	ci.dependencyCount = 1;
@@ -434,6 +462,9 @@ void createRenderPass(VkRenderPass &rp)
 void stop_vulkan()
 {
 	vSys->getDevice("vdevice-main").wait();
+
+	texture.reset();
+	depthMap.reset();
 
 	vkDestroyPipelineLayout(vSys->getDevice("vdevice-main").getDevice(), pipelineLayout, nullptr);
 	vkDestroyShaderModule(vSys->getDevice("vdevice-main").getDevice(), vertShader, nullptr);
@@ -533,78 +564,40 @@ void cmdTransitionImageLayout(VkCommandBuffer buff, VkImage img, VkFormat format
 	);
 }
 
-void transitionImageLayoutNonBlock(VkDevice dev, VkQueue q, VkImage img, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> initDepthTexture(size_t w, size_t h)
 {
-	VkImageMemoryBarrier ibar;
-	ibar.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	ibar.pNext = nullptr;
-	ibar.image = img;
-	ibar.dstQueueFamilyIndex = ibar.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	ibar.oldLayout = oldLayout;
-	ibar.newLayout = newLayout;
+	VkFormat format = VK_FORMAT_D32_SFLOAT;
 
-	ibar.srcAccessMask = 0;
-	ibar.dstAccessMask = 0;
-
-	if (oldLayout == VK_IMAGE_LAYOUT_PREINITIALIZED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-	{
-		ibar.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
-		ibar.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-	}
-	else throw std::runtime_error("Unsupport transition!");
-
-	ibar.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	ibar.subresourceRange.baseArrayLayer = 0;
-	ibar.subresourceRange.layerCount = 1;
-	ibar.subresourceRange.baseMipLevel = 0;
-	ibar.subresourceRange.levelCount = 1;
-
-	VkCommandBuffer cmdBuff = beginOneTimeCmdBuffer(dev, comPool);
-
-
-
-	vkCmdPipelineBarrier(cmdBuff, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-		0,
-		0, nullptr, //mem
-		0, nullptr, //buff
-		1, &ibar	//img
-	);
-
-
-	endOneTimeCmdBuffer(cmdBuff);
-	submitOneTimeCmdBuffer(dev, q, comPool, cmdBuff);
-}
-
-void init_texture(const zenith::util::zfile_format::zImgDescription &img)
-{
-	VkFormat format = VK_FORMAT_UNDEFINED;
-	size_t actNumChan = 0, actChanSize = 0;
-	bool needFormatTransform = false;
-	if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R8G8B8A8)
-	{
-		format = VK_FORMAT_R8G8B8A8_UNORM;
-		actNumChan = 4;
-		actChanSize = 1;
-	}
-	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R8)
-	{
-		format = VK_FORMAT_R8_UNORM;
-		actNumChan = 1;
-		actChanSize = 1;
-	}
-	else if (img.imageFormat == zenith::util::zfile_format::ImageFormat::R32F)
-	{
-		format = VK_FORMAT_R32_SFLOAT;
-		actNumChan = 1;
-		actChanSize = 4;
-	}
-	else throw std::runtime_error("initTexture: unsupported number of textures!");
-
-
-	texture = new zenith::vulkan::vTextureAutoImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
-		zenith::vulkan::vTextureDimensions::SingleTextureWithoutMip(img.width, img.height), format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+	std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> res = std::make_unique<zenith::vulkan::vTextureAutoImpl_>(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
+		zenith::vulkan::vTextureDimensions::SingleTextureWithoutMip(w, h), format, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 		zenith::vulkan::vMemoryUsage::GPU_STATIC, zenith::vulkan::vObjectSharingInfo(),
 		VK_IMAGE_LAYOUT_UNDEFINED, true);
+
+	VkCommandBuffer cmdBuff = beginOneTimeCmdBuffer(vSys->getDevice("vdevice-main").getDevice(), comPool);
+	cmdTransitionImageLayout(cmdBuff, res->handle(), format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 0, VK_ACCESS_TRANSFER_WRITE_BIT);
+
+	endOneTimeCmdBuffer(cmdBuff);
+	submitOneTimeCmdBuffer(vSys->getDevice("vdevice-main").getDevice(), vSys->getDevice("vdevice-main").getQueue("vqueue-graphics"), comPool, cmdBuff);
+
+	vkDeviceWaitIdle(vSys->getDevice("vdevice-main").getDevice());
+	return res;
+}
+
+std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> initTexture(const zenith::util::zfile_format::zImgDescription &img)
+{
+
+	VkFormat format = zenith::util::zfile_format::ImageFormat2Vulkan(img.imageFormat);
+	size_t actNumChan = zenith::util::zfile_format::getNumChannels(img.imageFormat);
+	size_t actChanSize = zenith::util::zfile_format::getChannelSize(img.imageFormat) >> 3;
+	bool needFormatTransform = false;
+
+	if (format == VK_FORMAT_UNDEFINED)
+		throw std::runtime_error("initTexture: unsupported texture format!");
+
+	std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> res(new zenith::vulkan::vTextureAutoImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
+		zenith::vulkan::vTextureDimensions::SingleTextureWithoutMip(img.width, img.height), format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+		zenith::vulkan::vMemoryUsage::GPU_STATIC, zenith::vulkan::vObjectSharingInfo(),
+		VK_IMAGE_LAYOUT_UNDEFINED, true));
 
 
 	zenith::vulkan::vBufferAutoImpl_ stagingBuff(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
@@ -621,40 +614,42 @@ void init_texture(const zenith::util::zfile_format::zImgDescription &img)
 	copyRegion.imageOffset.x = 0;
 	copyRegion.imageOffset.y = 0;
 	copyRegion.imageOffset.z = 0;
-	copyRegion.imageExtent.width = texture->getDimensions().width();
-	copyRegion.imageExtent.height = texture->getDimensions().height();
-	copyRegion.imageExtent.depth = texture->getDimensions().depth();
-	copyRegion.imageSubresource = zenith::vulkan::vTextureSubresource::Full(texture->getDimensions()).vkImageSubresourceLayers(VK_IMAGE_ASPECT_COLOR_BIT);
+	copyRegion.imageExtent.width = res->getDimensions().width();
+	copyRegion.imageExtent.height = res->getDimensions().height();
+	copyRegion.imageExtent.depth = res->getDimensions().depth();
+	copyRegion.imageSubresource = zenith::vulkan::vTextureSubresource::Full(res->getDimensions()).vkImageSubresourceLayers(VK_IMAGE_ASPECT_COLOR_BIT);
 	copyRegion.bufferOffset = 0;
 	copyRegion.bufferRowLength = img.width;
 	copyRegion.bufferImageHeight = img.height;
 
 
 	VkCommandBuffer cmdBuff = beginOneTimeCmdBuffer(vSys->getDevice("vdevice-main").getDevice(), comPool);
-	cmdTransitionImageLayout(cmdBuff, texture->handle(), format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, VK_ACCESS_TRANSFER_WRITE_BIT);
+	cmdTransitionImageLayout(cmdBuff, res->handle(), format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, VK_ACCESS_TRANSFER_WRITE_BIT);
 
-	vkCmdCopyBufferToImage(cmdBuff, stagingBuff.handle(), texture->handle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+	vkCmdCopyBufferToImage(cmdBuff, stagingBuff.handle(), res->handle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 
-	cmdTransitionImageLayout(cmdBuff, texture->handle(), format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT);
+	cmdTransitionImageLayout(cmdBuff, res->handle(), format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT);
 	endOneTimeCmdBuffer(cmdBuff);
 	submitOneTimeCmdBuffer(vSys->getDevice("vdevice-main").getDevice(), vSys->getDevice("vdevice-main").getQueue("vqueue-graphics"), comPool, cmdBuff);
 
 	vkDeviceWaitIdle(vSys->getDevice("vdevice-main").getDevice());
 
-	sampler = new zenith::vulkan::vSamplerImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
-		zenith::vulkan::vSamplerFiltering(), zenith::vulkan::vSamplerAddressing(), zenith::vulkan::vSamplerLOD());
+	return res;
 }
 
-
-void init_vulkan_app(const char * shdrVert, const char * shdrFrag)
+void init_vulkan()
 {
+
+	//const char * shdrVert = "../../Resource/Shaders/Test12a/vert.spv";
+	//const char * shdrFrag = "../../Resource/Shaders/Test12a/frag.spv";
+
 	const size_t BUFF_SIZE_XML = 16384;
 	const size_t BUFF_SIZE_SHDR = 4096;
 
 	char buff1[BUFF_SIZE_XML], buff2[BUFF_SIZE_XML], buff3[BUFF_SIZE_SHDR], buff4[BUFF_SIZE_SHDR];
 
-	auto resSHDR_v = readFile(shdrVert, (uint8_t *)buff3, BUFF_SIZE_SHDR);
-	auto resSHDR_f = readFile(shdrFrag, (uint8_t *)buff4, BUFF_SIZE_SHDR);
+	auto resSHDR_v = readFile(fnameVShader.c_str(), (uint8_t *)buff3, BUFF_SIZE_SHDR);
+	auto resSHDR_f = readFile(fnameFShader.c_str(), (uint8_t *)buff4, BUFF_SIZE_SHDR);
 
 	auto shdr_code_v = resSHDR_v.get();
 	auto shdr_code_f = resSHDR_f.get();
@@ -662,13 +657,16 @@ void init_vulkan_app(const char * shdrVert, const char * shdrFrag)
 	createShaderModule((const char *)shdr_code_v.data, shdr_code_v.size, vertShader, shaderStages[0], VK_SHADER_STAGE_VERTEX_BIT);
 	createShaderModule((const char *)shdr_code_f.data, shdr_code_f.size, fragShader, shaderStages[1], VK_SHADER_STAGE_FRAGMENT_BIT);
 
+	createCommandPool(comPool, vSys->getDevice("vdevice-main").getQueueFamilyIndex("vqueue-graphics"));
+	depthMap = initDepthTexture(wnd->getSize().width, wnd->getSize().height);
+
 	VkPipelineInputAssemblyStateCreateInfo pias_ci;
 	VkPipelineVertexInputStateCreateInfo pvis_ci;
 	createInputAssembly(pvis_ci, pias_ci);
 
 	auto bd = Vertex::getBindingDescription();
 	auto ad = Vertex::getAttributeDescription();
-	pvis_ci.vertexAttributeDescriptionCount = static_cast<uint32_t>(ad.size());
+	pvis_ci.vertexAttributeDescriptionCount = ad.size();
 	pvis_ci.pVertexAttributeDescriptions = &ad[0];
 	pvis_ci.vertexBindingDescriptionCount = 1;
 	pvis_ci.pVertexBindingDescriptions = &bd;
@@ -685,6 +683,9 @@ void init_vulkan_app(const char * shdrVert, const char * shdrFrag)
 	VkPipelineColorBlendAttachmentState pcbas;
 	VkPipelineColorBlendStateCreateInfo pcbs_ci;
 	createColorBlend(pcbas, pcbs_ci);
+
+	VkPipelineDepthStencilStateCreateInfo dss_ci;
+	createDepthStencilState(dss_ci);
 
 
 	VkDynamicState dynamicStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH };
@@ -707,7 +708,7 @@ void init_vulkan_app(const char * shdrVert, const char * shdrFrag)
 	pci.pViewportState = &pvs_ci;
 	pci.pRasterizationState = &prs_ci;
 	pci.pMultisampleState = &pms_ci;
-	pci.pDepthStencilState = nullptr;
+	pci.pDepthStencilState = &dss_ci;
 	pci.pColorBlendState = &pcbs_ci;
 	pci.pDynamicState = nullptr;
 
@@ -725,7 +726,7 @@ void init_vulkan_app(const char * shdrVert, const char * shdrFrag)
 	ZLOG_REGULAR("Created pipeline. Creating command buffers and framebuffers.");
 	createVertexBuffer();
 	createIndexBuffer();
-	createCommandBuffers(comPool, comBuffers, 3, vSys->getDevice("vdevice-main").getQueueFamilyIndex("vqueue-graphics"));
+	createCommandBuffers(comPool, comBuffers, 3);
 	for (size_t i = 0; i < 3; i++)
 		createFramebuffer(vSys->getDevice("vdevice-main").getSwapchain("vswapchain-main").getImageView(i), frameBuffers[i]);
 	ZLOG_REGULAR("Frambuffers and command buffers created.");
@@ -738,10 +739,27 @@ void init_vulkan_app(const char * shdrVert, const char * shdrFrag)
 	std::cout << "Init finished.\n";
 }
 
+
+void init_input()
+{
+	for (bool &v : keys)
+		v = false;
+}
+
+void process_input_key_up(zenith::util::Window * wnd, WPARAM wparam, LPARAM lparam)
+{
+	keys[wparam] = false;
+}
+void process_input_key_down(zenith::util::Window * wnd, WPARAM wparam, LPARAM lparam)
+{
+	keys[wparam] = true;
+}
+
+
 void init_camera()
 {
 	mainCamera.pos = glm::vec3(0.0f, 0.0f, 0.0f);
-	mainCamera.dir = glm::vec3(0.0f, 1.0f, 0.0f);
+	mainCamera.dir = glm::vec3(0.5f, 0.5f, 0.14f);
 	mainCamera.up = glm::vec3(0.0f, 0.0f, 1.0f);
 	mainCamera.updateProj();
 	mainCamera.updateView();
@@ -813,11 +831,6 @@ void init_camera()
 	vkUpdateDescriptorSets(vSys->getDevice("vdevice-main").getDevice(), 2, &wis[0], 0, nullptr);
 }
 
-void init_input()
-{
-	for (bool &v : keys)
-		v = false;
-}
 
 void update_camera()
 {
@@ -881,13 +894,4 @@ void update_camera()
 	void * data = cameraUniformBuffer->memoryBlock().map();
 	memcpy(data, mainCamera.dataViewProj(), sz);
 	cameraUniformBuffer->memoryBlock().unmap();
-}
-
-void process_input_key_up(zenith::util::Window * wnd, WPARAM wparam, LPARAM lparam)
-{
-	keys[wparam] = false;
-}
-void process_input_key_down(zenith::util::Window * wnd, WPARAM wparam, LPARAM lparam)
-{
-	keys[wparam] = true;
 }

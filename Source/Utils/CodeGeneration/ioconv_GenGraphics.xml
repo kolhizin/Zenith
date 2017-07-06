@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root astyle_options="--style=allman -t -N">
+  <file name="../../Source/Graphics/General/ggUtil_Enums.h">
+    <prefix>
+      #pragma once      
+      #include &lt;Utils\ioconv\io_config.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;Utils\nameid.h&gt;
+      
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+    </prefix>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>    
+    <namespace name="zenith">
+      <namespace name="gengraphics">
+        <enum name="ggPipelineStage" qual="zenith::gengraphics">
+          <val name="UNDEF" value="0"/>
+          <val name="INPUT_ASSEMBLER" value="1"/>
+          <val name="VERTEX_SHADER" value="128"/>
+          <val name="PIXEL_SHADER" value="256"/>
+          <val name="RASTERIZER" value="1024"/>
+        </enum>
+        <enum name="ggPipelineObjectType" qual="zenith::gengraphics">
+          <val name="UNDEF" value="0"/>
+          <val name="PROGRAM"/>
+          <val name="RESOURCE"/>
+          <val name="INSTREAM"/>
+          <val name="OUTSTREAM"/>
+        </enum>
+        <enum name="ggPipelineResourceType" qual="zenith::gengraphics">
+          <val name="UNDEF" value="0"/>
+          <val name="TEXTURE" value="1"/>
+          <val name="SAMPLER" value="2"/>
+          <val name="COMBINED_TEXTURE_SAMPLER" value="3"/>
+          <val name="UNIFORM_BUFFFER" value="4"/>
+          <val name="STORAGE_BUFFFER" value="8"/>
+        </enum>
+        <enum name="ggBaseType" qual="zenith::gengraphics">
+          <val name="UNDEF" value="0"/>
+          <val name="HALF"/>
+          <val name="FLOAT"/>
+          <val name="DOUBLE"/>
+          <val name="INT"/>
+          <val name="UINT"/>
+          <val name="BOOL"/>
+        </enum>
+      </namespace>
+    </namespace>
+  </file>
+  <file name="../../Source/Graphics/General/ggUtil_Pipeline.h">
+    <prefix>
+      #pragma once
+      #include &lt;Utils\ioconv\io_config.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;Utils\nameid.h&gt;
+      #include &quot;ggraphics_base.h&quot;
+
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+    </prefix>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>
+    <namespace name="zenith">
+      <namespace name="gengraphics">
+        <class name="ggPipelineResourceLocation" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="group" type="uint32_t" hint="ATTRIBUTE" grp-in="simple"/>
+          <var name="index" type="uint32_t" hint="ATTRIBUTE" grp-in="simple"/>
+        </class>
+        <class name="ggPipelineResourceDescriptor" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="location" type="ggPipelineResourceLocation" grp-in="complex"/>
+          <var name="type" type="ggPipelineResourceType" hint="ATTRIBUTE" grp-in="simple"/>
+          <var name="stages" type="zenith::util::bitenum&lt;ggPipelineStage&gt;" hint="ATTRIBUTE" grp-in="simple"/>
+        </class>        
+      </namespace>
+    </namespace>
+  </file>
+</root>
+

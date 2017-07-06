@@ -88,6 +88,53 @@ namespace zenith
 		{
 			return enum2str_converter<Str, E>::to_enum_safe(in, out, def);
 		}
+		
+		template<class Str, class E>
+		inline void str2bitenum(const Str &in, E &out)
+		{
+			out = static_cast<E>(0);
+			std::string r;
+			size_t off = 0;
+			while (off < in.length())
+			{
+				E tmp;
+				size_t t_off = in.find('|', off);
+				str2enum(in.substr(off, t_off - off), tmp);
+				off = t_off;
+				if (off < in.length())
+					off++;
+
+				out = static_cast<E>(static_cast<uint64_t>(out) | static_cast<uint64_t>(tmp));
+			}
+		}
+		template<class Str, class E>
+		inline void bitenum2str(E in, Str &out)
+		{
+			uint64_t res = static_cast<uint64_t>(in);
+			uint64_t msk = 1;
+			bool empty = true;
+			while (res)
+			{
+				uint64_t tmp = res & msk;
+				if (tmp > 0)
+				{
+					if (empty)
+					{
+						enum2str(static_cast<E>(tmp), out);
+						empty = false;
+					}
+					else
+					{
+						Str tmps;
+						enum2str(static_cast<E>(tmp), tmps);
+						out += "|";
+						out += tmps;
+					}
+					res ^= tmp;
+				}
+				msk <<= 1;
+			}
+		}
 
 
 		enum class ExtendedBitMask { NO = 0, YES = 1, ANY = -1 };

@@ -129,6 +129,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Graphics\General\ggPipelineResource.h" />
+    <ClInclude Include="..\..\Source\Graphics\General\ggraphics_base.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\spirv-reflection.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vBuffer.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vBufferImpl.h" />
@@ -145,6 +147,8 @@
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vulkan_general.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vUtil.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vUtil_Enums.h" />
+    <ClInclude Include="..\..\Source\Utils\bitenum.h" />
+    <ClInclude Include="..\..\Source\Utils\dynamic_pdag.h" />
     <ClInclude Include="..\..\Source\Utils\FileFormat\ff_base.h" />
     <ClInclude Include="..\..\Source\Utils\FileFormat\ff_font.h" />
     <ClInclude Include="..\..\Source\Utils\FileFormat\ff_img.h" />
@@ -170,7 +174,7 @@
     <None Include="..\..\Source\Graphics\Vulkan\vUtil_Enums.h.orig" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="AppConfig.xml" />
+    <Xml Include="SystemFont_Config.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
