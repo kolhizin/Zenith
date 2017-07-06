@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root astyle_options="--style=allman -t -N">
+  <file name="../../Source/Graphics/Vulkan/vUtilRaw.h">
+    <prefix>
+      #pragma once
+      #include &lt;Utils\ioconv\io_config.h&gt;
+      #include &lt;Utils\macro_version.h&gt;
+      #include &lt;Utils\nameid.h&gt;
+      #include &lt;Graphics\Vulkan\vulkan_config.h&gt;
+      #include &lt;vector&gt;
+      #include &lt;list&gt;
+      
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+    </prefix>
+    <postfix>
+      #pragma warning(pop)
+    </postfix>
+    <namespace name="zenith">
+      <namespace name="vulkan">
+        <class name="VkLayerProperties" qual="" genOutput="1">
+          <var name="layerName" grp-in="simple"/>
+          <var name="specVersion" grp-in="complex" grp-out="cast" cast="zenith::version32_t"/>
+          <var name="implementationVersion" grp-in="complex" grp-out="cast" cast="zenith::version32_t"/>
+          <var name="description" grp-in="simple"/>
+        </class>
+        <class name="VkExtensionProperties" qual="" genOutput="1">
+          <var name="extensionName" grp-in="simple"/>
+          <var name="specVersion" grp-in="complex" grp-out="cast" cast="zenith::version32_t"/>
+        </class>
+        <class name="VkPhysicalDeviceLimits" qual="" genOutput="1">
+          <var name="maxImageDimension1D" grp-in="simple"/>
+          <var name="maxImageDimension2D" grp-in="simple"/>
+          <var name="maxImageDimension3D" grp-in="simple"/>
+          <var name="maxImageDimensionCube" grp-in="simple"/>
+          <var name="maxImageArrayLayers" grp-in="simple"/>
+          <var name="maxTexelBufferElements" grp-in="simple"/>
+          <var name="maxUniformBufferRange" grp-in="simple"/>
+          <var name="maxStorageBufferRange" grp-in="simple"/>
+          <var name="maxPushConstantsSize" grp-in="simple"/>
+          <var name="maxMemoryAllocationCount" grp-in="simple"/>
+          <var name="maxSamplerAllocationCount" grp-in="simple"/>
+          <var name="bufferImageGranularity" grp-in="simple"/>
+          <var name="sparseAddressSpaceSize" grp-in="simple"/>
+
+          <var name="maxBoundDescriptorSets" grp-in="simple"/>
+
+          <var name="maxPerStageDescriptorSamplers" grp-in="simple"/>
+          <var name="maxPerStageDescriptorUniformBuffers" grp-in="simple"/>
+          <var name="maxPerStageDescriptorStorageBuffers" grp-in="simple"/>
+          <var name="maxPerStageDescriptorSampledImages" grp-in="simple"/>
+          <var name="maxPerStageDescriptorStorageImages" grp-in="simple"/>
+          <var name="maxPerStageDescriptorInputAttachments" grp-in="simple"/>
+          <var name="maxPerStageResources" grp-in="simple"/>
+
+          <var name="maxDescriptorSetSamplers" grp-in="simple"/>
+          <var name="maxDescriptorSetUniformBuffers" grp-in="simple"/>
+          <var name="maxDescriptorSetUniformBuffersDynamic" grp-in="simple"/>
+          <var name="maxDescriptorSetStorageBuffers" grp-in="simple"/>
+          <var name="maxDescriptorSetStorageBuffersDynamic" grp-in="simple"/>
+          <var name="maxDescriptorSetSampledImages" grp-in="simple"/>
+          <var name="maxDescriptorSetStorageImages" grp-in="simple"/>
+          <var name="maxDescriptorSetInputAttachments" grp-in="simple"/>
+
+          <var name="maxVertexInputATTRIBUTEibutes" grp-in="simple"/>
+          <var name="maxVertexInputBindings" grp-in="simple"/>
+          <var name="maxVertexInputATTRIBUTEibuteOffset" grp-in="simple"/>
+          <var name="maxVertexInputBindingStride" grp-in="simple"/>
+          <var name="maxVertexOutputComponents" grp-in="simple"/>
+
+          <var name="maxTessellationGenerationLevel" grp-in="simple"/>
+          <var name="maxTessellationPatchSize" grp-in="simple"/>
+          <var name="maxTessellationControlPerVertexInputComponents" grp-in="simple"/>
+          <var name="maxTessellationControlPerVertexOutputComponents" grp-in="simple"/>
+          <var name="maxTessellationControlPerPatchOutputComponents" grp-in="simple"/>
+          <var name="maxTessellationControlTotalOutputComponents" grp-in="simple"/>
+          <var name="maxTessellationEvaluationInputComponents" grp-in="simple"/>
+          <var name="maxTessellationEvaluationOutputComponents" grp-in="simple"/>
+
+          <var name="maxGeometryShaderInvocations" grp-in="simple"/>
+          <var name="maxGeometryInputComponents" grp-in="simple"/>
+          <var name="maxGeometryOutputComponents" grp-in="simple"/>
+          <var name="maxGeometryOutputVertices" grp-in="simple"/>
+          <var name="maxGeometryTotalOutputComponents" grp-in="simple"/>
+
+          <var name="maxFragmentInputComponents" grp-in="simple"/>
+          <var name="maxFragmentOutputAttachments" grp-in="simple"/>
+          <var name="maxFragmentDualSrcAttachments" grp-in="simple"/>
+          <var name="maxFragmentCombinedOutputResources" grp-in="simple"/>
+
+          <var name="maxComputeSharedMemorySize" grp-in="simple"/>
+          <var name="maxComputeWorkGroupInvocations" grp-in="simple"/>
+
+          <var name="maxComputeWorkGroupCount[0]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupSize[0]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupCount[1]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupSize[1]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupCount[2]" grp-in="simple"/>
+          <var name="maxComputeWorkGroupSize[2]" grp-in="simple"/>
+
+          <var name="subPixelPrecisionBits" grp-in="simple"/>
+          <var name="subTexelPrecisionBits" grp-in="simple"/>
+          <var name="mipmapPrecisionBits" grp-in="simple"/>
+
+          <var name="maxDrawIndexedIndexValue" grp-in="simple"/>
+          <var name="maxDrawIndirectCount" grp-in="simple"/>
+
+          <var name="maxSamplerLodBias" grp-in="simple"/>
+          <var name="maxSamplerAnisotropy" grp-in="simple"/>
+          <var name="maxViewports" grp-in="simple"/>
+          <var name="maxViewportDimensions[0]" grp-in="simple"/>
+          <var name="maxViewportDimensions[1]" grp-in="simple"/>
+          <var name="viewportBoundsRange[0]" grp-in="simple"/>
+          <var name="viewportBoundsRange[1]" grp-in="simple"/>
+          <var name="viewportSubPixelBits" grp-in="simple"/>
+
+
+          <var name="minMemoryMapAlignment" grp-in="simple"/>
+          <var name="minTexelBufferOffsetAlignment" grp-in="simple"/>
+          <var name="minUniformBufferOffsetAlignment" grp-in="simple"/>
+          <var name="minStorageBufferOffsetAlignment" grp-in="simple"/>
+
+          <var name="minTexelOffset" grp-in="simple"/>
+          <var name="maxTexelOffset" grp-in="simple"/>
+          <var name="minTexelGatherOffset" grp-in="simple"/>
+          <var name="maxTexelGatherOffset" grp-in="simple"/>
+          <var name="minInterpolationOffset" grp-in="simple"/>
+          <var name="maxInterpolationOffset" grp-in="simple"/>
+          <var name="subPixelInterpolationOffsetBits" grp-in="simple"/>
+
+          <var name="maxFramebufferWidth" grp-in="simple"/>
+          <var name="maxFramebufferHeight" grp-in="simple"/>
+          <var name="maxFramebufferLayers" grp-in="simple"/>
+          <var name="maxColorAttachments" grp-in="simple"/>
+
+          <var name="maxSampleMaskWords" grp-in="simple"/>
+          <var name="timestampComputeAndGraphics" grp-in="simple"/>
+          <var name="timestampPeriod" grp-in="simple"/>
+          <var name="maxClipDistances" grp-in="simple"/>
+          <var name="maxCullDistances" grp-in="simple"/>
+          <var name="maxCombinedClipAndCullDistances" grp-in="simple"/>
+          <var name="discreteQueuePriorities" grp-in="simple"/>
+
+          <var name="strictLines" grp-in="simple"/>
+          <var name="standardSampleLocations" grp-in="simple"/>
+          <var name="optimalBufferCopyOffsetAlignment" grp-in="simple"/>
+          <var name="optimalBufferCopyRowPitchAlignment" grp-in="simple"/>
+          <var name="nonCoherentAtomSize" grp-in="simple"/>
+
+
+          <var name="pointSizeGranularity" grp-in="simple"/>
+          <var name="lineWidthGranularity" grp-in="simple"/>
+          <var name="pointSizeRange[0]" grp-in="simple"/>
+          <var name="pointSizeRange[1]" grp-in="simple"/>
+          <var name="lineWidthRange[0]" grp-in="simple"/>
+          <var name="lineWidthRange[1]" grp-in="simple"/>
+
+          <var name="framebufferColorSampleCounts" grp-in="simple"/>
+          <var name="framebufferDepthSampleCounts" grp-in="simple"/>
+          <var name="framebufferStencilSampleCounts" grp-in="simple"/>
+          <var name="framebufferNoAttachmentsSampleCounts" grp-in="simple"/>
+          <var name="sampledImageColorSampleCounts" grp-in="simple"/>
+          <var name="sampledImageIntegerSampleCounts" grp-in="simple"/>
+          <var name="sampledImageDepthSampleCounts" grp-in="simple"/>
+          <var name="sampledImageStencilSampleCounts" grp-in="simple"/>
+          <var name="storageImageSampleCounts" grp-in="simple"/>
+        </class>
+        <class name="VkPhysicalDeviceProperties" qual="" genOutput="1">
+          <var name="deviceName" grp-in="simple"/>
+          <var name="vendorID" grp-in="simple"/>
+          <var name="deviceID" grp-in="simple"/>
+          <var name="driverVersion" grp-in="complex" grp-out="cast" cast="zenith::version32_t"/>
+          <var name="apiVersion" grp-in="complex" grp-out="cast" cast="zenith::version32_t"/>
+          <var name="deviceType" grp-in="simple" cast_to="vPhysicalDeviceType"/>
+          <var name="limits" type="VkPhysicalDeviceLimits" grp-in="complex"/>
+        </class>
+      </namespace>
+    </namespace>
+  </file>
+</root>
+

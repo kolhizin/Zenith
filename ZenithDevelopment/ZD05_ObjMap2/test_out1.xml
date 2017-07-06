@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<FULL a="9" b0="1" b2="3">
+	<Poly>
+		<point name="p1">
+			<x>32.0</x>
+			<y>12.0</y>
+		</point>
+		<point name="p2">
+			<x>20.0</x>
+			<y>1.0</y>
+		</point>
+		<point name="p3">
+			<x>-20.5</x>
+			<y>111.0</y>
+		</point>
+		<index>1</index>
+		<index>2</index>
+		<index>5</index>
+		<index>6</index>
+	</Poly>
+	<a>10</a>
+	<a>11</a>
+	<a>12</a>
+	<c>45</c>
+	<q>67</q>
+</FULL>

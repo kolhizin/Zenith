@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Poly>
+	<index>1</index>
+	<index>2</index>
+	<index>5</index>
+	<index>6</index>
+	<point>
+		<key>p1</key>
+		<x>32</x>
+		<y>12</y>
+	</point>
+	<point>
+		<key>p2</key>
+		<x>20</x>
+		<y>1</y>
+	</point>
+	<point>
+		<key>p3</key>
+		<x>-20.5</x>
+		<y>111</y>
+	</point>
+</Poly>

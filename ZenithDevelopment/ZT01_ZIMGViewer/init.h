@@ -16,6 +16,11 @@
 #include <thread>
 #include <string>
 #include "SimpleCamera.h"
+#include <Utils\ioconv\io_config.h>
+#include <Utils\ioconv\input_objmap.h>
+#include <Utils\ioconv\input_xml.h>
+#include <Utils\wndUtil_ObjMapIO.h>
+#include <Graphics\Vulkan\vUtil_ObjMapIO.h>
 
 extern std::string fnameVShader, fnameFShader;
 

@@ -1,6 +1,6 @@
 
       #pragma once
-      #include <Utils\object_map.h>
+      #include <Utils\ioconv\io_config.h>
       #include <Utils\macro_version.h>
       #include <Utils\nameid.h>
       #pragma warning(push)
@@ -15,119 +15,114 @@ double x1;
 double y0;
 double y1;
 };
-inline void to_objmap(const TerraGenParam_Box2D &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "TerraGenParam_Box2D", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.x0, buff, 128);
-om.addValue("x0", buff, zenith::util::ObjectMapValueHint::ATTR);
- zenith::util::str_cast(obj.x1, buff, 128);
-om.addValue("x1", buff, zenith::util::ObjectMapValueHint::ATTR);
- zenith::util::str_cast(obj.y0, buff, 128);
-om.addValue("y0", buff, zenith::util::ObjectMapValueHint::ATTR);
- zenith::util::str_cast(obj.y1, buff, 128);
-om.addValue("y1", buff, zenith::util::ObjectMapValueHint::ATTR);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_Box2D, It>{public:
+typedef zenith::terragen::TerraGenParam_Box2D value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::terragen::TerraGenParam_Box2D &val, const It &it){
+zenith::util::ioconv::input_named_required(val.x0, it, "x0");
+zenith::util::ioconv::input_named_required(val.x1, it, "x1");
+zenith::util::ioconv::input_named_required(val.y0, it, "y0");
+zenith::util::ioconv::input_named_required(val.y1, it, "y1");
 }
-inline void from_objmap(TerraGenParam_Box2D &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.x0, "x0");
-OBJMAP_GET_ONE_VALUE(om, obj.x1, "x1");
-OBJMAP_GET_ONE_VALUE(om, obj.y0, "y0");
-OBJMAP_GET_ONE_VALUE(om, obj.y1, "y1");
+inline static void output(const zenith::terragen::TerraGenParam_Box2D &val, It &it){
+zenith::util::ioconv::output_single(val.x0, it.append_value("x0", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_single(val.x1, it.append_value("x1", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_single(val.y0, it.append_value("y0", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_single(val.y1, it.append_value("y1", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
 }
+};
 
 
 struct TerraGenParam_Box1D {
 double x0;
 double x1;
 };
-inline void to_objmap(const TerraGenParam_Box1D &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "TerraGenParam_Box1D", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.x0, buff, 128);
-om.addValue("x0", buff, zenith::util::ObjectMapValueHint::ATTR);
- zenith::util::str_cast(obj.x1, buff, 128);
-om.addValue("x1", buff, zenith::util::ObjectMapValueHint::ATTR);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_Box1D, It>{public:
+typedef zenith::terragen::TerraGenParam_Box1D value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::terragen::TerraGenParam_Box1D &val, const It &it){
+zenith::util::ioconv::input_named_required(val.x0, it, "x0");
+zenith::util::ioconv::input_named_required(val.x1, it, "x1");
 }
-inline void from_objmap(TerraGenParam_Box1D &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.x0, "x0");
-OBJMAP_GET_ONE_VALUE(om, obj.x1, "x1");
+inline static void output(const zenith::terragen::TerraGenParam_Box1D &val, It &it){
+zenith::util::ioconv::output_single(val.x0, it.append_value("x0", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_single(val.x1, it.append_value("x1", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
 }
+};
 
 
 struct TerraGenParam_MuSigma {
 double mu;
 double sigma;
 };
-inline void to_objmap(const TerraGenParam_MuSigma &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "TerraGenParam_MuSigma", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.mu, buff, 128);
-om.addValue("mu", buff, zenith::util::ObjectMapValueHint::ATTR);
- zenith::util::str_cast(obj.sigma, buff, 128);
-om.addValue("sigma", buff, zenith::util::ObjectMapValueHint::ATTR);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_MuSigma, It>{public:
+typedef zenith::terragen::TerraGenParam_MuSigma value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::terragen::TerraGenParam_MuSigma &val, const It &it){
+val.mu = 0.0;
+zenith::util::ioconv::input_named_optional(val.mu, it, "mu");
+val.sigma = 1.0;
+zenith::util::ioconv::input_named_optional(val.sigma, it, "sigma");
 }
-inline void from_objmap(TerraGenParam_MuSigma &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.mu, "mu", 0.0);
-OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.sigma, "sigma", 1.0);
+inline static void output(const zenith::terragen::TerraGenParam_MuSigma &val, It &it){
+zenith::util::ioconv::output_single(val.mu, it.append_value("mu", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_single(val.sigma, it.append_value("sigma", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
 }
+};
 
 
 struct TerraGenParam_CatDistrDouble {
 double value;
 double prob;
 };
-inline void to_objmap(const TerraGenParam_CatDistrDouble &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "TerraGenParam_CatDistrDouble", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.value, buff, 128);
-om.addValue("value", buff, zenith::util::ObjectMapValueHint::ATTR);
- zenith::util::str_cast(obj.prob, buff, 128);
-om.addValue("prob", buff, zenith::util::ObjectMapValueHint::ATTR);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrDouble, It>{public:
+typedef zenith::terragen::TerraGenParam_CatDistrDouble value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::terragen::TerraGenParam_CatDistrDouble &val, const It &it){
+zenith::util::ioconv::input_named_required(val.value, it, "value");
+zenith::util::ioconv::input_named_required(val.prob, it, "prob");
 }
-inline void from_objmap(TerraGenParam_CatDistrDouble &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.value, "value");
-OBJMAP_GET_ONE_VALUE(om, obj.prob, "prob");
+inline static void output(const zenith::terragen::TerraGenParam_CatDistrDouble &val, It &it){
+zenith::util::ioconv::output_single(val.value, it.append_value("value", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_single(val.prob, it.append_value("prob", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
 }
+};
 
 
 struct TerraGenParam_CatDistrInt {
 int64_t value;
 double prob;
 };
-inline void to_objmap(const TerraGenParam_CatDistrInt &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "TerraGenParam_CatDistrInt", zenith::util::ObjectMapValueHint::ATTR);
-
- zenith::util::str_cast(obj.value, buff, 128);
-om.addValue("value", buff, zenith::util::ObjectMapValueHint::ATTR);
- zenith::util::str_cast(obj.prob, buff, 128);
-om.addValue("prob", buff, zenith::util::ObjectMapValueHint::ATTR);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrInt, It>{public:
+typedef zenith::terragen::TerraGenParam_CatDistrInt value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::terragen::TerraGenParam_CatDistrInt &val, const It &it){
+zenith::util::ioconv::input_named_required(val.value, it, "value");
+zenith::util::ioconv::input_named_required(val.prob, it, "prob");
 }
-inline void from_objmap(TerraGenParam_CatDistrInt &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.value, "value");
-OBJMAP_GET_ONE_VALUE(om, obj.prob, "prob");
+inline static void output(const zenith::terragen::TerraGenParam_CatDistrInt &val, It &it){
+zenith::util::ioconv::output_single(val.value, it.append_value("value", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_single(val.prob, it.append_value("prob", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
 }
+};
 
 
 struct TerraGenParam_CatDistrString {
 std::string value;
 double prob;
 };
-inline void to_objmap(const TerraGenParam_CatDistrString &obj, zenith::util::ObjectMap<char, char> &om){
-char buff[128];
-om.addValue("type", "TerraGenParam_CatDistrString", zenith::util::ObjectMapValueHint::ATTR);
-
-om.addValue("value", obj.value.c_str(), zenith::util::ObjectMapValueHint::ATTR);
- zenith::util::str_cast(obj.prob, buff, 128);
-om.addValue("prob", buff, zenith::util::ObjectMapValueHint::ATTR);
+template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrString, It>{public:
+typedef zenith::terragen::TerraGenParam_CatDistrString value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void input(zenith::terragen::TerraGenParam_CatDistrString &val, const It &it){
+zenith::util::ioconv::input_named_required(val.value, it, "value");
+zenith::util::ioconv::input_named_required(val.prob, it, "prob");
 }
-inline void from_objmap(TerraGenParam_CatDistrString &obj, const zenith::util::ObjectMap<char, char> &om){
-OBJMAP_GET_ONE_VALUE(om, obj.value, "value");
-OBJMAP_GET_ONE_VALUE(om, obj.prob, "prob");
+inline static void output(const zenith::terragen::TerraGenParam_CatDistrString &val, It &it){
+zenith::util::ioconv::output_single(val.value, it.append_value("value", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+zenith::util::ioconv::output_single(val.prob, it.append_value("prob", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
 }
+};
 
 }
 }

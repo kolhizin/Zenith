@@ -501,17 +501,28 @@ namespace zenith
 		class str_cast_impl_s3<const Char *, std::basic_string<Char, std::char_traits<Char>, A>>
 		{
 		public:
-			inline static void cast(const char *from, std::basic_string<Char, std::char_traits<Char>, A> &to, size_t maxSize)
+			inline static void cast(const Char *from, std::basic_string<Char, std::char_traits<Char>, A> &to, size_t maxSize = 0)
 			{
 				to = from;
 			}
 		};
-
+		/*
+		template<>
+		class str_cast_impl_s3<const char *, std::string>
+		{
+		public:
+			inline static void cast(const char *from, std::string &to, size_t maxSize)
+			{
+				to = from;
+			}
+		};
+		*/
+		
 		template<class To>
 		class str_cast_impl_s3<zenith::util::nameid, To>
 		{
 		public:
-			inline static void cast(const zenith::util::nameid &from, To &to, size_t maxSize)
+			inline static void cast(const zenith::util::nameid &from, To &to, size_t maxSize = 0)
 			{
 				str_cast_impl_s3<const char *, To>::cast(from.c_str(), to, maxSize);
 			}
@@ -520,11 +531,11 @@ namespace zenith
 		class str_cast_impl_s3<From, zenith::util::nameid>
 		{
 		public:
-			inline static void cast(const From &from, zenith::util::nameid &to, size_t maxSize)
+			inline static void cast(const From &from, zenith::util::nameid &to, size_t maxSize = 0)
 			{
-				std::string str;
-				str_cast_impl_s3<From, std::string>::cast(from, str, maxSize);
-				to = str;
+				//std::string str;
+				//str_cast_impl_s3<From, std::string>::cast(from, str, maxSize);
+				to = from;
 			}
 		};
 				

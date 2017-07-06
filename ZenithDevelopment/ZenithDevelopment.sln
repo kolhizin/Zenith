@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZD01_MultigridSolver", "ZD01_MultigridSolver\ZD01_MultigridSolver.vcxproj", "{3730FDE1-603E-4F05-B637-C3B2199A0CD8}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZT04_ZIMGEdit", "ZT04_ZIMGEdit\ZT04_ZIMGEdit.vcxproj", "{2D85AFD5-F376-4E32-914A-CC5053640672}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZD04_TerrainViewer01", "ZD04_TerrainViewer01\ZD04_TerrainViewer01.vcxproj", "{0859A3C3-3589-4540-A5F3-C18D45E520B7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZD05_ObjMap2", "ZD05_ObjMap2\ZD05_ObjMap2.vcxproj", "{D277FD21-19E1-4F4A-B822-A21935134947}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +93,14 @@ Global
 		{0859A3C3-3589-4540-A5F3-C18D45E520B7}.Release|x64.Build.0 = Release|x64
 		{0859A3C3-3589-4540-A5F3-C18D45E520B7}.Release|x86.ActiveCfg = Release|Win32
 		{0859A3C3-3589-4540-A5F3-C18D45E520B7}.Release|x86.Build.0 = Release|Win32
+		{D277FD21-19E1-4F4A-B822-A21935134947}.Debug|x64.ActiveCfg = Debug|x64
+		{D277FD21-19E1-4F4A-B822-A21935134947}.Debug|x64.Build.0 = Debug|x64
+		{D277FD21-19E1-4F4A-B822-A21935134947}.Debug|x86.ActiveCfg = Debug|Win32
+		{D277FD21-19E1-4F4A-B822-A21935134947}.Debug|x86.Build.0 = Debug|Win32
+		{D277FD21-19E1-4F4A-B822-A21935134947}.Release|x64.ActiveCfg = Release|x64
+		{D277FD21-19E1-4F4A-B822-A21935134947}.Release|x64.Build.0 = Release|x64
+		{D277FD21-19E1-4F4A-B822-A21935134947}.Release|x86.ActiveCfg = Release|Win32
+		{D277FD21-19E1-4F4A-B822-A21935134947}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

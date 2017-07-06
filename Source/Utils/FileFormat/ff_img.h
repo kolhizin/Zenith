@@ -289,9 +289,11 @@ namespace zenith
 
 					descr.rowPitch.set(uint64_t(width) * pixelSize);
 					descr.depthPitch.set(descr.rowPitch.get());
-					descr.arrayPitch.set(arrayPitch);
+					descr.arrayPitch.set(descr.rowPitch.get());
+
 					return descr;
 				}
+
 				inline static zImgDataDescription create2D(uint16_t width, uint16_t height, uint64_t rowPitch)
 				{
 					zImgDataDescription descr;
@@ -449,7 +451,7 @@ namespace zenith
 			inline void zimg_to_mem(zImgDescription descr, void * dst, uint64_t size)
 			{
 				if(descr.getFullSize() > size)
-					throw ZFileException("zimg_from_mem: too small size of dst.");
+					throw ZFileException("zimg_to_mem: too small size of dst.");
 				ZChunk16B_Header * h = reinterpret_cast<ZChunk16B_Header *>(dst);
 				*h = ZChunk16B_Header();/*init with defaults*/
 				h->varTag[0] = 'I';

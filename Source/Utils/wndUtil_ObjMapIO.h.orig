@@ -1,0 +1,62 @@
+
+      #pragma once      
+      #include <Utils\object_map.h>
+      #include "wndUtil.h"
+    
+namespace zenith {
+namespace util {
+inline void to_objmap(const WndSize &obj, zenith::util::ObjectMap<char, char> &om){
+char buff[128];
+om.addValue("type", "WndSize", zenith::util::ObjectMapValueHint::ATTR);
+
+ zenith::util::str_cast(obj.width, buff, 128);
+om.addValue("width", buff, zenith::util::ObjectMapValueHint::ATTR);
+ zenith::util::str_cast(obj.height, buff, 128);
+om.addValue("height", buff, zenith::util::ObjectMapValueHint::ATTR);
+}
+inline void from_objmap(WndSize &obj, const zenith::util::ObjectMap<char, char> &om){
+OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.width, "width", 800);
+OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.height, "height", 600);
+}
+
+
+inline void to_objmap(const WndPos &obj, zenith::util::ObjectMap<char, char> &om){
+char buff[128];
+om.addValue("type", "WndPos", zenith::util::ObjectMapValueHint::ATTR);
+
+ zenith::util::str_cast(obj.x, buff, 128);
+om.addValue("x", buff, zenith::util::ObjectMapValueHint::ATTR);
+ zenith::util::str_cast(obj.y, buff, 128);
+om.addValue("y", buff, zenith::util::ObjectMapValueHint::ATTR);
+}
+inline void from_objmap(WndPos &obj, const zenith::util::ObjectMap<char, char> &om){
+OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.x, "x", 200);
+OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.y, "y", 200);
+}
+
+
+inline void to_objmap(const WndConfig &obj, zenith::util::ObjectMap<char, char> &om){
+char buff[128];
+om.addValue("type", "WndConfig", zenith::util::ObjectMapValueHint::ATTR);
+
+to_objmap(obj.size, om.addObject("size"));
+to_objmap(obj.pos, om.addObject("pos"));
+ zenith::util::str_cast(obj.fullscreen, buff, 128);
+om.addValue("fullscreen", buff);
+ zenith::util::str_cast(obj.showCursor, buff, 128);
+om.addValue("showCursor", buff);
+om.addValue("title", obj.title.c_str());
+om.addValue("iconFilename", obj.iconFilename.c_str());
+}
+inline void from_objmap(WndConfig &obj, const zenith::util::ObjectMap<char, char> &om){
+from_objmap(obj.size, om.getObjects("size", zenith::util::ObjectMapPresence::ONE).first->second);
+from_objmap(obj.pos, om.getObjects("pos", zenith::util::ObjectMapPresence::ONE).first->second);
+OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fullscreen, "fullscreen", false);
+OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.showCursor, "showCursor", true);
+OBJMAP_GET_ONE_VALUE(om, obj.title, "title");
+OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.iconFilename, "iconFilename", "");
+}
+
+}
+}
+

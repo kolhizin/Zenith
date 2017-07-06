@@ -12,6 +12,8 @@
 #include <Utils\IO\filesystem.h>
 #include <Utils\Manager\manager_unique.h>
 #include <Utils/FileFormat/ff_img.h>
+#include <Utils\ioconv\io_config.h>
+#include <Utils\ioconv\input_xml.h>
 #include <chrono>
 #include <thread>
 #include <string>

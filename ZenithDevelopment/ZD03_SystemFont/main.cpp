@@ -3,15 +3,17 @@
 #include <sstream>
 #include "Graphics\Vulkan\vMemoryManager.h"
 
-void init(const std::string &moduleDir)
+
+std::string moduleDir;
+
+void init()
 {
-	const char * appConf = "AppConfig.xml";
+	const char * appConf = "SystemFont_Config.xml";
 	std::string appConfFilename = moduleDir + appConf;
-	//const char * texFilename = "../Test12e_TerrainGen1/initialGrid.zimg";
 	const size_t BUFF_SIZE_XML = 16384;
 	char buff1[BUFF_SIZE_XML], buff2[BUFF_SIZE_XML];
 
-	std::string fnameVShader, fnameFShader, fnameTexture;
+	std::string fnameTexture;
 
 	ZLOG_REGULAR("init: creating FileSystem.");
 	fs = new zenith::util::io::FileSystem(3);
@@ -33,9 +35,9 @@ void init(const std::string &moduleDir)
 
 	docA.load_buffer_inplace(resXMLd.data, resXMLd.size);
 
-	auto xSettings = docA.root().child("AppConfig").child("Settings");
-	auto xWindow = docA.root().child("AppConfig").child("Window");
-	auto xVulkan = docA.root().child("AppConfig").child("VulkanSystem");
+	auto xSettings = docA.root().child("SystemFontConfig").child("Settings");
+	auto xWindow = docA.root().child("SystemFontConfig").child("Window");
+	auto xVulkan = docA.root().child("SystemFontConfig").child("VulkanSystem");
 
 	auto xSettingsLog = xSettings.child("log");
 	auto xSettingsShaders = xSettings.child("shaders");
@@ -84,25 +86,14 @@ void init(const std::string &moduleDir)
 	}
 	auto resIMG0 = readFile(fnameTexture.c_str());
 
-
+	zenith::gengraphics::ggPipelineResourceDescriptor pdescr;
+	zenith::util::ioconv::input(pdescr, zenith::util::ioconv::input_xml_root(xSettings.child("pipeline")));
 
 	zenith::util::WndConfig wndConf;
-
-	{
-		zenith::util::ObjectMap<char, char> omW;
-		zenith::util::xml::xml2objmap(xWindow, omW);
-		zenith::util::from_objmap(wndConf, omW);
-	}
-
+	zenith::util::ioconv::input(wndConf, zenith::util::ioconv::input_xml_root(xWindow));
 
 	zenith::vulkan::vSystemConfig vConf;
-
-	{
-		zenith::util::ObjectMap<char, char> omV;
-
-		zenith::util::xml::xml2objmap(xVulkan, omV);
-		zenith::vulkan::from_objmap(vConf, omV);
-	}
+	zenith::util::ioconv::input(vConf, zenith::util::ioconv::input_xml_root(xVulkan));
 
 
 
@@ -132,13 +123,16 @@ void init(const std::string &moduleDir)
 	vSys = new zenith::vulkan::vSystem(vConf, wndInfo);
 
 	zenith::vulkan::vObjectSharingInfo objsi{ false };
-
-	init_vulkan_app(fnameVShader.c_str(), fnameFShader.c_str());
-
+	
 	auto resIMG0r = resIMG0.first.get();
 	auto imgData = zenith::util::zfile_format::zimg_from_mem(resIMG0r.data, resIMG0r.size);
 
-	init_texture(imgData);
+	init_vulkan();
+
+
+	texture = initTexture(imgData);
+	sampler = new zenith::vulkan::vSamplerImpl_(const_cast<zenith::vulkan::vDeviceImpl_ *>(vSys->getDevice("vdevice-main").rawImpl()),
+		zenith::vulkan::vSamplerFiltering(), zenith::vulkan::vSamplerAddressing(), zenith::vulkan::vSamplerLOD());
 
 	init_camera();
 
@@ -150,7 +144,6 @@ void init(const std::string &moduleDir)
 
 void deinit()
 {
-	//delete vSys;
 	wnd.release();
 	delete fs;
 }
@@ -183,14 +176,37 @@ void mainLoop()
 
 	vSys->getDevice("vdevice-main").getSwapchain("vswapchain-main").queuePresent(vSys->getDevice("vdevice-main").getQueue("vqueue-present"), imgInd, renderFinishedSemaphore);
 }
-int main()
+
+void init_args(LPSTR lpCmdLine)
 {
+	/*
+	texFilename = lpCmdLine;
+	if (texFilename.size() > 0)
+	{
+	if (texFilename.front() == '\"')
+	texFilename.erase(0, 1);
+	if (texFilename.back() == '\"')
+	texFilename.erase(texFilename.size() - 1, 1);
+	}
+
+
 	char buffer[MAX_PATH];
 	GetModuleFileName(NULL, buffer, MAX_PATH);
-	std::string moduleDir = "";//buffer;
-	//moduleDir.erase(moduleDir.find_last_of('\\') + 1, moduleDir.size());
+	moduleDir = buffer;
+	moduleDir.erase(moduleDir.find_last_of('\\') + 1, moduleDir.size());
+	*/
+	moduleDir = "";
+}
 
-	init(moduleDir);
+int APIENTRY WinMain(_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR    lpCmdLine,
+	_In_ int       nCmdShow)
+{
+
+	init_args(lpCmdLine);
+	init();
+
 
 	wnd->loop([]() {mainLoop();});
 

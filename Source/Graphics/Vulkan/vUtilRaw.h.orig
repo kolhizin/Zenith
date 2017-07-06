@@ -1,0 +1,178 @@
+
+      #pragma once
+      #include <Utils\ioconv\io_config.h>
+      #include <Utils\macro_version.h>
+      #include <Utils\nameid.h>
+      #include <Graphics\Vulkan\vulkan_config.h>
+      #include <vector>
+      #include <list>
+      
+      #pragma warning(push)
+      #pragma warning(disable:4101)
+    
+namespace zenith {
+namespace vulkan {
+template<class It> class zenith::util::ioconv::io_handler_impl<::VkLayerProperties, It>{public:
+typedef ::VkLayerProperties value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void output(const ::VkLayerProperties &val, It &it){
+zenith::util::ioconv::output_single(val.layerName, it.append_value("layerName"));
+zenith::util::ioconv::output_single(static_cast<zenith::version32_t>(val.specVersion), it, "specVersion");
+zenith::util::ioconv::output_single(static_cast<zenith::version32_t>(val.implementationVersion), it, "implementationVersion");
+zenith::util::ioconv::output_single(val.description, it.append_value("description"));
+}
+};
+
+
+template<class It> class zenith::util::ioconv::io_handler_impl<::VkExtensionProperties, It>{public:
+typedef ::VkExtensionProperties value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void output(const ::VkExtensionProperties &val, It &it){
+zenith::util::ioconv::output_single(val.extensionName, it.append_value("extensionName"));
+zenith::util::ioconv::output_single(static_cast<zenith::version32_t>(val.specVersion), it, "specVersion");
+}
+};
+
+
+template<class It> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceLimits, It>{public:
+typedef ::VkPhysicalDeviceLimits value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void output(const ::VkPhysicalDeviceLimits &val, It &it){
+zenith::util::ioconv::output_single(val.maxImageDimension1D, it.append_value("maxImageDimension1D"));
+zenith::util::ioconv::output_single(val.maxImageDimension2D, it.append_value("maxImageDimension2D"));
+zenith::util::ioconv::output_single(val.maxImageDimension3D, it.append_value("maxImageDimension3D"));
+zenith::util::ioconv::output_single(val.maxImageDimensionCube, it.append_value("maxImageDimensionCube"));
+zenith::util::ioconv::output_single(val.maxImageArrayLayers, it.append_value("maxImageArrayLayers"));
+zenith::util::ioconv::output_single(val.maxTexelBufferElements, it.append_value("maxTexelBufferElements"));
+zenith::util::ioconv::output_single(val.maxUniformBufferRange, it.append_value("maxUniformBufferRange"));
+zenith::util::ioconv::output_single(val.maxStorageBufferRange, it.append_value("maxStorageBufferRange"));
+zenith::util::ioconv::output_single(val.maxPushConstantsSize, it.append_value("maxPushConstantsSize"));
+zenith::util::ioconv::output_single(val.maxMemoryAllocationCount, it.append_value("maxMemoryAllocationCount"));
+zenith::util::ioconv::output_single(val.maxSamplerAllocationCount, it.append_value("maxSamplerAllocationCount"));
+zenith::util::ioconv::output_single(val.bufferImageGranularity, it.append_value("bufferImageGranularity"));
+zenith::util::ioconv::output_single(val.sparseAddressSpaceSize, it.append_value("sparseAddressSpaceSize"));
+zenith::util::ioconv::output_single(val.maxBoundDescriptorSets, it.append_value("maxBoundDescriptorSets"));
+zenith::util::ioconv::output_single(val.maxPerStageDescriptorSamplers, it.append_value("maxPerStageDescriptorSamplers"));
+zenith::util::ioconv::output_single(val.maxPerStageDescriptorUniformBuffers, it.append_value("maxPerStageDescriptorUniformBuffers"));
+zenith::util::ioconv::output_single(val.maxPerStageDescriptorStorageBuffers, it.append_value("maxPerStageDescriptorStorageBuffers"));
+zenith::util::ioconv::output_single(val.maxPerStageDescriptorSampledImages, it.append_value("maxPerStageDescriptorSampledImages"));
+zenith::util::ioconv::output_single(val.maxPerStageDescriptorStorageImages, it.append_value("maxPerStageDescriptorStorageImages"));
+zenith::util::ioconv::output_single(val.maxPerStageDescriptorInputAttachments, it.append_value("maxPerStageDescriptorInputAttachments"));
+zenith::util::ioconv::output_single(val.maxPerStageResources, it.append_value("maxPerStageResources"));
+zenith::util::ioconv::output_single(val.maxDescriptorSetSamplers, it.append_value("maxDescriptorSetSamplers"));
+zenith::util::ioconv::output_single(val.maxDescriptorSetUniformBuffers, it.append_value("maxDescriptorSetUniformBuffers"));
+zenith::util::ioconv::output_single(val.maxDescriptorSetUniformBuffersDynamic, it.append_value("maxDescriptorSetUniformBuffersDynamic"));
+zenith::util::ioconv::output_single(val.maxDescriptorSetStorageBuffers, it.append_value("maxDescriptorSetStorageBuffers"));
+zenith::util::ioconv::output_single(val.maxDescriptorSetStorageBuffersDynamic, it.append_value("maxDescriptorSetStorageBuffersDynamic"));
+zenith::util::ioconv::output_single(val.maxDescriptorSetSampledImages, it.append_value("maxDescriptorSetSampledImages"));
+zenith::util::ioconv::output_single(val.maxDescriptorSetStorageImages, it.append_value("maxDescriptorSetStorageImages"));
+zenith::util::ioconv::output_single(val.maxDescriptorSetInputAttachments, it.append_value("maxDescriptorSetInputAttachments"));
+zenith::util::ioconv::output_single(val.maxVertexInputATTRIBUTEibutes, it.append_value("maxVertexInputATTRIBUTEibutes"));
+zenith::util::ioconv::output_single(val.maxVertexInputBindings, it.append_value("maxVertexInputBindings"));
+zenith::util::ioconv::output_single(val.maxVertexInputATTRIBUTEibuteOffset, it.append_value("maxVertexInputATTRIBUTEibuteOffset"));
+zenith::util::ioconv::output_single(val.maxVertexInputBindingStride, it.append_value("maxVertexInputBindingStride"));
+zenith::util::ioconv::output_single(val.maxVertexOutputComponents, it.append_value("maxVertexOutputComponents"));
+zenith::util::ioconv::output_single(val.maxTessellationGenerationLevel, it.append_value("maxTessellationGenerationLevel"));
+zenith::util::ioconv::output_single(val.maxTessellationPatchSize, it.append_value("maxTessellationPatchSize"));
+zenith::util::ioconv::output_single(val.maxTessellationControlPerVertexInputComponents, it.append_value("maxTessellationControlPerVertexInputComponents"));
+zenith::util::ioconv::output_single(val.maxTessellationControlPerVertexOutputComponents, it.append_value("maxTessellationControlPerVertexOutputComponents"));
+zenith::util::ioconv::output_single(val.maxTessellationControlPerPatchOutputComponents, it.append_value("maxTessellationControlPerPatchOutputComponents"));
+zenith::util::ioconv::output_single(val.maxTessellationControlTotalOutputComponents, it.append_value("maxTessellationControlTotalOutputComponents"));
+zenith::util::ioconv::output_single(val.maxTessellationEvaluationInputComponents, it.append_value("maxTessellationEvaluationInputComponents"));
+zenith::util::ioconv::output_single(val.maxTessellationEvaluationOutputComponents, it.append_value("maxTessellationEvaluationOutputComponents"));
+zenith::util::ioconv::output_single(val.maxGeometryShaderInvocations, it.append_value("maxGeometryShaderInvocations"));
+zenith::util::ioconv::output_single(val.maxGeometryInputComponents, it.append_value("maxGeometryInputComponents"));
+zenith::util::ioconv::output_single(val.maxGeometryOutputComponents, it.append_value("maxGeometryOutputComponents"));
+zenith::util::ioconv::output_single(val.maxGeometryOutputVertices, it.append_value("maxGeometryOutputVertices"));
+zenith::util::ioconv::output_single(val.maxGeometryTotalOutputComponents, it.append_value("maxGeometryTotalOutputComponents"));
+zenith::util::ioconv::output_single(val.maxFragmentInputComponents, it.append_value("maxFragmentInputComponents"));
+zenith::util::ioconv::output_single(val.maxFragmentOutputAttachments, it.append_value("maxFragmentOutputAttachments"));
+zenith::util::ioconv::output_single(val.maxFragmentDualSrcAttachments, it.append_value("maxFragmentDualSrcAttachments"));
+zenith::util::ioconv::output_single(val.maxFragmentCombinedOutputResources, it.append_value("maxFragmentCombinedOutputResources"));
+zenith::util::ioconv::output_single(val.maxComputeSharedMemorySize, it.append_value("maxComputeSharedMemorySize"));
+zenith::util::ioconv::output_single(val.maxComputeWorkGroupInvocations, it.append_value("maxComputeWorkGroupInvocations"));
+zenith::util::ioconv::output_single(val.maxComputeWorkGroupCount[0], it.append_value("maxComputeWorkGroupCount[0]"));
+zenith::util::ioconv::output_single(val.maxComputeWorkGroupSize[0], it.append_value("maxComputeWorkGroupSize[0]"));
+zenith::util::ioconv::output_single(val.maxComputeWorkGroupCount[1], it.append_value("maxComputeWorkGroupCount[1]"));
+zenith::util::ioconv::output_single(val.maxComputeWorkGroupSize[1], it.append_value("maxComputeWorkGroupSize[1]"));
+zenith::util::ioconv::output_single(val.maxComputeWorkGroupCount[2], it.append_value("maxComputeWorkGroupCount[2]"));
+zenith::util::ioconv::output_single(val.maxComputeWorkGroupSize[2], it.append_value("maxComputeWorkGroupSize[2]"));
+zenith::util::ioconv::output_single(val.subPixelPrecisionBits, it.append_value("subPixelPrecisionBits"));
+zenith::util::ioconv::output_single(val.subTexelPrecisionBits, it.append_value("subTexelPrecisionBits"));
+zenith::util::ioconv::output_single(val.mipmapPrecisionBits, it.append_value("mipmapPrecisionBits"));
+zenith::util::ioconv::output_single(val.maxDrawIndexedIndexValue, it.append_value("maxDrawIndexedIndexValue"));
+zenith::util::ioconv::output_single(val.maxDrawIndirectCount, it.append_value("maxDrawIndirectCount"));
+zenith::util::ioconv::output_single(val.maxSamplerLodBias, it.append_value("maxSamplerLodBias"));
+zenith::util::ioconv::output_single(val.maxSamplerAnisotropy, it.append_value("maxSamplerAnisotropy"));
+zenith::util::ioconv::output_single(val.maxViewports, it.append_value("maxViewports"));
+zenith::util::ioconv::output_single(val.maxViewportDimensions[0], it.append_value("maxViewportDimensions[0]"));
+zenith::util::ioconv::output_single(val.maxViewportDimensions[1], it.append_value("maxViewportDimensions[1]"));
+zenith::util::ioconv::output_single(val.viewportBoundsRange[0], it.append_value("viewportBoundsRange[0]"));
+zenith::util::ioconv::output_single(val.viewportBoundsRange[1], it.append_value("viewportBoundsRange[1]"));
+zenith::util::ioconv::output_single(val.viewportSubPixelBits, it.append_value("viewportSubPixelBits"));
+zenith::util::ioconv::output_single(val.minMemoryMapAlignment, it.append_value("minMemoryMapAlignment"));
+zenith::util::ioconv::output_single(val.minTexelBufferOffsetAlignment, it.append_value("minTexelBufferOffsetAlignment"));
+zenith::util::ioconv::output_single(val.minUniformBufferOffsetAlignment, it.append_value("minUniformBufferOffsetAlignment"));
+zenith::util::ioconv::output_single(val.minStorageBufferOffsetAlignment, it.append_value("minStorageBufferOffsetAlignment"));
+zenith::util::ioconv::output_single(val.minTexelOffset, it.append_value("minTexelOffset"));
+zenith::util::ioconv::output_single(val.maxTexelOffset, it.append_value("maxTexelOffset"));
+zenith::util::ioconv::output_single(val.minTexelGatherOffset, it.append_value("minTexelGatherOffset"));
+zenith::util::ioconv::output_single(val.maxTexelGatherOffset, it.append_value("maxTexelGatherOffset"));
+zenith::util::ioconv::output_single(val.minInterpolationOffset, it.append_value("minInterpolationOffset"));
+zenith::util::ioconv::output_single(val.maxInterpolationOffset, it.append_value("maxInterpolationOffset"));
+zenith::util::ioconv::output_single(val.subPixelInterpolationOffsetBits, it.append_value("subPixelInterpolationOffsetBits"));
+zenith::util::ioconv::output_single(val.maxFramebufferWidth, it.append_value("maxFramebufferWidth"));
+zenith::util::ioconv::output_single(val.maxFramebufferHeight, it.append_value("maxFramebufferHeight"));
+zenith::util::ioconv::output_single(val.maxFramebufferLayers, it.append_value("maxFramebufferLayers"));
+zenith::util::ioconv::output_single(val.maxColorAttachments, it.append_value("maxColorAttachments"));
+zenith::util::ioconv::output_single(val.maxSampleMaskWords, it.append_value("maxSampleMaskWords"));
+zenith::util::ioconv::output_single(val.timestampComputeAndGraphics, it.append_value("timestampComputeAndGraphics"));
+zenith::util::ioconv::output_single(val.timestampPeriod, it.append_value("timestampPeriod"));
+zenith::util::ioconv::output_single(val.maxClipDistances, it.append_value("maxClipDistances"));
+zenith::util::ioconv::output_single(val.maxCullDistances, it.append_value("maxCullDistances"));
+zenith::util::ioconv::output_single(val.maxCombinedClipAndCullDistances, it.append_value("maxCombinedClipAndCullDistances"));
+zenith::util::ioconv::output_single(val.discreteQueuePriorities, it.append_value("discreteQueuePriorities"));
+zenith::util::ioconv::output_single(val.strictLines, it.append_value("strictLines"));
+zenith::util::ioconv::output_single(val.standardSampleLocations, it.append_value("standardSampleLocations"));
+zenith::util::ioconv::output_single(val.optimalBufferCopyOffsetAlignment, it.append_value("optimalBufferCopyOffsetAlignment"));
+zenith::util::ioconv::output_single(val.optimalBufferCopyRowPitchAlignment, it.append_value("optimalBufferCopyRowPitchAlignment"));
+zenith::util::ioconv::output_single(val.nonCoherentAtomSize, it.append_value("nonCoherentAtomSize"));
+zenith::util::ioconv::output_single(val.pointSizeGranularity, it.append_value("pointSizeGranularity"));
+zenith::util::ioconv::output_single(val.lineWidthGranularity, it.append_value("lineWidthGranularity"));
+zenith::util::ioconv::output_single(val.pointSizeRange[0], it.append_value("pointSizeRange[0]"));
+zenith::util::ioconv::output_single(val.pointSizeRange[1], it.append_value("pointSizeRange[1]"));
+zenith::util::ioconv::output_single(val.lineWidthRange[0], it.append_value("lineWidthRange[0]"));
+zenith::util::ioconv::output_single(val.lineWidthRange[1], it.append_value("lineWidthRange[1]"));
+zenith::util::ioconv::output_single(val.framebufferColorSampleCounts, it.append_value("framebufferColorSampleCounts"));
+zenith::util::ioconv::output_single(val.framebufferDepthSampleCounts, it.append_value("framebufferDepthSampleCounts"));
+zenith::util::ioconv::output_single(val.framebufferStencilSampleCounts, it.append_value("framebufferStencilSampleCounts"));
+zenith::util::ioconv::output_single(val.framebufferNoAttachmentsSampleCounts, it.append_value("framebufferNoAttachmentsSampleCounts"));
+zenith::util::ioconv::output_single(val.sampledImageColorSampleCounts, it.append_value("sampledImageColorSampleCounts"));
+zenith::util::ioconv::output_single(val.sampledImageIntegerSampleCounts, it.append_value("sampledImageIntegerSampleCounts"));
+zenith::util::ioconv::output_single(val.sampledImageDepthSampleCounts, it.append_value("sampledImageDepthSampleCounts"));
+zenith::util::ioconv::output_single(val.sampledImageStencilSampleCounts, it.append_value("sampledImageStencilSampleCounts"));
+zenith::util::ioconv::output_single(val.storageImageSampleCounts, it.append_value("storageImageSampleCounts"));
+}
+};
+
+
+template<class It> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceProperties, It>{public:
+typedef ::VkPhysicalDeviceProperties value_type;
+static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+inline static void output(const ::VkPhysicalDeviceProperties &val, It &it){
+zenith::util::ioconv::output_single(val.deviceName, it.append_value("deviceName"));
+zenith::util::ioconv::output_single(val.vendorID, it.append_value("vendorID"));
+zenith::util::ioconv::output_single(val.deviceID, it.append_value("deviceID"));
+zenith::util::ioconv::output_single(static_cast<zenith::version32_t>(val.driverVersion), it, "driverVersion");
+zenith::util::ioconv::output_single(static_cast<zenith::version32_t>(val.apiVersion), it, "apiVersion");
+zenith::util::ioconv::output_single(val.deviceType, it.append_value("deviceType"));
+zenith::util::ioconv::output_single(val.limits, it.append_complex("limits"));
+}
+};
+
+}
+}
+
+
+      #pragma warning(pop)
+    

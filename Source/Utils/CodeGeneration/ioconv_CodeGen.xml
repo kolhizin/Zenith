@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<functions>
+  <namespace>
+    <define>
+      <action type="output" code="namespace #name {\n"/>
+      <action type="foreach" node="namespace" fun="define" join="\n" code="#result"/>
+      <action type="foreach" node="enum" fun="define" join="\n" code="#result"/>
+      <action type="foreach" node="class" fun="define" join="\n" code="#result"/>
+      <action type="output" code="}\n"/>
+    </define>
+  </namespace>
+
+  <enum>
+    <define>
+      <action type="output" require="name" code="enum class #name {"/>
+      <action type="foreach" node="val" fun="define" join=", " code="#result"/>
+      <action type="output" require="name" code="};"/>
+      <action type="output" require="name,qual" code="\nZENITH_ENUM2STR_START(#qual::#name)\n"/>
+      <action type="foreach" node="val" fun="enum2str" join="" code="#result"/>
+      <action type="output" code="ZENITH_ENUM2STR_END\n\n"/>
+    </define>
+  </enum>
+
+  <val>
+    <define>
+      <action type="output" require="name,value" code="#name=#value"/>
+      <action type="output" require="name" restrict="value" code="#name"/>
+    </define>
+    <enum2str>
+      <action type="output" require="name" code="ZENITH_ENUM2STR_ELEM(#name)\n"/>
+    </enum2str>
+  </val>
+
+  <class>
+    <define>
+      <action type="output" require="name,classType" chk_genDef="1" code="#classType #name {\n"/>
+      <action type="foreach" node="any" chk_genDef="1" fun="define" join="" code="#result"/>
+      <action type="output" require="name" chk_genDef="1" code="};\n"/>
+
+      
+      <action type="output" require="name,qual" code="template&lt;class It&gt; class zenith::util::ioconv::io_handler_impl&lt;#qual::#name, It&gt;{public:\n"/>
+      <action type="output" require="name,qual" code="typedef #qual::#name value_type;\nstatic const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;\n"/>
+
+      <action type="output" chk_genInput="1" require="name,qual" code="inline static void input(#qual::#name &amp;val, const It &amp;it){\n"/>
+      <action type="foreach" chk_genInput="1" require="name,qual" node="any" fun="Input" join="" code="#result"/>
+      <action type="output" chk_genInput="1" require="name,qual" code="}\n"/>
+
+      <action type="output" chk_genOutput="1" require="name,qual" code="inline static void output(const #qual::#name &amp;val, It &amp;it){\n"/>
+      <action type="foreach" chk_genOutput="1" require="name,qual" node="any" fun="Output" join="" code="#result"/>
+      <action type="output" chk_genOutput="1" require="name,qual" code="}\n"/>
+
+      <action type="output" require="name" code="};\n"/>
+
+      <action type="output" require="name" code="\n"/>
+    </define>
+  </class>
+
+  <var>
+    <define>
+      <action type="output" require="name,type" code="#type #name;\n"/>
+    </define>
+
+    <Output chk_grp-in="simple" restrict="grp-out">
+      <action type="output" require="name,hint" code="zenith::util::ioconv::output_single(val.#name, it.append_value(&quot;#name&quot;, zenith::util::ioconv::NodeValueHint::#hint));\n"/>
+      <action type="output" require="name" restrict="hint" code="zenith::util::ioconv::output_single(val.#name, it.append_value(&quot;#name&quot;));\n"/>
+    </Output>
+    <Output chk_grp-in="complex" restrict="grp-out">
+      <action type="output" require="name" restrict="hint" code="zenith::util::ioconv::output_single(val.#name, it.append_complex(&quot;#name&quot;));\n"/>
+    </Output>
+    <Output chk_grp-out="seq">
+      <action type="output" require="name" code="zenith::util::ioconv::output_multiple(val.#name, it, &quot;#name&quot;);\n"/>
+    </Output>
+    <Output chk_grp-out="cast">
+      <action type="output" require="name,cast" code="zenith::util::ioconv::output_single(static_cast&lt;#cast&gt;(val.#name), it, &quot;#name&quot;);\n"/>
+    </Output>
+    
+    <Input restrict="grp-out,default">
+      <action type="output" require="name" code="zenith::util::ioconv::input_named_required(val.#name, it, &quot;#name&quot;);\n"/>
+    </Input>
+    <Input require="default" restrict="grp-out">
+      <action type="output" require="name" code="val.#name = #default;\nzenith::util::ioconv::input_named_optional(val.#name, it, &quot;#name&quot;);\n"/>
+    </Input>
+    <Input chk_grp-out="seq">
+      <action type="output" require="name" code="zenith::util::ioconv::input_named_multiple(val.#name, it, &quot;#name&quot;);\n"/>
+    </Input>
+    <Input chk_grp-out="cast">
+      <action type="output" require="name,cast" code="{\nauto #cast tmp;"/>
+      <action type="output" require="name" code="zenith::util::ioconv::input_named_required(tmp, it, &quot;#name&quot;);\n"/>
+      <action type="output" require="name,cast" code="val.#name = tmp;\n}\n"/>
+    </Input>
+  </var>
+</functions>

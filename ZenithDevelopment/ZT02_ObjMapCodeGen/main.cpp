@@ -217,83 +217,162 @@ void init()
 	params["PATH"] = "D:/Programming/Zenith/";
 	params["RPATH_GEN"] = "Source/Utils/CodeGeneration/";
 	params["RPATH_DEF"] = "Source/Utils/CodeGeneration/";
-	params["CODE_GEN"] = "ObjectMap_CodeGen.xml";
+	params["CODE_GEN"] = "ioconv_CodeGen.xml";//"ObjectMap_CodeGen.xml";
 }
 
-void update_params(int argc, char **argv)
+struct NamedParameter
 {
-	if (argc < 2)
+	std::string paramName;
+	std::string paramValue;
+};
+
+NamedParameter parseArgument(const char * str)
+{
+	NamedParameter res;
+	bool quoted = false;
+	const char * str2 = str;
+	uint32_t len1 = 0;
+	while (*str2 != '\0')
+	{
+		if (*str2 == '\"')
+			quoted = !quoted;
+		if (!quoted && *str2 == '=')
+		{
+			str2++;
+			break;
+		}
+		str2++;
+		len1++;
+	}
+	if (!*str2)
+	{
+		res.paramName = "";
+		res.paramValue = str;
+		return res;
+	}
+	res.paramName = std::string(str, len1);
+	res.paramValue = str2;
+	return res;
+}
+
+std::vector<NamedParameter> parseArguments(int argc, const char *argv[])
+{
+	std::vector<NamedParameter> res;
+	res.reserve(argc);
+	for (uint32_t i = 1; i < argc; i++)
+		res.push_back(parseArgument(argv[i]));
+	return res;
+}
+
+
+void update_params(int argc, const char *argv[])
+{
+	std::vector<NamedParameter> args = parseArguments(argc, argv);
+	int numDef = 0;
+	for (auto &arg : args)
+	{
+		std::transform(arg.paramName.begin(), arg.paramName.end(), arg.paramName.begin(), tolower);
+		if (arg.paramName == "code_def")
+		{
+			if (numDef >= 9)
+			{
+				std::cout << "Expecting at most 9 CODE-DEF arguments!";
+				throw std::runtime_error("Expecting at most 9 CODE-DEF arguments!");
+			}
+			std::string nm1 = "CODE_DEF0", nm2 = "FILE:DEF0";
+			nm1.back() = '0' + numDef;
+			nm2.back() = '0' + numDef;
+			params[nm1] = arg.paramValue;
+			params[nm2] = params["PATH"] + params["RPATH_DEF"] + params[nm1];
+			numDef++;
+		}
+		if (arg.paramName == "code_gen")
+			params["CODE_GEN"] = arg.paramValue;
+	}
+	if (numDef == 0)
 	{
 		std::cout << "Expecting at least 1 argument: CODE-DEF filename!";
 		throw std::runtime_error("Expecting at least 1 argument: CODE-DEF filename!");
 	}
-	params["CODE_DEF"] = argv[1];
+
+	params["NUM_DEF"] = "0";
+	params["NUM_DEF"][0] = '0' + numDef;
 
 	params["FILE:GEN"] = params["PATH"] + params["RPATH_GEN"] + params["CODE_GEN"];
-	params["FILE:DEF"] = params["PATH"] + params["RPATH_DEF"] + params["CODE_DEF"];
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char *argv[])
 {
 	init();
 	update_params(argc, argv);
 
-	pugi::xml_document codeGenXML, codeDefXML;
-	codeGenXML.load_file(params["FILE:GEN"].c_str());
-	codeDefXML.load_file(params["FILE:DEF"].c_str());
-
-	ObjectMap<char, char> omCodeGen;
-
-	xml::xml2objmap(codeGenXML.root().child("functions"), omCodeGen);
-
-	std::string gOptions;
-	auto gOptionsAttr = codeDefXML.root().child("root").attribute("astyle_options");
-	if (!gOptionsAttr.empty())
-		gOptions = gOptionsAttr.as_string();
-
-	for (auto ch : codeDefXML.root().child("root").children("file"))
+	uint32_t numDefs = params["NUM_DEF"][0] - '0';
+	for (uint32_t defIt = 0; defIt < numDefs; defIt++)
 	{
-		std::string fName = ch.attribute("name").as_string();
+		std::string nDef = "FILE:DEF0";
+		nDef.back() = '0' + defIt;
 
-		auto chPrefix = ch.child("prefix");
-		std::string prefix = "";
-		if (!chPrefix.empty())
-			prefix = chPrefix.child_value();
+		std::cout << "\nProcessing definition " << nDef << " = " << params[nDef] << "...\n\n";
 
-		auto chPostfix = ch.child("postfix");
-		std::string postfix = "";
-		if (!chPostfix.empty())
-			postfix = chPostfix.child_value();
+		pugi::xml_document codeGenXML, codeDefXML;
+		codeGenXML.load_file(params["FILE:GEN"].c_str());
+		codeDefXML.load_file(params[nDef].c_str());
 
-		std::string locOptions;
-		auto locOptionsAttr = ch.attribute("astyle_options");
-		if (!locOptionsAttr.empty())
-			locOptions = locOptionsAttr.as_string();
+		ObjectMap<char, char> omCodeGen;
 
-		std::string options = (locOptions.empty() ? gOptions : locOptions);
+		xml::xml2objmap(codeGenXML.root().child("functions"), omCodeGen);
 
+		std::string gOptions;
+		auto gOptionsAttr = codeDefXML.root().child("root").attribute("astyle_options");
+		if (!gOptionsAttr.empty())
+			gOptions = gOptionsAttr.as_string();
 
-		std::cout << "generating file: " << fName << std::endl;
-
-		std::remove(fName.c_str());
-		std::ofstream f(fName.c_str());
-		f << prefix << "\n";
-		for (auto chn : ch.children("namespace"))
+		for (auto ch : codeDefXML.root().child("root").children("file"))
 		{
-			ObjectMap<char, char> omCodeDef;
-			xml::xml2objmap(ch.child("namespace"), omCodeDef);
+			std::string fName = ch.attribute("name").as_string();
 
-			f << genCode(omCodeDef, omCodeGen, "namespace", "define") << "\n";
+			auto chPrefix = ch.child("prefix");
+			std::string prefix = "";
+			if (!chPrefix.empty())
+				prefix = chPrefix.child_value();
+
+			auto chPostfix = ch.child("postfix");
+			std::string postfix = "";
+			if (!chPostfix.empty())
+				postfix = chPostfix.child_value();
+
+			std::string locOptions;
+			auto locOptionsAttr = ch.attribute("astyle_options");
+			if (!locOptionsAttr.empty())
+				locOptions = locOptionsAttr.as_string();
+
+			std::string options = (locOptions.empty() ? gOptions : locOptions);
+
+
+			std::cout << "generating file: " << fName << std::endl;
+
+			std::remove(fName.c_str());
+			std::ofstream f(fName.c_str());
+			f << prefix << "\n";
+			for (auto chn : ch.children("namespace"))
+			{
+				ObjectMap<char, char> omCodeDef;
+				xml::xml2objmap(ch.child("namespace"), omCodeDef);
+
+				f << genCode(omCodeDef, omCodeGen, "namespace", "define") << "\n";
+			}
+
+			f << postfix;
+			f.close();
+
+			std::cout << "file (" << fName << ") generated." << std::endl;
+
+			std::string cmd = std::string("astyle -v ") + options + " " + fName;
+			std::system(cmd.c_str());
 		}
-		
-		f << postfix;
-		f.close();
 
-		std::cout << "file (" << fName << ") generated." << std::endl;
-
-		std::string cmd = std::string("astyle -v ") + options + " " + fName;
-		std::system(cmd.c_str());
+		std::cout << "\nProcessing of definition " << nDef << " = " << params[nDef] << " completed!\n";
 	}
-	std::cout << "finished processing successfully!";
+	std::cout << "Finished processing successfully!";
 	return 0;
 }

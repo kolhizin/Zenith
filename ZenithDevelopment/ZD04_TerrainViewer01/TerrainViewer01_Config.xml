@@ -71,7 +71,7 @@
     <surface type="vSurfaceConfig" uid="vsurface-main" windowUID="wnd-main"/>
     <memory type="vMemoryConfig" uid="vmem-main" deviceUID="vdevice-main">
       <memoryPool type="vMemoryPoolConfig" uid="vmempool-main">
-        <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" maxChunkSize="268435456" minChunkSize="33554432" align="131072"/>
+        <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" defChunkSize="16777216" maxChunkSize="268435456" minChunkSize="33554432" align="131072"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="63"     blockSize="8"     chunkSize="131072"  align="8" subTypeMask="1"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="63"     blockSize="8"     chunkSize="131072"  align="8" subTypeMask="2"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="511"    blockSize="64"    chunkSize="131072"  align="64" subTypeMask="1"/>
@@ -84,12 +84,12 @@
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="262143" blockSize="32768" chunkSize="2097152" align="32768" subTypeMask="2"/>
       </memoryPool>
       <memoryPool type="vMemoryPoolConfig" uid="vmempool-staging">
-        <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" maxChunkSize="67108864" minChunkSize="2097152" align="131072"/>
+        <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" defChunkSize="16777216" maxChunkSize="67108864" minChunkSize="2097152" align="131072"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="1"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="2"/>
       </memoryPool>
       <memoryPool type="vMemoryPoolConfig" uid="vmempool-backup">
-        <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" maxChunkSize="8388608" minChunkSize="2097152" align="131072"/>
+        <physicalChunk type="vMemoryPhysicalChunkConfig" minAllocSize="131072" defChunkSize="16777216" maxChunkSize="67108864" minChunkSize="2097152" align="131072"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="4095"   blockSize="512"   chunkSize="131072"  align="512" subTypeMask="1"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="4095"   blockSize="512"   chunkSize="131072"  align="512" subTypeMask="2"/>
         <logicalChunk type="vMemoryLogicalChunkConfig" maxAllocSize="131071" blockSize="16384" chunkSize="1048576" align="16384" subTypeMask="1"/>
@@ -123,9 +123,20 @@
         <memoryType type="vMemoryTypeConfig" isDeviceLocal="YES" isHostVisible="NO" poolUID="vmempool-main"/>
         <memoryType type="vMemoryTypeConfig" isHostVisible="YES" poolUID="vmempool-staging"/>
         <memoryType type="vMemoryTypeConfig" poolUID="vmempool-backup"/>
+        <memoryUsage usage="GPU_STATIC" type="vMemoryUsageConfig">
+          <memoryUsageOption type="vMemoryUsageOption">
+            <memoryPropertyBit>DEVICE_LOCAL</memoryPropertyBit>
+          </memoryUsageOption>
+        </memoryUsage>
+        <memoryUsage usage="STAGING" type="vMemoryUsageConfig">
+          <memoryUsageOption type="vMemoryUsageOption">
+            <memoryPropertyBit>HOST_VISIBLE</memoryPropertyBit>
+            <memoryPropertyBit>HOST_COHERENT</memoryPropertyBit>
+          </memoryUsageOption>
+        </memoryUsage>
       </memoryManager>
       <memoryManagerReqOrder>vmmconf-nvidia</memoryManagerReqOrder>
       <memoryManagerReqOrder>vmmconf-universal</memoryManagerReqOrder>
     </memory>
   </VulkanSystem>
-</ZIMGViewer>
+</TerrainViewer01>

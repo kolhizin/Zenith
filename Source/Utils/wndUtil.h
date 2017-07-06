@@ -1,6 +1,6 @@
 
 #pragma once
-#include <Utils\object_map.h>
+#include <Utils\ioconv\io_config.h>
 #include <Utils\macro_version.h>
 #include <vector>
 #include <list>
@@ -15,21 +15,24 @@ namespace zenith
 			uint16_t width;
 			uint16_t height;
 		};
-		inline void to_objmap(const WndSize &obj, zenith::util::ObjectMap<char, char> &om)
+		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndSize, It>
 		{
-			char buff[128];
-			om.addValue("type", "WndSize", zenith::util::ObjectMapValueHint::ATTR);
-
-			zenith::util::str_cast(obj.width, buff, 128);
-			om.addValue("width", buff, zenith::util::ObjectMapValueHint::ATTR);
-			zenith::util::str_cast(obj.height, buff, 128);
-			om.addValue("height", buff, zenith::util::ObjectMapValueHint::ATTR);
-		}
-		inline void from_objmap(WndSize &obj, const zenith::util::ObjectMap<char, char> &om)
-		{
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.width, "width", 800);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.height, "height", 600);
-		}
+		public:
+			typedef zenith::util::WndSize value_type;
+			static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+			inline static void input(zenith::util::WndSize &val, const It &it)
+			{
+				val.width = 800;
+				zenith::util::ioconv::input_named_optional(val.width, it, "width");
+				val.height = 600;
+				zenith::util::ioconv::input_named_optional(val.height, it, "height");
+			}
+			inline static void output(const zenith::util::WndSize &val, It &it)
+			{
+				zenith::util::ioconv::output_single(val.width, it.append_value("width", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.height, it.append_value("height", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+			}
+		};
 
 
 		struct WndPos
@@ -37,21 +40,24 @@ namespace zenith
 			uint16_t x;
 			uint16_t y;
 		};
-		inline void to_objmap(const WndPos &obj, zenith::util::ObjectMap<char, char> &om)
+		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndPos, It>
 		{
-			char buff[128];
-			om.addValue("type", "WndPos", zenith::util::ObjectMapValueHint::ATTR);
-
-			zenith::util::str_cast(obj.x, buff, 128);
-			om.addValue("x", buff, zenith::util::ObjectMapValueHint::ATTR);
-			zenith::util::str_cast(obj.y, buff, 128);
-			om.addValue("y", buff, zenith::util::ObjectMapValueHint::ATTR);
-		}
-		inline void from_objmap(WndPos &obj, const zenith::util::ObjectMap<char, char> &om)
-		{
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.x, "x", 200);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.y, "y", 200);
-		}
+		public:
+			typedef zenith::util::WndPos value_type;
+			static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+			inline static void input(zenith::util::WndPos &val, const It &it)
+			{
+				val.x = 200;
+				zenith::util::ioconv::input_named_optional(val.x, it, "x");
+				val.y = 200;
+				zenith::util::ioconv::input_named_optional(val.y, it, "y");
+			}
+			inline static void output(const zenith::util::WndPos &val, It &it)
+			{
+				zenith::util::ioconv::output_single(val.x, it.append_value("x", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+				zenith::util::ioconv::output_single(val.y, it.append_value("y", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
+			}
+		};
 
 
 		struct WndConfig
@@ -63,29 +69,34 @@ namespace zenith
 			std::string title;
 			std::string iconFilename;
 		};
-		inline void to_objmap(const WndConfig &obj, zenith::util::ObjectMap<char, char> &om)
+		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndConfig, It>
 		{
-			char buff[128];
-			om.addValue("type", "WndConfig", zenith::util::ObjectMapValueHint::ATTR);
-
-			to_objmap(obj.size, om.addObject("size"));
-			to_objmap(obj.pos, om.addObject("pos"));
-			zenith::util::str_cast(obj.fullscreen, buff, 128);
-			om.addValue("fullscreen", buff);
-			zenith::util::str_cast(obj.showCursor, buff, 128);
-			om.addValue("showCursor", buff);
-			om.addValue("title", obj.title.c_str());
-			om.addValue("iconFilename", obj.iconFilename.c_str());
-		}
-		inline void from_objmap(WndConfig &obj, const zenith::util::ObjectMap<char, char> &om)
-		{
-			from_objmap(obj.size, om.getObjects("size", zenith::util::ObjectMapPresence::ONE).first->second);
-			from_objmap(obj.pos, om.getObjects("pos", zenith::util::ObjectMapPresence::ONE).first->second);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.fullscreen, "fullscreen", false);
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.showCursor, "showCursor", true);
-			OBJMAP_GET_ONE_VALUE(om, obj.title, "title");
-			OBJMAP_GET_ONE_VALUE_DEFAULT(om, obj.iconFilename, "iconFilename", "");
-		}
+		public:
+			typedef zenith::util::WndConfig value_type;
+			static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
+			inline static void input(zenith::util::WndConfig &val, const It &it)
+			{
+				zenith::util::ioconv::input_named_required(val.size, it, "size");
+				zenith::util::ioconv::input_named_required(val.pos, it, "pos");
+				val.fullscreen = false;
+				zenith::util::ioconv::input_named_optional(val.fullscreen, it, "fullscreen");
+				val.showCursor = true;
+				zenith::util::ioconv::input_named_optional(val.showCursor, it, "showCursor");
+				zenith::util::ioconv::input_named_required(val.title, it, "title");
+				val.iconFilename = "";
+				zenith::util::ioconv::input_named_optional(val.iconFilename, it, "iconFilename");
+			}
+			inline static void output(const zenith::util::WndConfig &val, It &it)
+			{
+				zenith::util::ioconv::output_single(val.size, it.append_complex("size"));
+				zenith::util::ioconv::output_single(val.pos, it.append_complex("pos"));
+				zenith::util::ioconv::output_single(val.fullscreen, it.append_value("fullscreen"));
+				zenith::util::ioconv::output_single(val.showCursor, it.append_value("showCursor"));
+				zenith::util::ioconv::output_single(val.title, it.append_value("title"));
+				zenith::util::ioconv::output_single(val.iconFilename, it.append_value("iconFilename"));
+			}
+		};
 
 	}
 }
+

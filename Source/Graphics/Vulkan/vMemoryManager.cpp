@@ -101,7 +101,7 @@ void zenith::vulkan::vMemorySubPool_::addChunk_(vMemoryChunkImpl_ * physicalChun
 {
 	if (memAllocInfo_.allocMinSize * 8 > chunkSize_)
 		throw vMemoryException("vMemorySubPool_::addChunk_: failed to create sub-pool: physical chunk-size is not large enough for required blocks (must be at least 8 times larger).");
-	if (memAllocInfo_.allocMaxSize> chunkSize_)
+	if (memAllocInfo_.allocMaxSize > chunkSize_)
 		throw vMemoryException("vMemorySubPool_::addChunk_: max alloc size could not be larger than physical chunk-size.");
 	if (chunkSize_ % (memAllocInfo_.allocMinSize * 8))
 		throw vMemoryException("vMemorySubPool_::addChunk_: physical chunk size should be a multiple of 8*block-size.");
@@ -382,7 +382,7 @@ zenith::vulkan::vMemoryBlock zenith::vulkan::vMemoryPool_::allocatePhysical_(siz
 			return res;
 	}
 	/*allocate new chunk*/
-	addPhysicalChunk_(conf_.physicalChunk.maxChunkSize);
+	addPhysicalChunk_((sz > conf_.physicalChunk.defChunkSize ? conf_.physicalChunk.maxChunkSize : conf_.physicalChunk.defChunkSize));
 	return allocatePhysical_(&memChunks_.back(), sz);
 }
 
@@ -413,7 +413,7 @@ zenith::vulkan::vMemoryBlock zenith::vulkan::vMemoryPool_::allocateLogical_(vMem
 	if (sz > conf_.physicalChunk.maxChunkSize)
 		throw zenith::vulkan::vMemoryException_OutOfMemory("vMemoryPool_::allocateLogical_: requested size exceeds max chunk size!");
 
-	addPhysicalChunk_(conf_.physicalChunk.maxChunkSize);
+	addPhysicalChunk_(conf_.physicalChunk.defChunkSize);
 	sp->addChunk(&memChunks_.back());
 	return sp->allocate(sz);
 }
@@ -464,6 +464,8 @@ zenith::vulkan::vMemoryManagerImpl_::vMemoryManagerImpl_(vDeviceImpl_ * dev, con
 	for (size_t i = 0; i < conf_.memoryType.size(); i++)
 	{
 		const auto &lc = conf_.memoryType[i];
+		if(lc.typeID >= int(memProps_.memoryTypeCount))
+			throw vMemoryException("vMemoryManagerImpl_::vMemoryManagerImpl_: required type-id exceeds maximum available.");
 		for (size_t j = 0; j < poolMapping.size(); j++)
 			if (poolMapping[j] != NotMapped)
 				continue;
