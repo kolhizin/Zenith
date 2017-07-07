@@ -87,7 +87,7 @@
     <ClInclude Include="..\..\Source\Utils\bitenum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utils\dynamic_pdag.h">
+    <ClInclude Include="..\..\Source\Utils\dtrie.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

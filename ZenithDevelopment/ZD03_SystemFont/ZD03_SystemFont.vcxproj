@@ -148,7 +148,7 @@
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vUtil.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vUtil_Enums.h" />
     <ClInclude Include="..\..\Source\Utils\bitenum.h" />
-    <ClInclude Include="..\..\Source\Utils\dynamic_pdag.h" />
+    <ClInclude Include="..\..\Source\Utils\dtrie.h" />
     <ClInclude Include="..\..\Source\Utils\FileFormat\ff_base.h" />
     <ClInclude Include="..\..\Source\Utils\FileFormat\ff_font.h" />
     <ClInclude Include="..\..\Source\Utils\FileFormat\ff_img.h" />

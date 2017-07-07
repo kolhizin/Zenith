@@ -43,9 +43,9 @@ namespace zenith
 			ggPipelineResourceType type() const { return descr_.type; }
 		};
 		
-		class ggPipelineResourcesStack
+		class ggPipelineResources
 		{
-			
+			std::vector<ggPipelineResource> resources_;
 		};
 	}
 }

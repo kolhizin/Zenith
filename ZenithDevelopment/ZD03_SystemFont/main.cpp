@@ -3,6 +3,7 @@
 #include <sstream>
 #include "Graphics\Vulkan\vMemoryManager.h"
 
+#include <Utils\dtrie.h>
 
 std::string moduleDir;
 
@@ -203,6 +204,29 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 	_In_ LPSTR    lpCmdLine,
 	_In_ int       nCmdShow)
 {
+	zenith::util::dtrie_id<char> dtrie;
+	std::cout << dtrie.add("ab");
+	std::cout << dtrie.add("bc");
+	std::cout << dtrie.add("cd");
+	std::cout << dtrie.add("abc");
+	std::cout << dtrie.add("bcd");
+	std::cout << dtrie.add("cde");
+	std::cout << dtrie.add("a");
+	std::cout << dtrie.add("b");
+	std::cout << dtrie.add("c");
+	std::cout << dtrie.add("abb");
+	
+	std::vector<uint32_t> res;
+	res.push_back(dtrie.get("ab"));
+	res.push_back(dtrie.get("bc"));
+	res.push_back(dtrie.get("cd"));
+	res.push_back(dtrie.get("abc"));
+	res.push_back(dtrie.get("bcd"));
+	res.push_back(dtrie.get("cde"));
+	res.push_back(dtrie.get("a"));
+	res.push_back(dtrie.get("b"));
+	res.push_back(dtrie.get("c"));
+	res.push_back(dtrie.get("abb"));
 
 	init_args(lpCmdLine);
 	init();
