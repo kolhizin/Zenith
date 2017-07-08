@@ -60,12 +60,12 @@ namespace zenith
 			typedef KeyType key_element_type;
 			typedef const KeyType * key_type;
 
-			template<class K>
+			template<class T, class U>
 			class iterator_t_;
 		private:
 			struct dtrie_id_node_
 			{
-				template<class K>
+				template<class T,class U>
 				friend class iterator_t_;
 				//NOTE:
 				/*
@@ -76,6 +76,8 @@ namespace zenith
 				5. keyBegin_ is start of key (which is not 0-terminated) and keyNum_ is its length
 				6. dagBegin_ is start of continuous array of children, dagNum_ is its length
 				*/
+				uint32_t fullKeyBegin_ = NoValueId; /*zero-terminated const char ptr*/
+				uint32_t key0Begin_ = NoValueId; /*first chars of children*/
 				uint32_t keyBegin_ = NoValueId;
 				uint32_t dagBegin_ = NoValueId;
 				uint32_t dagParent_ = NoValueId;
@@ -269,8 +271,14 @@ namespace zenith
 				//update key-indices
 				auto bufferEnd_ = reinterpret_cast<dtrie_id_node_ *>(bufferPtr_ + bufferSize_);
 				for (auto pn = reinterpret_cast<dtrie_id_node_ *>(stackRight_); pn < bufferEnd_; pn++)
+				{
 					if (pn->keyBegin_ > ind)
 						pn->keyBegin_ -= length;
+					if (pn->key0Begin_ > ind)
+						pn->key0Begin_ -= length;
+					if (pn->fullKeyBegin_ > ind)
+						pn->fullKeyBegin_ -= length;
+				}
 
 				dealloc_buffer_left_(bufferPtr_ + ind * KeySize, length * KeySize);
 			}
@@ -318,7 +326,7 @@ namespace zenith
 
 				return startNew;
 			}
-			inline void add_node_(uint32_t idx, const KeyType * k, uint32_t klen)
+			inline void add_node_(uint32_t idx, const KeyType * k, uint32_t klen, const KeyType * fullkey, uint32_t fullLen)
 			{
 				auto pNode = node_ptr_(idx);
 				uint32_t oldNum = pNode->dagNum_;
@@ -346,7 +354,9 @@ namespace zenith
 				*p = dtrie_id_node_::empty();
 				p->keyBegin_ = alloc_key_(klen);
 				p->keyNum_ = klen;
+				p->fullKeyBegin_ = alloc_key_(fullLen + 1);
 				copy_key_(key_ptr_(p->keyBegin_), k, klen);
+				copy_key_(key_ptr_(p->fullKeyBegin_), fullkey, fullLen + 1);
 				p->dagParent_ = idx;
 
 				//all indices are invalidated after here:
@@ -355,15 +365,30 @@ namespace zenith
 
 			inline uint32_t split_node_(uint32_t nodeIdx, uint32_t klen)
 			{
-				uint32_t newNodeIdx = alloc_node_();
-				dtrie_id_node_ * nn = node_ptr_(newNodeIdx);
 				dtrie_id_node_ * n = node_ptr_(nodeIdx);
+				KeyType * ptr = key_ptr_(n->fullKeyBegin_);
+				uint32_t fklen = 0;
+				while (*ptr++)
+					fklen++;
+				uint32_t nklen = fklen - keyNum_ + klen;
+				uint32_t newNodeIdx = alloc_node_();
+				uint32_t newFullKey = alloc_key_(nklen + 1);
+
+				dtrie_id_node_ * nn = node_ptr_(newNodeIdx);
+				n = node_ptr_(nodeIdx);
+
+				copy_key_(key_ptr_(newFullKey), key_ptr_(n->fullKeyBegin_), nklen);
+				key_ptr_(newFullKey)[nklen] = 0;
+
 				*nn = dtrie_id_node_::empty();
 				uint32_t leftLen = n->keyNum_ - klen;
 
 				n->keyNum_ = klen;
 				nn->keyNum_ = leftLen;
 				nn->keyBegin_ = n->keyBegin_ + klen;
+
+				nn->fullKeyBegin_ = n->fullKeyBegin_;
+				n->fullKeyBegin_ = newFullKey;
 
 				nn->dagBegin_ = n->dagBegin_;
 				nn->dagNum_ = n->dagNum_;
@@ -628,11 +653,11 @@ namespace zenith
 				return pp.first->valueId_;
 			}
 
-			/*
-			template<class V, class T, class U>
+			
+			template<class T, class U>
 			class iterator_t_
 			{
-				friend class prefix_dag;
+				friend class dtrie_id;
 				T * pn_ = nullptr;
 				U * po_ = nullptr;
 
@@ -644,7 +669,7 @@ namespace zenith
 				inline void assert_() const
 				{
 					if (!check_())
-						throw PrefixDagInvalidIteratorException();
+						throw DTrieInvalidIteratorException();
 				}
 			public:
 				typedef ValueType value_type;
@@ -710,7 +735,7 @@ namespace zenith
 				}
 			};
 
-			*/
+			
 			dtrie_id(const dtrie_id &d) = delete;
 			dtrie_id(dtrie_id &&d) = delete;
 			dtrie_id &operator =(const dtrie_id &d) = delete;
@@ -718,8 +743,8 @@ namespace zenith
 
 		public:
 
-			//typedef iterator_t_<ValueType, dtrie_id_node_, object_type> iterator;
-			//typedef iterator_t_<const ValueType, const dtrie_id_node_, const object_type> const_iterator;
+			typedef iterator_t_<dtrie_id_node_, object_type> iterator;
+			typedef iterator_t_<const dtrie_id_node_, const object_type> const_iterator;
 
 			~dtrie_id()
 			{
