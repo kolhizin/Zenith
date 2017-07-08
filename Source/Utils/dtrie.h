@@ -99,6 +99,9 @@ namespace zenith
 			uint8_t *stackLeft_, *stackRight_;
 			uint32_t valueTop_ = 0;
 
+			enum class _MatchRes { UNDEF = 0, EXACT = 1, MATCH_SHORT, MATCH_LONG, MISMATCH };
+			enum class _SearchRes {UNDEF = 0, EXACT = 1, ADD_NODE, SPLIT_NODE, SPLIT_AND_ADD_NODE};
+
 			//LOW-LEVEL MEMORY OPERATIONS:
 			//1. new and delete of buffer
 			enum class _Task {UNDEF = 0, NEW_KEY, NEW_NODE, MOVE_NODES};
@@ -334,8 +337,9 @@ namespace zenith
 					else
 						idxNew = uint32_t(pl - node_ptr_(pNode->dagBegin_));
 				}
-
-				pNode->dagBegin_ = add_node_tech_(oldDag, oldNum, idxNew);
+				uint32_t tmpId = add_node_tech_(oldDag, oldNum, idxNew);
+				pNode = node_ptr_(idx);
+				pNode->dagBegin_ = tmpId;
 				pNode->dagNum_ = newNum;
 
 				dtrie_id_node_ * p = node_ptr_(pNode->dagBegin_) + idxNew; //new node
@@ -413,13 +417,10 @@ namespace zenith
 				return res;
 			}
 
-			//match = -1 -- pk mismatched node key (either shorter, or different)
-			//match = +1 -- pk longer than node key
-			//match = 0  -- pk equal to node key
 			template<class U, class T>
-			inline static uint32_t match_(U * po, T * pn, const KeyType * pk, int &match)
+			inline static uint32_t match_(U * po, T * pn, const KeyType * pk, _MatchRes &matchres)
 			{
-				match = 0;
+				matchres = _MatchRes::UNDEF;
 				if (!pn || !pk)
 					return 0;
 				const KeyType * pnk = po->key_ptr_(pn->keyBegin_);
@@ -427,13 +428,18 @@ namespace zenith
 				{
 					if (*pk != pnk[i])
 					{
-						match = -1;
+						if (!*pk)
+							matchres = _MatchRes::MATCH_SHORT;
+						else
+							matchres = _MatchRes::MISMATCH;
 						return i;
 					}
 					pk++;
 				}
 				if (*pk)
-					match = 1;
+					matchres = _MatchRes::MATCH_LONG;
+				else
+					matchres = _MatchRes::EXACT;
 				return pn->keyNum_;
 			}
 			//searches children by first char
@@ -487,27 +493,36 @@ namespace zenith
 				}
 			}
 
+			/*
+			options:
+			1) found exact node
+			2) need new node (to continue)
+			3) need split node
+			4) need split node and new node
+			*/
+
 			//searches node
 			template<class T, class U>
-			inline static std::pair<T *, const KeyType *> search_(U * po, T * pn, const KeyType * pk, bool &exact)
+			inline static std::pair<T *, const KeyType *> search_(U * po, T * pn, const KeyType * pk, _SearchRes &sres)
 			{
+				sres = _SearchRes::UNDEF;
 				while (1)
 				{
 					if (!pn || !pk)
 					{
-						exact = false;
+						sres = _SearchRes::UNDEF;
 						return std::pair<T *, const KeyType *>(nullptr, nullptr);
 					}
 					if (!*pk)
 					{
-						exact = true;
+						sres = _SearchRes::EXACT;
 						return std::pair<T *, const KeyType *>(pn, pk);
 					}
 					bool needContinue = false;
 
 					if (pn->dagNum_ > 0)
 					{
-						int match = 0;
+						_MatchRes match = _MatchRes::UNDEF;
 						uint32_t iadv = 0;
 						dtrie_id_node_ * pf = po->node_ptr_(pn->dagBegin_);
 						auto pl = pf + (pn->dagNum_ - 1);
@@ -515,20 +530,41 @@ namespace zenith
 						if (pf == pl)
 						{
 							iadv = match_(po, pf, pk, match);
-							if (match <= 0)
+							if (match == _MatchRes::MATCH_LONG)
 							{
-								exact = (match == 0);
-								return std::pair<T *, const KeyType *>(pf, pk);
+								pk += iadv;
+								pn = pf;
 							}
-							pk += iadv;
-							pn = pf;
-							needContinue = true;
+							else
+							{
+								if (match == _MatchRes::EXACT)
+								{
+									sres = _SearchRes::EXACT;
+									return std::pair<T *, const KeyType *>(pf, pk);
+								}
+								else if (match == _MatchRes::MATCH_SHORT)
+								{
+									sres = _SearchRes::SPLIT_NODE;
+									return std::pair<T *, const KeyType *>(pf, pk);
+								}
+								else if (match == _MatchRes::MISMATCH)
+								{
+									sres = _SearchRes::SPLIT_AND_ADD_NODE;
+									return std::pair<T *, const KeyType *>(pf, pk);
+								}
+							}
+						}
+						else
+						{
+							sres = _SearchRes::ADD_NODE;
+							return std::pair<T *, const KeyType *>(pn, pk);
 						}
 					}
-					if (needContinue)
-						continue;
-					exact = false;
-					return std::pair<T *, const KeyType *>(pn, pk);
+					else
+					{
+						sres = _SearchRes::ADD_NODE;
+						return std::pair<T *, const KeyType *>(pn, pk);
+					}
 				}
 			}
 
@@ -577,17 +613,17 @@ namespace zenith
 
 			inline uint32_t search_value_(const KeyType *pk) const
 			{
-				bool exact = false;
-				auto pp = search_(this, root_(), pk, exact);
-				if (!exact)
-					return nullptr;
+				_SearchRes sr;
+				auto pp = search_(this, root_(), pk, sr);
+				if (sr != _SearchRes::EXACT)
+					return NoValueId;
 				return get_value_(pp.first);
 			}
 			inline uint32_t search_value_(const KeyType *pk)
 			{
-				bool exact = false;
-				auto pp = search_(this, root_(), pk, exact);
-				if (!exact)
+				_SearchRes sr;
+				auto pp = search_(this, root_(), pk, sr);
+				if (sr != _SearchRes::EXACT)
 					return NoValueId;
 				return pp.first->valueId_;
 			}
@@ -704,9 +740,9 @@ namespace zenith
 
 			inline uint32_t add(const KeyType * key)
 			{
-				bool exact = false;
-				auto pp = search_(this, root_(), key, exact);
-				if (exact)
+				_SearchRes sr;
+				auto pp = search_(this, root_(), key, sr);
+				if (sr == _SearchRes::EXACT)
 				{
 					if (pp.first->valueId_ == NoValueId)
 					{
@@ -715,49 +751,54 @@ namespace zenith
 					}
 					throw DTrieDuplicateKeyException("dtrie_id::add(): key already exists!");
 				}
-				auto pn = pp.first;
-				uint32_t pnId = node_idx_(pn);
-				auto pk = pp.second;
-				int match;
-				uint32_t adv = match_(this, pn, pk, match);
-				if (adv == 0)
-				{
-					auto pkl = pk;
-					while (*pkl)pkl++;
-					//indices are invalidated
-					add_node_(node_idx_(pn), pk, uint32_t(pkl - pk));
-					bool locExact = false;
-					auto pp = search_(this, root_(), key, locExact);
-					if (!locExact || pp.first->valueId_ != NoValueId)
-						throw DTrieInvalidUseException("dtrie_id::add(): invalid add operation!");
-					pp.first->valueId_ = valueTop_++;
-					return pp.first->valueId_;
-				}
-				auto pnnId = split_node_(pnId, adv);
-				if (match <= 0)
-				{
-					auto rp = node_ptr_(pnId);
-					rp->valueId_ = valueTop_++;
-					return rp->valueId_;
-				}
 				else
 				{
-					auto pkl = pk + adv;
-					while (*pkl)pkl++;
-					add_node_(pnId, pk + adv, uint32_t(pkl - pk - adv));
-					bool locExact = false;
-					auto pp = search_(this, root_(), key, locExact);
-					if (!locExact || pp.first->valueId_ != NoValueId)
-						throw DTrieInvalidUseException("dtrie_id::add(): invalid add operation!");
-					pp.first->valueId_ = valueTop_++;
-					return pp.first->valueId_;
+					auto pn = pp.first;
+					uint32_t pnId = node_idx_(pn);
+					auto pk = pp.second;
+
+					if (sr == _SearchRes::SPLIT_NODE)
+					{
+						_MatchRes mr;
+						uint32_t adv = match_(this, pn, pk, mr);
+						split_node_(pnId, adv);
+						auto rp = node_ptr_(pnId);
+						rp->valueId_ = valueTop_++;
+						return rp->valueId_;
+					}
+					else if (sr == _SearchRes::SPLIT_AND_ADD_NODE)
+					{
+						_MatchRes mr;
+						uint32_t adv = match_(this, pn, pk, mr);
+						auto pkl = pk; while (*pkl++);pkl--;
+						split_node_(pnId, adv);
+						add_node_(pnId, pk + adv, uint32_t(pkl - pk - adv));
+						_SearchRes sloc;
+						auto pp = search_(this, root_(), key, sloc);
+						if (sloc != _SearchRes::EXACT || pp.first->valueId_ != NoValueId)
+							throw DTrieInvalidUseException("dtrie_id::add(): invalid add operation!");
+						pp.first->valueId_ = valueTop_++;
+						return pp.first->valueId_;
+					}
+					else if (sr == _SearchRes::ADD_NODE)
+					{
+						auto pkl = pk; while (*pkl++);pkl--;
+						add_node_(pnId, pk, uint32_t(pkl - pk));
+						_SearchRes sloc;
+						auto pp = search_(this, root_(), key, sloc);
+						if (sloc != _SearchRes::EXACT || pp.first->valueId_ != NoValueId)
+							throw DTrieInvalidUseException("dtrie_id::add(): invalid add operation!");
+						pp.first->valueId_ = valueTop_++;
+						return pp.first->valueId_;
+					}
+					else throw DTrieInvalidUseException("dtrie_id::add(): invalid results!");
 				}
 			}
 			inline void remove(const KeyType * key)
 			{
-				bool exact = false;
-				auto pp = search_(this, root_(), key, exact);
-				if (!exact)
+				_SearchRes sr;
+				auto pp = search_(this, root_(), key, sr);
+				if (sr != _SearchRes::EXACT)
 					throw DTrieMissingKeyException("dtrie_id::remove(): key does not exist!");
 				if (pp.first->valueId_ == NoValueId)
 					throw DTrieMissingKeyException("dtrie_id::remove(): key does not exist!");

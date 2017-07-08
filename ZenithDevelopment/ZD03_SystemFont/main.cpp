@@ -214,8 +214,12 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 	std::cout << dtrie.add("a");
 	std::cout << dtrie.add("b");
 	std::cout << dtrie.add("c");
-	std::cout << dtrie.add("abb");
-	
+	std::cout << dtrie.add("abb");	
+	std::cout << dtrie.add("xyzw");
+	std::cout << dtrie.add("xywa");
+	std::cout << dtrie.add("xyyq");
+
+
 	std::vector<uint32_t> res;
 	res.push_back(dtrie.get("ab"));
 	res.push_back(dtrie.get("bc"));
@@ -227,6 +231,9 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 	res.push_back(dtrie.get("b"));
 	res.push_back(dtrie.get("c"));
 	res.push_back(dtrie.get("abb"));
+	res.push_back(dtrie.get("xyzw"));
+	res.push_back(dtrie.get("xywa"));
+	res.push_back(dtrie.get("xyyq"));
 
 	init_args(lpCmdLine);
 	init();
