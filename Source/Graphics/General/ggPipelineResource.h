@@ -1,7 +1,7 @@
 #pragma once
 #include "ggraphics_base.h"
 #include "ggUtil_Pipeline.h"
-#include <Utils/prefix_dag.h>
+#include <Utils/dtrie.h>
 
 namespace zenith
 {
@@ -45,7 +45,8 @@ namespace zenith
 		
 		class ggPipelineResources
 		{
-			std::vector<ggPipelineResource> resources_;
+			zenith::util::dtrie_vec<ggPipelineResource, char> resources_;
+		public:
 		};
 	}
 }
