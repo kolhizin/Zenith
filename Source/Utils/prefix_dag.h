@@ -290,7 +290,7 @@ namespace zenith
 					else if (!pl)
 						idxNew = oldNum;
 					else
-						idxNew = pl - n->dagBegin_;
+						idxNew = static_cast<uint32_t>(pl - n->dagBegin_);
 				}
 
 				n->dagBegin_ = add_node_tech_(n->dagBegin_, oldNum, idxNew);
@@ -672,7 +672,7 @@ namespace zenith
 				{
 					auto pkl = pk;
 					while (*pkl)pkl++;
-					auto newp = add_node_(pn, pk, pkl - pk); 
+					auto newp = add_node_(pn, pk, uint32_t(pkl - pk)); 
 					create_value_(newp, std::move(val));
 					return;
 				}
@@ -683,7 +683,7 @@ namespace zenith
 				{
 					auto pkl = pk + adv;
 					while (*pkl)pkl++;
-					auto newp = add_node_(psp.first, pk + adv, pkl - pk - adv); 
+					auto newp = add_node_(psp.first, pk + adv, static_cast<uint32_t>(pkl - pk - adv)); 
 					create_value_(newp, std::move(val));
 				}
 			}

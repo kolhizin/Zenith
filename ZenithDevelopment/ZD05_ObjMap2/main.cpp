@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <chrono>
 #include <thread>
 #include <pugixml\pugixml.hpp>
@@ -23,6 +24,7 @@
 #include <Utils\ioconv\io_alg.h>
 
 #include <Utils\prefix_dag.h>
+#include <Utils\dtrie.h>
 //using namespace zenith::util::ioconv;
 
 struct TestPoint
@@ -271,12 +273,309 @@ void test_prefix_dag()
 	*/
 }
 
+void test_dtrie_id()
+{
+	zenith::util::dtrie_id<char> pd;
+
+	//simple add
+	pd.add("ab");
+	pd.add("cd");
+	pd.add("ef");
+	std::cout << "a: " << pd.exists("a") << "\n";
+	std::cout << "ab: " << pd.exists("ab") << "\n";
+	std::cout << "abc: " << pd.exists("abc") << "\n";
+	std::cout << "cd: " << pd.exists("cd") << "\n";
+	std::cout << "ef: " << pd.exists("ef") << "\n";
+	std::cout << "gh: " << pd.exists("gh") << "\n";
+
+
+
+	//first structure
+	pd.add("abc");
+	pd.add("cde");
+	pd.add("efg");
+
+	std::cout << "a: " << pd.exists("a") << "\n";
+	std::cout << "ab: " << pd.exists("ab") << "\n";
+	std::cout << "abc: " << pd.exists("abc") << "\n";
+	std::cout << "cd: " << pd.exists("cd") << "\n";
+	std::cout << "cde: " << pd.exists("cde") << "\n";
+	std::cout << "ef: " << pd.exists("ef") << "\n";
+	std::cout << "efg: " << pd.exists("efg") << "\n";
+	std::cout << "gh: " << pd.exists("gh") << "\n";
+	
+	pd.add("xyzw");
+	pd.add("xywz");
+	pd.add("xyyy");
+
+	//split structure
+	pd.add("a");
+	pd.add("b");
+	pd.add("c");
+	//	pd.add("d", 14);
+	pd.add("e");
+	pd.add("f");
+	pd.add("g");
+	pd.add("h");
+
+
+//	pd.debug_output();
+
+	std::cout << "a: " << pd.exists("a") << "\n";
+	std::cout << "ab: " << pd.exists("ab") << "\n";
+	std::cout << "abc: " << pd.exists("abc") << "\n";
+	std::cout << "cd: " << pd.exists("cd") << "\n";
+	std::cout << "cde: " << pd.exists("cde") << "\n";
+	std::cout << "ef: " << pd.exists("ef") << "\n";
+	std::cout << "efg: " << pd.exists("efg") << "\n";
+	std::cout << "gh: " << pd.exists("gh") << "\n";
+	std::cout << "b: " << pd.exists("b") << "\n";
+	std::cout << "c: " << pd.exists("c") << "\n";
+	std::cout << "d: " << pd.exists("d") << "\n";
+	std::cout << "e: " << pd.exists("e") << "\n";
+	std::cout << "f: " << pd.exists("f") << "\n";
+	std::cout << "g: " << pd.exists("g") << "\n";
+	std::cout << "h: " << pd.exists("h") << "\n";
+
+
+	std::cout << "a: " << pd.get("a") << "\n";
+	std::cout << "ab: " << pd.get("ab") << "\n";
+	std::cout << "abc: " << pd.get("abc") << "\n";
+	std::cout << "cd: " << pd.get("cd") << "\n";
+	std::cout << "cde: " << pd.get("cde") << "\n";
+	std::cout << "ef: " << pd.get("ef") << "\n";
+	std::cout << "efg: " << pd.get("efg") << "\n";
+	//	std::cout << "gh: " << pd.get("gh") << "\n";
+	std::cout << "b: " << pd.get("b") << "\n";
+	std::cout << "c: " << pd.get("c") << "\n";
+	//	std::cout << "d: " << pd.get("d") << "\n";
+	std::cout << "e: " << pd.get("e") << "\n";
+	std::cout << "f: " << pd.get("f") << "\n";
+	std::cout << "g: " << pd.get("g") << "\n";
+	std::cout << "h: " << pd.get("h") << "\n";
+
+	//pd.debug_output();
+	//auto it = pd.begin();
+	for (auto it = pd.begin(); it != pd.end(); ++it)
+		std::cout << it.key() << " -> " << it.value() << "\n";
+	
+	for (auto x : pd)
+	{
+		std::cout << " -> " << x << "\n";
+	}
+	std::cout << zenith::util::dtrie_id<char>::NodeSize;
+	
+}
+
+
+void test_dtrie_vec()
+{
+	zenith::util::dtrie_vec<int, char> pd;
+
+	//simple add
+	pd.add("ab", 71);
+	pd.add("cd", 72);
+	pd.add("ef", 73);
+
+	//first structure
+	pd.add("abc", 91);
+	pd.add("cde", 92);
+	pd.add("efg", 93);
+
+	pd.add("xyzw", -1);
+	pd.add("xywz", -2);
+	pd.add("xyyy", -3);
+
+	//split structure
+	pd.add("a", 1);
+	pd.add("b", 2);
+	pd.add("c", 3);
+	//	pd.add("d", 14);
+	pd.add("e", 3);
+	pd.add("f", 2);
+	pd.add("g", 1);
+	pd.add("h", 0);
+
+	std::cout << "a: " << pd.exists("a") << "\n";
+	std::cout << "ab: " << pd.exists("ab") << "\n";
+	std::cout << "abc: " << pd.exists("abc") << "\n";
+	std::cout << "cd: " << pd.exists("cd") << "\n";
+	std::cout << "cde: " << pd.exists("cde") << "\n";
+	std::cout << "ef: " << pd.exists("ef") << "\n";
+	std::cout << "efg: " << pd.exists("efg") << "\n";
+	std::cout << "gh: " << pd.exists("gh") << "\n";
+	std::cout << "b: " << pd.exists("b") << "\n";
+	std::cout << "c: " << pd.exists("c") << "\n";
+	std::cout << "d: " << pd.exists("d") << "\n";
+	std::cout << "e: " << pd.exists("e") << "\n";
+	std::cout << "f: " << pd.exists("f") << "\n";
+	std::cout << "g: " << pd.exists("g") << "\n";
+	std::cout << "h: " << pd.exists("h") << "\n";
+
+
+	std::cout << "a: " << pd.get("a") << "\n";
+	std::cout << "ab: " << pd.get("ab") << "\n";
+	std::cout << "abc: " << pd.get("abc") << "\n";
+	std::cout << "cd: " << pd.get("cd") << "\n";
+	std::cout << "cde: " << pd.get("cde") << "\n";
+	std::cout << "ef: " << pd.get("ef") << "\n";
+	std::cout << "efg: " << pd.get("efg") << "\n";
+	//	std::cout << "gh: " << pd.get("gh") << "\n";
+	std::cout << "b: " << pd.get("b") << "\n";
+	std::cout << "c: " << pd.get("c") << "\n";
+	//	std::cout << "d: " << pd.get("d") << "\n";
+	std::cout << "e: " << pd.get("e") << "\n";
+	std::cout << "f: " << pd.get("f") << "\n";
+	std::cout << "g: " << pd.get("g") << "\n";
+	std::cout << "h: " << pd.get("h") << "\n";
+
+	
+	for (auto it = pd.begin(); it != pd.end(); ++it)
+		std::cout << it.key() << " -> " << it.value() << "\n";
+	
+	for (auto &x : pd)
+	{
+		std::cout << x.first << " => " << x.second << "\n";
+		x.second++;
+		std::cout << x.first << " => " << x.second << "\n";
+	}	
+	std::cout << pd.size() << " " << pd.dtrie_capacity();
+}
+
+inline std::string genRndString()
+{
+	uint32_t len = 3 + (std::rand() % 5);
+	std::string rnd(len, 'a');
+	for (uint32_t j = 0; j < len; j++)
+	{
+		char v = 'a' + (std::rand() % 26);
+		rnd[j] = v;
+	}
+	return rnd;
+}
+
 int main()
 {
 	//test_ioconv();
-	test_prefix_dag();
+	//test_prefix_dag();
+	//test_dtrie_vec();
 	
+	uint32_t NumInserted = 30000;
+	uint32_t NumOut = 30000;
+
+	std::unordered_map<std::string, int> map_vals;
+	zenith::util::dtrie_vec<int, char> dtrie_vals(NumInserted, NumInserted * 20);
+
+	uint32_t TestSize = 1000000;
+	double pOut = 0.9;
+	/*
+	dtrie v map
+	0.0: 347 v 540 - 35% speedup
+	0.1: 326 v 582 | 323 v 535 - 40% speedup
+	0.5: 327 v 440 | 249 v 484 - 25%-50% speedup
+	0.9: 208 v 365 | 185 v 329 - 50% speedup
+
+	dtrie v hash_map
+	0.0: 349 v 108 | 3.2x slower
+	0.1: 302 v 119 | 2.5x slower
+	0.5: 237 v 84  | 2.8x slower
+	0.9: 205 v 60  | 3.4x slower
+	*/
+
+	std::vector<std::string> inNames;
+	std::vector<std::string> outNames;
+
+	std::vector<std::string> testNames;
+	
+	std::cout << "Generating dictionaries..\n";
+	inNames.reserve(NumInserted);
+	uint32_t numCycles = 0;
+	for (uint32_t i = 0; i < NumInserted; numCycles++)
+	{
+		auto rnd = genRndString();
+		bool me = (map_vals.find(rnd) != map_vals.end());
+		bool de = dtrie_vals.exists(rnd.c_str());
+		if (me != de)
+			std::cout << "ERR\n";
+		if (de)
+			continue;
+		int r = (std::rand() % 101) - 50;
+		dtrie_vals.add(rnd.c_str(), r);
+		map_vals[rnd] = r;
+		inNames.push_back(rnd);
+		i++;
+	}
+	std::cout << numCycles << " cycles needed.\n";
+	std::cout << "Generating external keys..\n";
+	outNames.reserve(NumOut);
+	numCycles = 0;
+	for (uint32_t i = 0; i < NumOut; numCycles++)
+	{
+		auto rnd = genRndString();
+		bool me = (map_vals.find(rnd) != map_vals.end());
+		bool de = dtrie_vals.exists(rnd.c_str());
+		if (me != de)
+			std::cout << "ERR\n";
+		if (de)
+			continue;
+		outNames.push_back(rnd);
+		i++;
+	}
+	std::cout << numCycles << " cycles needed.\n";
+	std::cout << "Combining test sample..\n";
+	testNames.reserve(TestSize);
+	uint32_t realIn = 0, realOut = 0;
+	for (uint32_t i = 0; i < TestSize; i++)
+	{
+		double p = double(std::rand() % 10000) * 0.0001;
+		if (p < pOut)
+		{
+			uint32_t idx = std::rand() % NumOut;
+			testNames.push_back(outNames[idx]);
+			realOut++;
+		}
+		else
+		{
+			uint32_t idx = std::rand() % NumInserted;
+			testNames.push_back(inNames[idx]);
+			realIn++;
+		}
+	}
+	std::cout << "In: " << realIn << ", out: " << realOut << "\n";
+	std::cout << "Preparation finished.\n\n";
+
+	int sum1 = 0, sum2 = 0;
+	std::cout << "Testing dtrie_vec..\n";
+
+	auto dtrie_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < TestSize; i++)
+	{		
+		if (!dtrie_vals.exists(testNames[i].c_str()))
+			continue;
+		sum1 += dtrie_vals.get(testNames[i].c_str());
+	}
+	auto dtrie_end = std::chrono::high_resolution_clock::now();
+
+
+	std::cout << "Testing map..\n";
+
+	auto map_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < TestSize; i++)
+	{
+		if (map_vals.find(testNames[i]) == map_vals.end())
+			continue;
+		sum2 += map_vals.at(testNames[i]);
+	}
+	auto map_end = std::chrono::high_resolution_clock::now();
+
+	std::cout << "Finished testing.\n";
+	std::cout << "Sum by dtrie_vec = " << sum1 << ", by map = " << sum2 << ".\n";
+	double dtrie_time = std::chrono::duration_cast<std::chrono::milliseconds>(dtrie_end - dtrie_start).count();
+	double map_time = std::chrono::duration_cast<std::chrono::milliseconds>(map_end - map_start).count();
+	std::cout << "Time by dtrie_vec = " << dtrie_time << "\n";
+	std::cout << "Time by map = " << map_time << "\n";
+
 	std::cout << "\nClosing...";
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 	return 0;
 }

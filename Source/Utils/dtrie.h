@@ -1,6 +1,6 @@
 #pragma once
 #include "log_config.h"
-#include <string>
+#include <vector>
 
 namespace zenith
 {
@@ -60,12 +60,12 @@ namespace zenith
 			typedef KeyType key_element_type;
 			typedef const KeyType * key_type;
 
-			template<class T, class U>
+			template<class U>
 			class iterator_t_;
 		private:
 			struct dtrie_id_node_
 			{
-				template<class T,class U>
+				template<class U>
 				friend class iterator_t_;
 				//NOTE:
 				/*
@@ -75,6 +75,7 @@ namespace zenith
 				4. Consider adding parent-ptr to allow use of iterators
 				5. keyBegin_ is start of key (which is not 0-terminated) and keyNum_ is its length
 				6. dagBegin_ is start of continuous array of children, dagNum_ is its length
+				7. size is 32, so simple shift is enough
 				*/
 				uint32_t fullKeyBegin_ = NoValueId; /*zero-terminated const char ptr*/
 				uint32_t key0Begin_ = NoValueId; /*first chars of children*/
@@ -87,9 +88,10 @@ namespace zenith
 
 				inline static dtrie_id_node_ empty() { return dtrie_id_node_(); }
 			};
+		public:
 			static const uint32_t KeySize = sizeof(KeyType);
 			static const uint32_t NodeSize = sizeof(dtrie_id_node_);
-
+		private:
 			/*
 			Allocator is just two-way stack. On left side are keys, on right side are nodes.
 			In case of resize everything is memcpy-able.
@@ -184,7 +186,7 @@ namespace zenith
 				uint8_t * p2 = ptr + sz;
 				while (p2 < stackLeft_)
 				{
-					uint32_t actSize = stackLeft_ - p2;
+					uint32_t actSize = static_cast<uint32_t>(stackLeft_ - p2);
 					if (actSize > sz)
 						actSize = sz;
 					memcpy_s(ptr, actSize, p2, actSize);
@@ -241,9 +243,9 @@ namespace zenith
 				auto bufferEnd_ = reinterpret_cast<dtrie_id_node_ *>(bufferPtr_ + bufferSize_);
 				for (auto pn = reinterpret_cast<dtrie_id_node_ *>(stackRight_); pn < bufferEnd_; pn++)
 				{
-					if (pn->dagBegin_ > ind - num)
+					if (pn->dagBegin_ > ind - num && pn->dagBegin_ != NoValueId)
 						pn->dagBegin_ -= num;
-					if (pn->dagParent_ > ind - num)
+					if (pn->dagParent_ > ind - num && pn->dagParent_ != NoValueId)
 						pn->dagParent_ -= num;
 				}
 				dealloc_buffer_right_(p, NodeSize * num);
@@ -268,15 +270,17 @@ namespace zenith
 			}
 			inline void dealloc_key_(uint32_t ind, uint32_t length)
 			{
+				if (length == 0)
+					return;
 				//update key-indices
 				auto bufferEnd_ = reinterpret_cast<dtrie_id_node_ *>(bufferPtr_ + bufferSize_);
 				for (auto pn = reinterpret_cast<dtrie_id_node_ *>(stackRight_); pn < bufferEnd_; pn++)
 				{
-					if (pn->keyBegin_ > ind)
+					if (pn->keyBegin_ > ind && pn->keyBegin_ != NoValueId)
 						pn->keyBegin_ -= length;
-					if (pn->key0Begin_ > ind)
+					if (pn->key0Begin_ > ind && pn->key0Begin_ != NoValueId)
 						pn->key0Begin_ -= length;
-					if (pn->fullKeyBegin_ > ind)
+					if (pn->fullKeyBegin_ > ind && pn->fullKeyBegin_ != NoValueId)
 						pn->fullKeyBegin_ -= length;
 				}
 
@@ -315,6 +319,7 @@ namespace zenith
 					if (i == idxNew)
 						continue;
 
+
 					memcpy_s(pNew + i, NodeSize, pOld + j, NodeSize);
 
 					reassign_children_parent_(startNew - i);
@@ -331,13 +336,15 @@ namespace zenith
 				auto pNode = node_ptr_(idx);
 				uint32_t oldNum = pNode->dagNum_;
 				uint32_t oldDag = pNode->dagBegin_;
+				uint32_t oldKey0 = pNode->key0Begin_;
 				uint32_t newNum = oldNum + 1;
 				uint32_t idxNew = 0;
 				if (oldNum != 0)
 				{
 					auto pf = node_ptr_(oldDag);
 					auto pl = pf + (oldNum - 1);
-					search_children0_(this, pf, pl, k);
+					//search_children0_(this, pf, pl, k);
+					search_children_fst_(this, pf, pl, *k);
 					if (!pf)
 						idxNew = 0;
 					else if (!pl)
@@ -346,20 +353,40 @@ namespace zenith
 						idxNew = uint32_t(pl - node_ptr_(pNode->dagBegin_));
 				}
 				uint32_t tmpId = add_node_tech_(oldDag, oldNum, idxNew);
+				uint32_t newKey0 = alloc_key_(oldNum + 1);
+				uint32_t aid_key = alloc_key_(klen);
+				uint32_t aid_full_key = alloc_key_(fullLen + 1);
+
 				pNode = node_ptr_(idx);
 				pNode->dagBegin_ = tmpId;
 				pNode->dagNum_ = newNum;
 
+				KeyType * pOldKey0 = key_ptr_(pNode->key0Begin_);
+				KeyType * pNewKey0 = key_ptr_(newKey0);
+				for (uint32_t i = 0, j = 0; i < newNum; i++)
+					if (i == idxNew)
+						pNewKey0[i] = *k;
+					else
+					{
+						pNewKey0[i] = pOldKey0[j];
+						j++;
+					}
+
+				pNode->key0Begin_ = newKey0;
+
 				dtrie_id_node_ * p = node_ptr_(pNode->dagBegin_) + idxNew; //new node
 				*p = dtrie_id_node_::empty();
-				p->keyBegin_ = alloc_key_(klen);
+				p->keyBegin_ = aid_key;
 				p->keyNum_ = klen;
-				p->fullKeyBegin_ = alloc_key_(fullLen + 1);
+				p->fullKeyBegin_ = aid_full_key;
 				copy_key_(key_ptr_(p->keyBegin_), k, klen);
 				copy_key_(key_ptr_(p->fullKeyBegin_), fullkey, fullLen + 1);
 				p->dagParent_ = idx;
 
+				
+
 				//all indices are invalidated after here:
+				dealloc_key_(oldKey0, oldNum);
 				dealloc_node_(oldDag, oldNum);
 			}
 
@@ -370,10 +397,12 @@ namespace zenith
 				uint32_t fklen = 0;
 				while (*ptr++)
 					fklen++;
-				uint32_t nklen = fklen - keyNum_ + klen;
+				uint32_t nklen = fklen - n->keyNum_ + klen;
 				uint32_t newNodeIdx = alloc_node_();
 				uint32_t newFullKey = alloc_key_(nklen + 1);
+				uint32_t key0 = alloc_key_(1);
 
+				KeyType * pkey0 = key_ptr_(key0);
 				dtrie_id_node_ * nn = node_ptr_(newNodeIdx);
 				n = node_ptr_(nodeIdx);
 
@@ -386,15 +415,18 @@ namespace zenith
 				n->keyNum_ = klen;
 				nn->keyNum_ = leftLen;
 				nn->keyBegin_ = n->keyBegin_ + klen;
+				*pkey0 = *key_ptr_(nn->keyBegin_);
 
 				nn->fullKeyBegin_ = n->fullKeyBegin_;
 				n->fullKeyBegin_ = newFullKey;
 
 				nn->dagBegin_ = n->dagBegin_;
 				nn->dagNum_ = n->dagNum_;
+				nn->key0Begin_ = n->key0Begin_;
 
 				nn->dagParent_ = nodeIdx;
 
+				n->key0Begin_ = key0;
 				n->dagBegin_ = newNodeIdx;
 				n->dagNum_ = 1;
 
@@ -475,6 +507,7 @@ namespace zenith
 					return;
 				if (first > last)
 					throw DTrieInvalidUseException("dtrie_id::search_children(): expecting last >= first");
+				const KeyType * pk0 = po->key_ptr_(po->node_ptr_(first->dagParent_)->key0Begin_);
 				if (*po->key_ptr_(first->keyBegin_) > *pk)
 				{
 					last = first;
@@ -518,6 +551,66 @@ namespace zenith
 				}
 			}
 
+			//searches children by first char
+			template<class T, class U>
+			inline static void search_children_fst_(U * po, T * &first, T * &last, KeyType ck)
+			{
+				if (!first || !last)
+					return;
+				if (first > last)
+					throw DTrieInvalidUseException("dtrie_id::search_children(): expecting last >= first");
+				auto pn = po->node_ptr_(first->dagParent_);
+				auto pfst = po->node_ptr_(pn->dagBegin_);
+				const KeyType * pk0 = po->key_ptr_(pn->key0Begin_);
+				uint32_t fst = first - pfst;
+				uint32_t lst = last - pfst;
+				if (pk0[fst] > ck)
+				{
+					last = first;
+					first = nullptr;
+					return;
+				}
+				else if (pk0[fst] == ck)
+				{
+					last = first;
+					return;
+				}
+
+				if (pk0[lst] < ck)
+				{
+					first = last;
+					last = nullptr;
+					return;
+				}
+				else if (pk0[lst] == ck)
+				{
+					first = last;
+					return;
+				}
+
+				while (fst < lst)
+				{
+					uint32_t num = lst - fst;
+					if (num == 1)
+					{
+						first = pfst + fst;
+						last = pfst + lst;
+						return;
+					}
+					auto mid = fst + (num >> 1);
+					if (pk0[mid] == ck)
+					{
+						first = pfst + mid;
+						last = pfst + mid;
+						return;
+					}
+					if (pk0[mid] < ck)
+						fst = mid;
+					else
+						lst = mid;
+				}
+			}
+
 			/*
 			options:
 			1) found exact node
@@ -549,9 +642,10 @@ namespace zenith
 					{
 						_MatchRes match = _MatchRes::UNDEF;
 						uint32_t iadv = 0;
-						dtrie_id_node_ * pf = po->node_ptr_(pn->dagBegin_);
+						auto pf = po->node_ptr_(pn->dagBegin_);
 						auto pl = pf + (pn->dagNum_ - 1);
-						search_children0_(po, pf, pl, pk);
+						//search_children0_(po, pf, pl, pk);
+						search_children_fst_(po, pf, pl, *pk);
 						if (pf == pl)
 						{
 							iadv = match_(po, pf, pk, match);
@@ -593,23 +687,27 @@ namespace zenith
 				}
 			}
 
-			template<class T>
-			inline static T * next_node_(T * pn)
+			template<class T, class U>
+			inline static T * next_node_(U * po, T * pn)
 			{
 				if (!pn)
 					return nullptr;
 				if (pn->dagNum_ > 0)
-					return node_ptr_(pn->dagBegin_);
+					return po->node_ptr_(pn->dagBegin_);
 				while (pn)
 				{
-					KeyType * pk = key_ptr_(pn->keyBegin_);
-					T * pp = node_ptr_(pn->dagParent_);
+					//root node check
+					if (pn->dagParent_ == NoValueId)
+						return nullptr;
+					KeyType * pk = po->key_ptr_(pn->keyBegin_);
+					T * pp = po->node_ptr_(pn->dagParent_);
 					if (!pp)
 						return nullptr;
-					T * pf = node_ptr_(pp->dagBegin_);
+					T * pf = po->node_ptr_(pp->dagBegin_);
 					T * pl = pf + (pp->dagNum_ - 1);
 					T * pl1 = pl;
-					search_children0_(pf, pl, pk);
+					//search_children0_(po, pf, pl, pk);
+					search_children_fst_(po, pf, pl, *pk);
 					if (pl < pl1)
 					{
 						pl++;
@@ -620,14 +718,14 @@ namespace zenith
 				return pn;
 			}
 
-			template<class T>
-			inline static T * next_vnode_(T * pn)
+			template<class T, class U>
+			inline static T * next_vnode_(U * po, T * pn)
 			{
 				if (!pn)
 					return nullptr;
 				while (pn)
 				{
-					auto p = next_node_(pn);
+					auto p = next_node_(po, pn);
 					if (!p)
 						return nullptr;
 					if (p->valueId_ != NoValueId)
@@ -642,40 +740,39 @@ namespace zenith
 				auto pp = search_(this, root_(), pk, sr);
 				if (sr != _SearchRes::EXACT)
 					return NoValueId;
-				return get_value_(pp.first);
-			}
-			inline uint32_t search_value_(const KeyType *pk)
-			{
-				_SearchRes sr;
-				auto pp = search_(this, root_(), pk, sr);
-				if (sr != _SearchRes::EXACT)
-					return NoValueId;
 				return pp.first->valueId_;
 			}
 
-			
-			template<class T, class U>
+			template<class U>
 			class iterator_t_
 			{
 				friend class dtrie_id;
-				T * pn_ = nullptr;
+				uint32_t pn_ = NoValueId;
 				U * po_ = nullptr;
 
-				iterator_t_(T * p, U * o) : pn_(p), po_(o) {}
+				iterator_t_(uint32_t p, U * o) : pn_(p), po_(o) {}
 				inline bool check_() const
 				{
-					return pn_ && po_ && (pn_->valueId_ != NoValueId);
+					return (pn_ != NoValueId) && po_ && (po_->node_ptr_(pn_)->valueId_ != NoValueId);
 				}
 				inline void assert_() const
 				{
 					if (!check_())
 						throw DTrieInvalidIteratorException();
 				}
+				inline uint32_t next_vnode_id_() const
+				{
+					auto pn = po_->node_ptr_(pn_);
+					auto pnn = next_vnode_(po_, pn);
+					if (!pnn)
+						return NoValueId;
+					return po_->node_idx_(pnn);
+				}
 			public:
-				typedef ValueType value_type;
+				typedef uint32_t value_type;
 				typedef KeyType key_type;
 
-				iterator_t_() : pn_(nullptr), po_(nullptr) {}
+				iterator_t_() : pn_(NoValueId), po_(nullptr) {}
 				iterator_t_(const iterator_t_ &t) : pn_(t.pn_), po_(t.po_) {}
 				iterator_t_(iterator_t_ &&t) : pn_(t.pn_), po_(t.po_) {}
 				iterator_t_ &operator =(const iterator_t_ &t) { pn_ = t.pn_; po_ = t.po_; return *this; }
@@ -683,49 +780,29 @@ namespace zenith
 
 				inline bool valid() const { return check_(); }
 
-				inline uint32_t key_length() const { assert_(); return full_key_(pn_, nullptr, 0); }
-				inline uint32_t key_fill(KeyType * buff, uint32_t buffSize) const
-				{
-					assert_();
-					return full_key_(pn_, buff, buffSize);
-				}
-				inline std::basic_string<KeyType> key_string() const
-				{
-					assert_();
-					auto len = full_key_(pn_, nullptr, 0);
-					std::basic_string<KeyType> res(len, KeyType(0));
-					full_key_(pn_, &res[0], len + 1);
-					return res;
-				}
+				inline const KeyType * key() const { assert_(); return po_->key_ptr_(po_->node_ptr_(pn_)->fullKeyBegin_); }
+				inline uint32_t value() const { assert_(); return po_->node_ptr_(pn_)->valueId_; }
 
-
-				inline ValueType &value() { assert_(); return *po_->get_value_(pn_); }
-				inline const ValueType &value() const { assert_(); return *po_->get_value_(pn_); }
-
-				inline iterator_t_<V, T, U> next() { return iterator_t_<V, T, U>(next_vnode_(pn_), po_); }
-				inline iterator_t_<const V, const T, const U> next() const { return iterator_t_<const V, const T, const U>(next_vnode_(pn_), po_); }
+				inline iterator_t_<U> next() { return iterator_t_<U>(next_vnode_id_(), po_); }
+				inline iterator_t_<const U> next() const { return iterator_t_<const U>(next_vnode_id_(), po_); }
 
 				//prefix
-				inline iterator_t_<V, T, U> &operator++() { pn_ = next_vnode_(pn_); return *this; }
+				inline iterator_t_<U> &operator++() { pn_ = next_vnode_id_(); return *this; }
 				//postfix
-				inline iterator_t_<V, T, U> operator++(int) { auto p = pn_; pn_ = next_vnode_(pn_); return iterator_t_<V, T, U>(p, po_); }
+				inline iterator_t_<U> operator++(int) { auto p = pn_; pn_ = next_vnode_id_(); return iterator_t_<U>(p, po_); }
 
-				inline V * operator->() { assert_(); return po_->get_value_(pn_); }
-				inline const V * operator->() const { assert_(); return po_->get_value_(pn_); }
-
-				inline V & operator*() { assert_(); return *po_->get_value_(pn_); }
-				inline const V & operator*() const { assert_(); return *po_->get_value_(pn_); }
+				inline uint32_t operator*() const { assert_(); return po_->node_ptr_(pn_)->valueId_; }
 
 
-				template<class V2, class T2, class U2>
-				inline bool operator ==(const iterator_t_<V2, T2, U2> &o) const
+				template<class U2>
+				inline bool operator ==(const iterator_t_<U2> &o) const
 				{
 					if (o.po_ != po_ || !po_ || !o.po_)
 						return false;
 					return pn_ == o.pn_;
 				}
-				template<class V2, class T2, class U2>
-				inline bool operator !=(const iterator_t_<V2, T2, U2> &o) const
+				template<class U2>
+				inline bool operator !=(const iterator_t_<U2> &o) const
 				{
 					if (!po_ || !o.po_)
 						return true;
@@ -735,37 +812,141 @@ namespace zenith
 				}
 			};
 
-			
-			dtrie_id(const dtrie_id &d) = delete;
-			dtrie_id(dtrie_id &&d) = delete;
-			dtrie_id &operator =(const dtrie_id &d) = delete;
-			dtrie_id &operator =(dtrie_id &&d) = delete;
-
+			inline void clear_()
+			{
+				if (bufferPtr_)
+					delete[] bufferPtr_;
+				bufferPtr_ = nullptr;
+				bufferSize_ = 0;
+				stackLeft_ = stackRight_ = nullptr;
+				valueTop_ = 0;
+			}
+			inline void init_(uint32_t sz)
+			{
+				clear_();
+				if (sz > 0)
+				{
+					resize_buffer_(sz);
+					create_root_node_();
+				}
+			}
+			inline bool valid_() const
+			{
+				return (bufferPtr_ != nullptr) && (bufferSize_ > 0);
+			}
+			inline void assert_() const
+			{
+				if (!valid_())
+					throw DTrieInvalidUseException("dtrie_id::assert failed: dtrie is not initialized.");
+			}
 		public:
 
-			typedef iterator_t_<dtrie_id_node_, object_type> iterator;
-			typedef iterator_t_<const dtrie_id_node_, const object_type> const_iterator;
+			typedef iterator_t_<object_type> iterator;
+			typedef iterator_t_<const object_type> const_iterator;
+			/*
+			void debug_output() const
+			{
+				const dtrie_id_node_ * p = reinterpret_cast<const dtrie_id_node_ *>(stackRight_);
+				const dtrie_id_node_ * pEnd = reinterpret_cast<const dtrie_id_node_ *>(bufferPtr_ + bufferSize_);
+				while (p < pEnd)
+				{
+					std::cout << "parent: " << p->dagParent_ << "; dagBegin: " << p->dagBegin_ 
+						<< "; key0: " << p->key0Begin_ << "; dagNum: " << p->dagNum_ << "\n";
+					p++;
+				}
+			}
+			*/
 
 			~dtrie_id()
 			{
-				delete[] bufferPtr_;
+				clear_();
 			}
 			dtrie_id(uint32_t capacityNodes = 5, uint32_t capactityKeys = 100)
 				: bufferPtr_(nullptr), bufferSize_(0), valueTop_(0)
 			{
-				resize_buffer_(capacityNodes * NodeSize + capactityKeys * KeySize);
-				create_root_node_();
+				init_(capacityNodes * NodeSize + capactityKeys * KeySize);				
 			}
-			/*
-			inline iterator begin() { return iterator(next_vnode_(root_()), this); }
-			inline const_iterator begin() const { return const_iterator(next_vnode_(root_()), this); }
-			inline iterator end() { return iterator(nullptr, this); }
-			inline const_iterator end() const { return const_iterator(nullptr, this); }
-			*/
+
+			dtrie_id(const dtrie_id &d)
+			{
+				bufferSize_ = d.bufferSize_;
+				bufferPtr_ = new uint8_t[d.bufferSize_];
+				stackLeft_ = bufferPtr_ + (d.stackLeft_ - d.bufferPtr_);
+				stackRight_ = bufferPtr_ + (d.stackRight_ - d.bufferPtr_);
+				valueTop_ = d.valueTop_;
+				memcpy_s(bufferPtr_, bufferSize_, d.bufferPtr_, d.bufferSize_);
+			}
+			dtrie_id(dtrie_id &&d)
+			{
+				bufferPtr_ = d.bufferPtr_; d.bufferPtr_ = nullptr;
+				bufferSize_ = d.bufferSize_; d.bufferSize_ = 0;
+				stackLeft_ = d.stackLeft_;
+				stackRight_ = d.stackRight_;
+				valueTop_ = d.valueTop_;
+
+				d.stackLeft_ = d.stackRight_ = nullptr;
+				d.valueTop_ = 0;
+			}
+			dtrie_id &operator =(const dtrie_id &d)
+			{
+				clear_();
+				bufferSize_ = d.bufferSize_;
+				bufferPtr_ = new uint8_t[d.bufferSize_];
+				stackLeft_ = bufferPtr_ + (d.stackLeft_ - d.bufferPtr_);
+				stackRight_ = bufferPtr_ + (d.stackRight_ - d.bufferPtr_);
+				valueTop_ = d.valueTop_;
+				memcpy_s(bufferPtr_, bufferSize_, d.bufferPtr_, d.bufferSize_);
+				return *this;
+			}
+			dtrie_id &operator =(dtrie_id &&d)
+			{
+				clear_();
+				bufferPtr_ = d.bufferPtr_; d.bufferPtr_ = nullptr;
+				bufferSize_ = d.bufferSize_; d.bufferSize_ = 0;
+				stackLeft_ = d.stackLeft_;
+				stackRight_ = d.stackRight_;
+				valueTop_ = d.valueTop_;
+
+				d.stackLeft_ = d.stackRight_ = nullptr;
+				d.valueTop_ = 0;
+				return *this;
+			}
+
+			inline uint32_t capacity() const { return bufferSize_; }
+			void clear(uint32_t capacityNodes = 5, uint32_t capactityKeys = 100)
+			{
+				clear_();
+				init_(capacityNodes * NodeSize + capactityKeys * KeySize);
+			}
+			
+			inline iterator begin()
+			{
+				assert_();
+				auto p = next_vnode_(this, root_());
+				if (!p)
+					return iterator(NoValueId, this);
+				return iterator(node_idx_(p), this);
+			}
+			inline const_iterator begin() const
+			{
+				assert_();
+				auto p = next_vnode_(this, root_());
+				if (!p)
+					return iterator(NoValueId, this);
+				return iterator(node_idx_(p), this);
+			}
+			inline iterator end() { return iterator(NoValueId, this); }
+			inline const_iterator end() const { return const_iterator(NoValueId, this); }
+			
 
 			inline uint32_t add(const KeyType * key)
 			{
+				assert_();
 				_SearchRes sr;
+
+				auto pfkl = key; while (*pfkl++);
+				uint32_t keyLength = static_cast<uint32_t>(pfkl - key - 1);
+
 				auto pp = search_(this, root_(), key, sr);
 				if (sr == _SearchRes::EXACT)
 				{
@@ -797,7 +978,7 @@ namespace zenith
 						uint32_t adv = match_(this, pn, pk, mr);
 						auto pkl = pk; while (*pkl++);pkl--;
 						split_node_(pnId, adv);
-						add_node_(pnId, pk + adv, uint32_t(pkl - pk - adv));
+						add_node_(pnId, pk + adv, uint32_t(pkl - pk - adv), key, keyLength);
 						_SearchRes sloc;
 						auto pp = search_(this, root_(), key, sloc);
 						if (sloc != _SearchRes::EXACT || pp.first->valueId_ != NoValueId)
@@ -808,7 +989,7 @@ namespace zenith
 					else if (sr == _SearchRes::ADD_NODE)
 					{
 						auto pkl = pk; while (*pkl++);pkl--;
-						add_node_(pnId, pk, uint32_t(pkl - pk));
+						add_node_(pnId, pk, uint32_t(pkl - pk), key, keyLength);
 						_SearchRes sloc;
 						auto pp = search_(this, root_(), key, sloc);
 						if (sloc != _SearchRes::EXACT || pp.first->valueId_ != NoValueId)
@@ -821,6 +1002,7 @@ namespace zenith
 			}
 			inline void remove(const KeyType * key)
 			{
+				assert_();
 				_SearchRes sr;
 				auto pp = search_(this, root_(), key, sr);
 				if (sr != _SearchRes::EXACT)
@@ -831,15 +1013,175 @@ namespace zenith
 			}
 			inline bool exists(const KeyType * key) const
 			{
+				assert_();
 				return search_value_(key) != NoValueId;
 			}
 			inline uint32_t get(const KeyType * key)
 			{
+				assert_();
 				return search_value_(key);
 			}
 			inline uint32_t get(const KeyType * key) const
 			{
+				assert_();
 				return search_value_(key);
+			}
+		};
+
+		template<class ValueType, class KeyType>
+		class dtrie_vec
+		{
+		public:
+			typedef ValueType value_type;
+			typedef KeyType key_elem_type;
+			typedef const KeyType * key_type;
+			typedef dtrie_vec<ValueType, KeyType> object_type;
+		private:
+			std::vector<ValueType> vals_;
+			dtrie_id<KeyType> ids_;
+
+			template<class V, class U, class It>
+			class iterator_t_
+			{
+				friend class dtrie_vec;
+				It iter_;
+				U * po_ = nullptr;
+
+				iterator_t_(U * po, It iter) : po_(po), iter_(iter) {}
+				inline bool check_() const
+				{
+					return (po_ != nullptr) && iter_.valid();
+				}
+				inline void assert_() const
+				{
+					if (!check_())
+						throw DTrieInvalidIteratorException();
+				}
+				inline void short_assert_() const
+				{
+					if (!po_)
+						throw DTrieInvalidIteratorException();
+				}
+			public:
+				typedef ValueType value_type;
+				typedef const KeyType * key_type;
+
+				iterator_t_() : po_(nullptr) {}
+				iterator_t_(const iterator_t_ &t) : iter_(t.iter_), po_(t.po_) {}
+				iterator_t_(iterator_t_ &&t) : iter_(std::move(t.iter_)), po_(t.po_) {}
+				iterator_t_ &operator =(const iterator_t_ &t) { iter_ = t.iter_; po_ = t.po_; return *this; }
+				iterator_t_ &operator =(iterator_t_ &&t) { iter_ = std::move(t.iter_); po_ = t.po_; return *this; }
+
+				inline bool valid() const { return check_(); }
+
+
+				inline const KeyType * key() const { short_assert_(); return iter_.key(); }
+				inline const V &value() const { short_assert_(); return po_->vals_.at(iter_.value()); }
+				inline V &value() { short_assert_(); return po_->vals_.at(iter_.value()); }
+
+				inline std::pair<const KeyType *, ValueType &> pair() { return std::pair<const KeyType *, ValueType &>(key(), value()); }
+				inline std::pair<const KeyType *, const ValueType &> pair() const { return std::pair<const KeyType *, const ValueType &>(key(), value()); }
+
+				inline iterator_t_<V, U, It> next() { return iterator_t_<V, U, It>(po_, iter_.next()); }
+				inline iterator_t_<const V, const U, const It> next() const { return iterator_t_<const V, const U, const It>(po_, iter_.next()); }
+
+				//prefix
+				inline iterator_t_<V, U, It> &operator++() { ++iter_; return *this; }
+				//postfix
+				inline iterator_t_<V, U, It> operator++(int) { auto p = pn_; ++iter_; return iterator_t_<V,U,It>(po_, p); }
+				
+				inline std::pair<const KeyType *, ValueType &> operator*() { return pair(); }
+				inline std::pair<const KeyType *, const ValueType &> operator*() const { return pair(); }
+
+				template<class V2, class U2, class It2>
+				inline bool operator ==(const iterator_t_<V2, U2, It2> &o) const
+				{
+					if (o.po_ != po_ || !po_ || !o.po_)
+						return false;
+					return iter_ == o.iter_;
+				}
+				template<class V2, class U2, class It2>
+				inline bool operator !=(const iterator_t_<V2,U2,It2> &o) const
+				{
+					if (!po_ || !o.po_)
+						return true;
+					if (po_ != o.po_)
+						return true;
+					return iter_ != o.iter_;
+				}
+			};
+
+		public:
+			typedef iterator_t_<ValueType, object_type, typename dtrie_id<KeyType>::iterator> iterator;
+			typedef iterator_t_<const ValueType, const object_type, typename dtrie_id<KeyType>::const_iterator> const_iterator;
+
+			~dtrie_vec()
+			{
+			}
+			dtrie_vec(uint32_t capacityNodes = 5, uint32_t capactityKeys = 100)
+				: ids_(capacityNodes, capactityKeys)
+			{
+				vals_.reserve(capacityNodes);
+			}
+
+			inline dtrie_vec(const dtrie_vec &d) : ids_(d.ids_), vals_(d.vals_) {}
+			inline dtrie_vec(dtrie_vec &&d) : ids_(std::move(d.ids_)), vals_(std::move(d.vals_)) {}
+			dtrie_vec &operator =(const dtrie_vec &d)
+			{
+				ids_ = d.ids_; vals_ = d.vals_;
+				return *this;
+			}
+			dtrie_vec &operator =(dtrie_vec &&d)
+			{
+				ids_ = std::move(d.ids_); vals_ = std::move(d.vals_);
+				return *this;
+			}
+
+			inline uint32_t dtrie_capacity() const { return ids_.capacity(); }
+			inline uint32_t vec_capacity() const { return vals_.capacity(); }
+			void clear(uint32_t capacityNodes = 5, uint32_t capactityKeys = 100)
+			{
+				ids_.clear(capacityNodes, capacityKeys);
+				vals_.clear();
+				vals_.reserve(capacityNodes);
+			}
+			inline iterator begin()	{ return iterator(this, ids_.begin());}
+			inline const_iterator begin() const { return iterator(this, ids_.begin()); }
+			inline iterator end() { return iterator(this, ids_.end()); }
+			inline const_iterator end() const { return const_iterator(this, ids_.end()); }
+			
+
+			inline void add(const KeyType * key, ValueType &&v)
+			{
+				uint32_t id = ids_.add(key);
+				if (id != vals_.size())
+					throw DTrieInvalidUseException("dtrie_vec::add(): unexpected uid. Dtrie_vec invalidated.");
+				vals_.emplace_back(std::move(v));
+			}
+			inline void add(const KeyType * key, const ValueType &v)
+			{
+				uint32_t id = ids_.add(key);
+				if (id != vals_.size())
+					throw DTrieInvalidUseException("dtrie_vec::add(): unexpected uid. Dtrie_vec invalidated.");
+				vals_.emplace_back(v);
+			}
+			inline uint32_t size() const
+			{
+				return vals_.size();
+			}
+			inline bool exists(const KeyType * key) const
+			{
+				return ids_.exists(key);
+			}
+			inline ValueType &get(const KeyType * key)
+			{
+				uint32_t id = ids_.get(key);
+				return vals_.at(id);
+			}
+			inline const ValueType &get(const KeyType * key) const
+			{
+				uint32_t id = ids_.get(key);
+				return vals_.at(id);
 			}
 		};
 	}
