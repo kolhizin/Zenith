@@ -127,6 +127,8 @@
     </Xml>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Utils\buffer.h" />
+    <ClInclude Include="..\..\Source\Utils\hdict.h" />
     <ClInclude Include="..\..\Source\Utils\ioconv\input_alg.h" />
     <ClInclude Include="..\..\Source\Utils\ioconv\input_objmap.h" />
     <ClInclude Include="..\..\Source\Utils\ioconv\input_xml.h" />

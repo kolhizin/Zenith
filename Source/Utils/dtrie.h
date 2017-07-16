@@ -1,5 +1,5 @@
 #pragma once
-#include "log_config.h"
+#include <exception>
 #include <vector>
 
 namespace zenith
@@ -1167,7 +1167,7 @@ namespace zenith
 			}
 			inline uint32_t size() const
 			{
-				return vals_.size();
+				return static_cast<uint32_t>(vals_.size());
 			}
 			inline bool exists(const KeyType * key) const
 			{

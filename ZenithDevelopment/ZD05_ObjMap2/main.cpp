@@ -4,6 +4,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <chrono>
 #include <thread>
 #include <pugixml\pugixml.hpp>
@@ -25,6 +26,7 @@
 
 #include <Utils\prefix_dag.h>
 #include <Utils\dtrie.h>
+#include <Utils\hdict.h>
 //using namespace zenith::util::ioconv;
 
 struct TestPoint
@@ -454,12 +456,8 @@ inline std::string genRndString()
 	return rnd;
 }
 
-int main()
+void test_perf_dtrie()
 {
-	//test_ioconv();
-	//test_prefix_dag();
-	//test_dtrie_vec();
-	
 	uint32_t NumInserted = 30000;
 	uint32_t NumOut = 30000;
 
@@ -481,12 +479,12 @@ int main()
 	0.5: 237 v 84  | 2.8x slower
 	0.9: 205 v 60  | 3.4x slower
 	*/
-	
+
 	std::vector<std::string> inNames;
 	std::vector<std::string> outNames;
 
 	std::vector<std::string> testNames;
-	
+
 	std::cout << "Generating dictionaries..\n";
 	inNames.reserve(NumInserted);
 	uint32_t numCycles = 0;
@@ -549,7 +547,7 @@ int main()
 
 	auto dtrie_start = std::chrono::high_resolution_clock::now();
 	for (uint32_t i = 0; i < TestSize; i++)
-	{		
+	{
 		if (!dtrie_vals.exists(testNames[i].c_str()))
 			continue;
 		sum1 += dtrie_vals.get(testNames[i].c_str());
@@ -574,8 +572,501 @@ int main()
 	double map_time = std::chrono::duration_cast<std::chrono::milliseconds>(map_end - map_start).count();
 	std::cout << "Time by dtrie_vec = " << dtrie_time << "\n";
 	std::cout << "Time by map = " << map_time << "\n";
+}
 
-	std::cout << "\nClosing...";
-	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+struct TestResult
+{
+	int result;
+	int num_false_in, num_false_out;
+	double insert_time;
+	double check_in_time, check_out_time;
+	double get_time;
+};
+
+std::map<std::string, TestResult> test_maps(uint32_t mapSize, uint32_t numTests, uint32_t numGet, double pGetIn)
+{
+	std::list<std::map<std::string, int>> stl_maps;
+	std::list<std::unordered_map<std::string, int>> stl_hash_maps;
+	std::list<zenith::util::dtrie_vec<int, char>> zenith_dtries;
+	std::list<zenith::util::hdict<int>> zenith_hdicts;
+	std::map<std::string, TestResult> result;
+	result.emplace(std::pair<std::string, TestResult>("stl_map", TestResult()));
+	result.emplace(std::pair<std::string, TestResult>("stl_hash_map", TestResult()));
+	result.emplace(std::pair<std::string, TestResult>("zenith_dtrie", TestResult()));
+	result.emplace(std::pair<std::string, TestResult>("zenith_hdict", TestResult()));
+
+	std::unordered_set<std::string> inSet;
+
+	std::list<std::vector<std::string>> inNames;
+	std::list<std::vector<int>> inVals;
+	std::list<std::vector<std::string>> outNames;
+
+	std::list<std::vector<std::string>> testNames;
+
+	std::cout << "Creating test data...\n";
+
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		inSet.clear();
+		inNames.emplace_back();
+		inVals.emplace_back();
+		outNames.emplace_back();
+		testNames.emplace_back();
+		auto &in = inNames.back();
+		auto &inVal = inVals.back();
+		auto &out = outNames.back();
+		auto &test = testNames.back();
+
+		in.reserve(mapSize);
+		out.reserve(mapSize);
+		test.reserve(numGet);
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			auto rnd = genRndString();
+			while (inSet.find(rnd) != inSet.end())
+				rnd = genRndString();
+			in.push_back(rnd);
+			inVal.push_back(std::rand() % 101 - 50);
+			inSet.insert(rnd);
+		}
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			auto rnd = genRndString();
+			while (inSet.find(rnd) != inSet.end())
+				rnd = genRndString();
+			out.push_back(rnd);
+		}
+		for (uint32_t j = 0; j < numGet; j++)
+		{
+			double pVal = double(std::rand() % 10000) * 0.0001;
+			uint32_t ind = std::rand() % mapSize;
+			if (pVal < pGetIn)
+				test.push_back(in[ind]);
+			else
+				test.push_back(out[ind]);
+		}
+	}
+
+	auto t_start = std::chrono::high_resolution_clock::now();
+	auto t_end = t_start;
+	auto in_iter = inNames.begin();
+	auto iv_iter = inVals.begin();
+	auto out_iter = outNames.begin();
+	uint32_t num_in_fails = 0, num_out_fails = 0;
+
+	std::cout << "Creating std::map...\n";
+	//stl map insert
+	in_iter = inNames.begin();
+	iv_iter = inVals.begin();
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		stl_maps.emplace_back();
+		auto &m = stl_maps.back();
+		const auto &vn = *in_iter;
+		const auto &vv = *iv_iter;
+		for(uint32_t j = 0; j < mapSize; j++)
+			m.insert(std::pair<std::string, int>(vn[j], vv[j]));
+		++in_iter;
+		++iv_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["stl_map"].insert_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+
+
+	std::cout << "Creating std::unordered_map...\n";
+	//stl hash map insert
+	in_iter = inNames.begin();
+	iv_iter = inVals.begin();
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		stl_hash_maps.emplace_back();
+		auto &m = stl_hash_maps.back();
+		const auto &vn = *in_iter;
+		const auto &vv = *iv_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+			m.insert(std::pair<std::string, int>(vn[j], vv[j]));
+		++in_iter;
+		++iv_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["stl_hash_map"].insert_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+
+
+	std::cout << "Creating zenith::dtrie...\n";
+	//zenith dtrie insert
+	in_iter = inNames.begin();
+	iv_iter = inVals.begin();
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		zenith_dtries.emplace_back();
+		auto &m = zenith_dtries.back();
+		const auto &vn = *in_iter;
+		const auto &vv = *iv_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+			m.add(vn[j].c_str(), vv[j]);
+		++in_iter;
+		++iv_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["zenith_dtrie"].insert_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+
+
+	std::cout << "Creating zenith::hdict...\n";
+	//zenith hdict insert
+	in_iter = inNames.begin();
+	iv_iter = inVals.begin();
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		zenith_hdicts.emplace_back();
+		auto &m = zenith_hdicts.back();
+		const auto &vn = *in_iter;
+		const auto &vv = *iv_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+			m.add(vn[j].c_str(), vv[j]);
+		++in_iter;
+		++iv_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["zenith_hdict"].insert_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+
+	//////////////////////////////
+	//Test in correctness
+	//////////////////////////////
+
+	std::cout << "Testing in-check std::map...\n";
+	//stl map check
+	in_iter = inNames.begin();
+	auto tm_iter = stl_maps.begin();
+	num_in_fails = 0; num_out_fails = 0;
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tm_iter;
+		const auto &vin = *in_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			if (m.find(vin[j]) == m.end())
+				num_in_fails++;
+		}
+		++in_iter;
+		++tm_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["stl_map"].check_in_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["stl_map"].num_false_in = num_in_fails;
+
+
+	std::cout << "Testing in-check std::unordered_map...\n";
+	//stl hash map check
+	in_iter = inNames.begin();
+	auto thm_iter = stl_hash_maps.begin();
+	num_in_fails = 0; num_out_fails = 0;
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *thm_iter;
+		const auto &vin = *in_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			if (m.find(vin[j]) == m.end())
+				num_in_fails++;
+		}
+		++in_iter;
+		++thm_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["stl_hash_map"].check_in_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["stl_hash_map"].num_false_in = num_in_fails;
+
+
+	std::cout << "Testing in-check zenith::dtrie...\n";
+	//zenith dtrie check
+	in_iter = inNames.begin();
+	auto tzt_iter = zenith_dtries.begin();
+	num_in_fails = 0; num_out_fails = 0;
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tzt_iter;
+		const auto &vin = *in_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			if (!m.exists(vin[j].c_str()))
+				num_in_fails++;
+		}
+		++in_iter;
+		++tzt_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["zenith_dtrie"].check_in_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["zenith_dtrie"].num_false_in = num_in_fails;
+
+
+	std::cout << "Testing in-check zenith::hdict...\n";
+	//zenith hdict check
+	in_iter = inNames.begin();
+	auto tzh_iter = zenith_hdicts.begin();
+	num_in_fails = 0; num_out_fails = 0;
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tzh_iter;
+		const auto &vin = *in_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			if (!m.exists(vin[j].c_str()))
+				num_in_fails++;
+		}
+		++in_iter;
+		++tzh_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["zenith_hdict"].check_in_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["zenith_hdict"].num_false_in = num_in_fails;
+	
+
+	//////////////////////////////
+	//Test out correctness
+	//////////////////////////////
+
+	std::cout << "Testing out-check std::map...\n";
+	//stl map check
+	out_iter = outNames.begin();
+	tm_iter = stl_maps.begin();
+	num_in_fails = 0; num_out_fails = 0;
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tm_iter;
+		const auto &vout = *out_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			if (m.find(vout[j]) != m.end())
+				num_out_fails++;
+		}
+		++out_iter;
+		++tm_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["stl_map"].check_out_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["stl_map"].num_false_out = num_out_fails;
+
+
+	std::cout << "Testing out-check std::unordered_map...\n";
+	//stl hash map check
+	out_iter = outNames.begin();
+	thm_iter = stl_hash_maps.begin();
+	num_in_fails = 0; num_out_fails = 0;
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *thm_iter;
+		const auto &vout = *out_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			if (m.find(vout[j]) != m.end())
+				num_out_fails++;
+		}
+		++out_iter;
+		++thm_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["stl_hash_map"].check_out_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["stl_hash_map"].num_false_out = num_out_fails;
+
+
+	std::cout << "Testing out-check zenith::dtrie...\n";
+	//zenith dtrie check
+	out_iter = outNames.begin();
+	tzt_iter = zenith_dtries.begin();
+	num_in_fails = 0; num_out_fails = 0;
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tzt_iter;
+		const auto &vout = *out_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			if (m.exists(vout[j].c_str()))
+				num_out_fails++;
+		}
+		++out_iter;
+		++tzt_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["zenith_dtrie"].check_out_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["zenith_dtrie"].num_false_out = num_out_fails;
+
+
+	std::cout << "Testing out-check zenith::hdict...\n";
+	//zenith hdict check
+	out_iter = outNames.begin();
+	tzh_iter = zenith_hdicts.begin();
+	num_in_fails = 0; num_out_fails = 0;
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tzh_iter;
+		const auto &vout = *out_iter;
+		for (uint32_t j = 0; j < mapSize; j++)
+		{
+			if (m.exists(vout[j].c_str()))
+				num_out_fails++;
+		}
+		++out_iter;
+		++tzh_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["zenith_hdict"].check_out_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["zenith_hdict"].num_false_out = num_out_fails;
+
+
+	//////////////////////////////
+	//Test get correctness / speed
+	//////////////////////////////
+	auto t_iter = testNames.begin();
+	int64_t res_sum = 0;
+
+	std::cout << "Testing sum-check std::map...\n";
+	//stl map gets
+	res_sum = 0;
+	t_iter = testNames.begin();
+	tm_iter = stl_maps.begin();
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tm_iter;
+		const auto &v = *t_iter;
+		for (uint32_t j = 0; j < numGet; j++)
+			if (m.find(v[j]) != m.end())
+				res_sum += m.at(v[j]);
+
+		++t_iter;
+		++tm_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["stl_map"].get_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["stl_map"].result = res_sum;
+
+
+	std::cout << "Testing sum-check std::unordered_map...\n";
+	//stl hash map gets
+	res_sum = 0;
+	t_iter = testNames.begin();
+	thm_iter = stl_hash_maps.begin();
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *thm_iter;
+		const auto &v = *t_iter;
+		for (uint32_t j = 0; j < numGet; j++)
+			if (m.find(v[j]) != m.end())
+				res_sum += m.at(v[j]);
+
+		++t_iter;
+		++thm_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["stl_hash_map"].get_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["stl_hash_map"].result = res_sum;
+
+
+
+
+	std::cout << "Testing sum-check zenith::dtrie...\n";
+	//zenith dtrie gets
+	res_sum = 0;
+	t_iter = testNames.begin();
+	tzt_iter = zenith_dtries.begin();
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tzt_iter;
+		const auto &v = *t_iter;
+		for (uint32_t j = 0; j < numGet; j++)
+			if (m.exists(v[j].c_str()))
+				res_sum += m.get(v[j].c_str());
+
+		++t_iter;
+		++tzt_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["zenith_dtrie"].get_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["zenith_dtrie"].result = res_sum;
+
+
+	std::cout << "Testing sum-check zenith::hdict...\n";
+	//zenith hdict gets
+	res_sum = 0;
+	t_iter = testNames.begin();
+	tzh_iter = zenith_hdicts.begin();
+	t_start = std::chrono::high_resolution_clock::now();
+	for (uint32_t i = 0; i < numTests; i++)
+	{
+		auto &m = *tzh_iter;
+		const auto &v = *t_iter;
+		for (uint32_t j = 0; j < numGet; j++)
+			if (m.exists(v[j].c_str()))
+				res_sum += m.get(v[j].c_str());
+
+		++t_iter;
+		++tzh_iter;
+	}
+	t_end = std::chrono::high_resolution_clock::now();
+	result["zenith_hdict"].get_time = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count();
+	result["zenith_hdict"].result = res_sum;
+
+
+	std::cout << "Test finished.\n\n";
+	return result;
+}
+
+void test_hdict()
+{
+	zenith::util::hdict<int> vals;
+	vals.add("abc", 7);
+	vals.add("cde", 8);
+	vals.add("fgh", 9);
+	vals.add("xyz", 10);
+	vals.add("qwe", 11);
+	vals.add("rts", 12);
+	std::cout << "fgh: " << vals.get("fgh") << "\n";
+	std::cout << "cde: " << vals.get("cde") << "\n";
+	std::cout << "abc: " << vals.get("abc") << "\n";
+	std::cout << "xyz: " << vals.get("xyz") << "\n";
+	std::cout << "qwe: " << vals.get("qwe") << "\n";
+}
+
+void output_result(const std::map<std::string, TestResult> &r)
+{
+	for (const auto &x : r)
+	{
+		const auto &z = x.second;
+		std::cout << x.first << ": ";
+		std::cout << "\tinit(" << z.insert_time << ") ";
+		std::cout << "\tcheck in/out(" << z.check_in_time << " / " << z.check_out_time << ") ";
+		std::cout << "\tget sum(" << z.get_time << ")\t";
+		std::cout << x.first << ": ";
+		std::cout << "result(" << z.result << ") ";
+		std::cout << "errors(" << z.num_false_in << " / " << z.num_false_out << ")\n";
+	}
+}
+
+int main()
+{
+	//test_ioconv();
+	//test_prefix_dag();
+	//test_dtrie_vec();
+
+	auto res = test_maps(1000, 3000, 5000, 0.99);
+	output_result(res);
+	
+	std::cout << "\nFinished\nEnter anything";
+	char q;
+	std::cin >> q;
 	return 0;
 }
