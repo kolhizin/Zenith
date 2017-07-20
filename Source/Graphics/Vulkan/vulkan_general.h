@@ -181,5 +181,63 @@ namespace zenith
 				obj_ = VK_NULL_HANDLE;
 			}
 		};
+
+		template<class T>
+		class vAutoArray
+		{
+			vAutoArray(const vAutoArray<T> &) = delete;
+			vAutoArray<T> &operator =(const vAutoArray<T> &) = delete;
+		public:
+			typedef  void(__stdcall*PFN_DELETE)(VkDevice dev, T handle, const VkAllocationCallbacks * pA);
+
+			inline vAutoArray(uint32_t num, PFN_DELETE deleter, VkDevice dev, const VkAllocationCallbacks * pA = nullptr) : deleter_(deleter), dev_(dev), pA_(pA), size_(num)
+			{
+				obj_ = new T[size_];
+				for (uint32_t i = 0; i < size_; i++)
+					obj_[i] = VK_NULL_HANDLE;
+			}
+			inline vAutoArray(vAutoArray<T> &&v) : deleter_(v.deleter_), dev_(v.dev_), pA_(v.pA_), obj_(v.obj_), size_(v.size_)
+			{
+				v.obj_ = nullptr;
+				v.size_ = 0;
+			}
+			inline vAutoArray<T> &operator =(vAutoArray<T> &&v)
+			{
+				free_();
+				dev_ = v.dev_;
+				pA_ = v.pA_;
+				deleter_ = v.deleter_;
+				obj_ = v.obj_;
+				size_ = v.size_;
+				v.obj_ = nullptr;
+				v.size_ = 0;
+			}
+			inline ~vAutoArray() { free_(); }
+			inline uint32_t size() const { return size_; }
+			inline T &operator[](uint32_t i) { return obj_[i]; }
+			inline const T &operator[](uint32_t i) const { return obj_[i]; }
+
+			inline T &at(uint32_t i) { return if (i < size_)obj_[i];else throw VulkanException("vAutoArray::at(): out of bounds."); }
+			inline const T &at(uint32_t i) const { return if (i < size_)obj_[i];else throw VulkanException("vAutoArray::at(): out of bounds."); }
+		private:
+			PFN_DELETE deleter_;
+			VkDevice dev_;
+			const VkAllocationCallbacks * pA_;
+			uint32_t size_ = 0;
+			T * obj_;
+
+			inline void free_()
+			{
+				if (obj_ && size_ > 0)
+				{
+					for(uint32_t i = 0; i < size_; i++)
+						if(obj_[i] != VK_NULL_HANDLE)
+							deleter_(dev_, obj_[i], pA_);
+					delete[] obj_;
+				}
+				obj_ = nullptr;
+				size_ = 0;
+			}
+		};
 	}
 }

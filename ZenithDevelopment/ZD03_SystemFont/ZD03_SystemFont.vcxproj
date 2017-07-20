@@ -129,6 +129,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Graphics\General\ggPipeline.h" />
+    <ClInclude Include="..\..\Source\Graphics\General\ggPipelineBase.h" />
+    <ClInclude Include="..\..\Source\Graphics\General\ggPipelineFixedFunction.h" />
+    <ClInclude Include="..\..\Source\Graphics\General\ggPipelineLayout.h" />
     <ClInclude Include="..\..\Source\Graphics\General\ggPipelineResource.h" />
     <ClInclude Include="..\..\Source\Graphics\General\ggraphics_base.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\spirv-reflection.h" />
@@ -138,6 +142,7 @@
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vInstance.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vMemoryBase.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vMemoryManager.h" />
+    <ClInclude Include="..\..\Source\Graphics\Vulkan\vPipelineUtils.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vSampler.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vSurface.h" />
     <ClInclude Include="..\..\Source\Graphics\Vulkan\vSwapchain.h" />
@@ -161,6 +166,7 @@
     <ClCompile Include="..\..\Source\Graphics\Vulkan\vInstance.cpp" />
     <ClCompile Include="..\..\Source\Graphics\Vulkan\vMemoryBase.cpp" />
     <ClCompile Include="..\..\Source\Graphics\Vulkan\vMemoryManager.cpp" />
+    <ClCompile Include="..\..\Source\Graphics\Vulkan\vPipelineUtils.cpp" />
     <ClCompile Include="..\..\Source\Graphics\Vulkan\vSampler.cpp" />
     <ClCompile Include="..\..\Source\Graphics\Vulkan\vSurface.cpp" />
     <ClCompile Include="..\..\Source\Graphics\Vulkan\vSwapchain.cpp" />
@@ -174,7 +180,9 @@
     <None Include="..\..\Source\Graphics\Vulkan\vUtil_Enums.h.orig" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="SystemFont_Config.xml" />
+    <Xml Include="SystemFont_Config.xml">
+      <SubType>Designer</SubType>
+    </Xml>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

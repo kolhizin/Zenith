@@ -1039,6 +1039,11 @@ void test_hdict()
 	std::cout << "abc: " << vals.get("abc") << "\n";
 	std::cout << "xyz: " << vals.get("xyz") << "\n";
 	std::cout << "qwe: " << vals.get("qwe") << "\n";
+
+	for (auto it = vals.find("qwe"); it != vals.end(); ++it)
+	{
+		std::cout << "name: " << it.key() << "\t\tvalue: " << it.value() << "\n";
+	}
 }
 
 void output_result(const std::map<std::string, TestResult> &r)
@@ -1061,9 +1066,11 @@ int main()
 	//test_ioconv();
 	//test_prefix_dag();
 	//test_dtrie_vec();
-
+	test_hdict();
+	/*
 	auto res = test_maps(1000, 3000, 5000, 0.99);
 	output_result(res);
+	*/
 	
 	std::cout << "\nFinished\nEnter anything";
 	char q;

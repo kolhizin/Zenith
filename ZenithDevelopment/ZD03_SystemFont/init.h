@@ -14,7 +14,8 @@
 #include <Utils/FileFormat/ff_img.h>
 #include <Utils\ioconv\io_config.h>
 #include <Utils\ioconv\input_xml.h>
-#include <Graphics\General\ggPipelineResource.h>
+#include <Graphics\General\ggPipelineLayout.h>
+#include <Graphics\General\ggPipelineFixedFunction.h>
 #include <chrono>
 #include <thread>
 #include <string>
@@ -84,6 +85,9 @@ extern VkCommandBuffer comBuffers[3];
 extern VkSemaphore imageAvailableSemaphore, renderFinishedSemaphore;
 
 extern zenith::vulkan::vBufferAutoImpl_ * vertexBuffer, *indexBuffer, *cameraUniformBuffer;
+
+extern zenith::gengraphics::ggPipelineLayout pplLayout;
+extern zenith::gengraphics::ggPipelineProgramFixed pplFixed;
 
 extern std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> texture, depthMap;
 extern zenith::vulkan::vSamplerImpl_ * sampler;
@@ -168,7 +172,6 @@ void createFramebuffer(VkImageView v, VkFramebuffer &fb);
 void createShaderModule(const char * code, size_t codeSize, VkShaderModule &shMod, VkPipelineShaderStageCreateInfo &sci, VkShaderStageFlagBits shaderStage);
 void createInputAssembly(VkPipelineVertexInputStateCreateInfo &vis, VkPipelineInputAssemblyStateCreateInfo &ias);
 void createViewport(VkPipelineViewportStateCreateInfo &pvs, VkViewport &viewport, VkRect2D &scissor);
-void createRasterization(VkPipelineRasterizationStateCreateInfo &prs, VkPipelineMultisampleStateCreateInfo &pms);
 void createPipelineLayout(VkPipelineLayout &pl);
 void createColorBlend(VkPipelineColorBlendAttachmentState &pcbas, VkPipelineColorBlendStateCreateInfo &pcbs_ci);
 void createRenderPass(VkRenderPass &rp);

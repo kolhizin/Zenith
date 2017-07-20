@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <SystemFontConfig>
   <Settings>
-    <log enable="true" filename="TerrainViewer.log"/>
+    <log enable="true" filename="SystemFont.log"/>
     <shaders vertex="../../Resource/Shaders/ZD03/vert.spv" fragment="../../Resource/Shaders/ZD03/frag.spv"/>
     <texture fname="../../Resource/Texture/EmptyRGB.zimg" />
     <font fname="../../Resource/Fonts/Lucida_std.zfnt"/>
-    <pipeline type="TEXTURE" stages="VERTEX_SHADER|PIXEL_SHADER">
-      <location index="1" group="0" />
-    </pipeline>
+    <layout>
+      <resource name="uboMVP" type="UNIFORM_BUFFER" dynamic="false" stages="VERTEX_SHADER">
+        <binding location="0" group="0" />
+      </resource>
+      <resource name="texDiffuse" type="COMBINED_TEXTURE_SAMPLER" stages="VERTEX_SHADER|PIXEL_SHADER">
+        <binding location="1" group="0" />
+      </resource>      
+    </layout>
+    <fixed>
+      <rasterize faceDef="COUNTER_CLOCKWISE" cullMode="BACK"/>
+      <depth fTest="true" fWrite="true" compareOp="LESS"/>
+    </fixed>
   </Settings>    
   <Window name="mainWnd">
     <size width="640" height="480"/>

@@ -177,6 +177,24 @@ namespace zenith
 					++it;
 				}
 			}
+			template<class It, class Cont>
+			inline void input_named_multiple_charmap(Cont &cont, const It &iter, const char * key, const char * value_key, PresenceType presence = PresenceType::ZERO_PLUS)
+			{
+				static const uint32_t BUFF_SIZE = 1024;
+				char buff[BUFF_SIZE];
+				auto p = iter.children(key);
+				ensure_multiple(std::move(p.first), std::move(p.second), presence);
+				auto it = p.first;
+				while (it != p.second)
+				{
+					typename Cont::mapped_type res_value;
+					typename Cont::key_type res_key = buff;
+					io_handler<char[BUFF_SIZE]>::input(buff, get_named_single(it, value_key));
+					io_handler<typename Cont::mapped_type>::input(res_value, it);
+					cont.insert(std::make_pair(res_key, std::move(res_value)));
+					++it;
+				}
+			}
 		}
 	}
 }

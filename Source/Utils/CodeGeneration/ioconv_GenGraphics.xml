@@ -22,6 +22,26 @@
           <val name="PIXEL_SHADER" value="256"/>
           <val name="RASTERIZER" value="1024"/>
         </enum>
+        <enum name="ggCullMode" qual="zenith::gengraphics">
+          <val name="NONE" value="0"/>
+          <val name="FRONT" value="1"/>
+          <val name="BACK" value="2"/>
+          <val name="FRONT_AND_BACK" value="3"/>
+        </enum>
+        <enum name="ggFaceDef" qual="zenith::gengraphics">
+          <val name="UNDEF" value="0"/>
+          <val name="CLOCKWISE" value="1"/>
+          <val name="COUNTER_CLOCKWISE" value="2"/>
+        </enum>
+        <enum name="ggCompareOp" qual="zenith::gengraphics">
+          <val name="UNDEF" value="0"/>
+          <val name="LESS" value="1"/>
+          <val name="LEQUAL" value="2"/>
+          <val name="GREATER" value="3"/>
+          <val name="GEQUAL" value="4"/>
+          <val name="EQUAL" value="5"/>
+          <val name="NEQUAL" value="6"/>
+        </enum>
         <enum name="ggPipelineObjectType" qual="zenith::gengraphics">
           <val name="UNDEF" value="0"/>
           <val name="PROGRAM"/>
@@ -34,8 +54,8 @@
           <val name="TEXTURE" value="1"/>
           <val name="SAMPLER" value="2"/>
           <val name="COMBINED_TEXTURE_SAMPLER" value="3"/>
-          <val name="UNIFORM_BUFFFER" value="4"/>
-          <val name="STORAGE_BUFFFER" value="8"/>
+          <val name="UNIFORM_BUFFER" value="4"/>
+          <val name="STORAGE_BUFFER" value="8"/>
         </enum>
         <enum name="ggBaseType" qual="zenith::gengraphics">
           <val name="UNDEF" value="0"/>
@@ -65,15 +85,33 @@
     </postfix>
     <namespace name="zenith">
       <namespace name="gengraphics">
-        <class name="ggPipelineResourceLocation" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
+        <class name="ggPipelineResourceBinding" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
           <var name="group" type="uint32_t" hint="ATTRIBUTE" grp-in="simple"/>
-          <var name="index" type="uint32_t" hint="ATTRIBUTE" grp-in="simple"/>
+          <var name="location" type="uint32_t" hint="ATTRIBUTE" grp-in="simple"/>
         </class>
         <class name="ggPipelineResourceDescriptor" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
-          <var name="location" type="ggPipelineResourceLocation" grp-in="complex"/>
+          <var name="binding" type="ggPipelineResourceBinding" grp-in="complex"/>
           <var name="type" type="ggPipelineResourceType" hint="ATTRIBUTE" grp-in="simple"/>
+          <var name="dynamic" type="bool" hint="ATTRIBUTE" grp-in="simple" default="false"/>
           <var name="stages" type="zenith::util::bitenum&lt;ggPipelineStage&gt;" hint="ATTRIBUTE" grp-in="simple"/>
-        </class>        
+        </class>
+
+        <class name="ggPipelineDepthProgramDescriptor" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="fTest" type="bool" hint="ATTRIBUTE" grp-in="simple" default="false"/>
+          <var name="fWrite" type="bool" hint="ATTRIBUTE" grp-in="simple" default="false"/>
+          <var name="compareOp" type="ggCompareOp" hint="ATTRIBUTE" grp-in="simple" default="zenith::gengraphics::ggCompareOp::LESS"/>
+        </class>
+        <class name="ggPipelineStencilProgramDescriptor" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="fTest" type="bool" hint="ATTRIBUTE" grp-in="simple" default="false"/>
+        </class>
+        <class name="ggPipelineRasterizeProgramDescriptor" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="fDiscard" type="bool" hint="ATTRIBUTE" grp-in="simple" default="false"/>
+          <var name="cullMode" type="ggCullMode" hint="ATTRIBUTE" grp-in="simple" default="zenith::gengraphics::ggCullMode::NONE"/>
+          <var name="faceDef" type="ggFaceDef" hint="ATTRIBUTE" grp-in="simple" default="zenith::gengraphics::ggFaceDef::CLOCKWISE"/>
+        </class>
+        <class name="ggPipelineMultisampleProgramDescriptor" qual="zenith::gengraphics" genOutput="1" genInput="1" genDef="1" classType="struct">
+          <var name="numSamples" type="uint32_t" hint="ATTRIBUTE" grp-in="simple" default="1"/>
+        </class>
       </namespace>
     </namespace>
   </file>

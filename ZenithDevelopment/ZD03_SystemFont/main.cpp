@@ -3,8 +3,6 @@
 #include <sstream>
 #include "Graphics\Vulkan\vMemoryManager.h"
 
-#include <Utils\dtrie.h>
-
 std::string moduleDir;
 
 void init()
@@ -87,8 +85,10 @@ void init()
 	}
 	auto resIMG0 = readFile(fnameTexture.c_str());
 
-	zenith::gengraphics::ggPipelineResourceDescriptor pdescr;
-	zenith::util::ioconv::input(pdescr, zenith::util::ioconv::input_xml_root(xSettings.child("pipeline")));
+
+	zenith::util::ioconv::input(pplLayout, zenith::util::ioconv::input_xml_root(xSettings.child("layout")));
+	zenith::util::ioconv::input(pplFixed, zenith::util::ioconv::input_xml_root(xSettings.child("fixed")));
+
 
 	zenith::util::WndConfig wndConf;
 	zenith::util::ioconv::input(wndConf, zenith::util::ioconv::input_xml_root(xWindow));
@@ -204,37 +204,6 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 	_In_ LPSTR    lpCmdLine,
 	_In_ int       nCmdShow)
 {
-	zenith::util::dtrie_id<char> dtrie;
-	std::cout << dtrie.add("ab");
-	std::cout << dtrie.add("bc");
-	std::cout << dtrie.add("cd");
-	std::cout << dtrie.add("abc");
-	std::cout << dtrie.add("bcd");
-	std::cout << dtrie.add("cde");
-	std::cout << dtrie.add("a");
-	std::cout << dtrie.add("b");
-	std::cout << dtrie.add("c");
-	std::cout << dtrie.add("abb");	
-	std::cout << dtrie.add("xyzw");
-	std::cout << dtrie.add("xywa");
-	std::cout << dtrie.add("xyyq");
-
-
-	std::vector<uint32_t> res;
-	res.push_back(dtrie.get("ab"));
-	res.push_back(dtrie.get("bc"));
-	res.push_back(dtrie.get("cd"));
-	res.push_back(dtrie.get("abc"));
-	res.push_back(dtrie.get("bcd"));
-	res.push_back(dtrie.get("cde"));
-	res.push_back(dtrie.get("a"));
-	res.push_back(dtrie.get("b"));
-	res.push_back(dtrie.get("c"));
-	res.push_back(dtrie.get("abb"));
-	res.push_back(dtrie.get("xyzw"));
-	res.push_back(dtrie.get("xywa"));
-	res.push_back(dtrie.get("xyyq"));
-
 	init_args(lpCmdLine);
 	init();
 

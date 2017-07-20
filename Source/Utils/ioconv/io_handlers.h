@@ -1,6 +1,7 @@
 #pragma once
 #include "ioconv_base.h"
 #include "../str_cast.h"
+#include "../str_utils.h"
 
 namespace zenith
 {
@@ -26,6 +27,23 @@ namespace zenith
 					static char CharBuffer_[BufferSize_];
 					zenith::util::str_cast<char[BufferSize_]>(val, CharBuffer_, BufferSize_);
 					it.set_value(CharBuffer_);
+				}
+			};
+
+			template<uint32_t SZ, class It>
+			class io_handler_impl<char[SZ], It>
+			{
+			public:
+				typedef std::string value_type;
+				static const NodeType node_type = NodeType::VALUE; //value by default
+
+				inline static void input(char val[SZ], const It &it)
+				{
+					zenith::util::zstrcpy(val, ensure_type(it, NodeType::VALUE).value());
+				}
+				inline static void output(const char val[SZ], It &it)
+				{
+					it.set_value(val);
 				}
 			};
 

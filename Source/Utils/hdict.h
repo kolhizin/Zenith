@@ -36,6 +36,13 @@ namespace zenith
 			HDictMissingKey(const char * p) : HDictException(p) {}
 			virtual ~HDictMissingKey() {}
 		};
+		class HDictInvalidIterator : public HDictException
+		{
+		public:
+			HDictInvalidIterator() : HDictException("HDictInvalidIterator: unknown cause") {}
+			HDictInvalidIterator(const char * p) : HDictException(p) {}
+			virtual ~HDictInvalidIterator() {}
+		};
 
 		template<class T>
 		class hdict
@@ -53,9 +60,11 @@ namespace zenith
 			static const uint32_t NoID = 0xFFFFFFFF;
 			static const uint32_t RecordSize = sizeof(record_);
 		public:
+
 			typedef const char * key_type;
 			typedef char key_elem_type;
 			typedef T value_type;
+			typedef T mapped_type;
 			
 			static const uint32_t ValueSize = sizeof(T);
 			
@@ -108,10 +117,10 @@ namespace zenith
 					pArray[i].~T();
 				}
 			}
-			void copy_values_(void * ptr)
+			void copy_values_(void * ptr_to) const
 			{
-				T * pDst = reinterpret_cast<T *>(ptr);
-				T * pArray = reinterpret_cast<T *>(buffer_.begin());
+				T * pDst = reinterpret_cast<T *>(ptr_to);
+				const T * pArray = reinterpret_cast<const T *>(buffer_.begin());
 				for (uint32_t i = 0; i < numElements_; i++)
 					new (&pDst[i]) T(pArray[i]);
 			}
@@ -289,7 +298,7 @@ namespace zenith
 				buffer_.right_grow(slen + 1);
 
 				char * dstPtr = reinterpret_cast<char *>(buffer_.right_begin());
-				uint32_t off = ptr_names_end_() - dstPtr;
+				uint32_t off = static_cast<uint32_t>(ptr_names_end_() - dstPtr);
 				for (uint32_t i = 0; i < slen+1; i++)
 					dstPtr[i] = key[i];
 
@@ -340,6 +349,24 @@ namespace zenith
 				}
 				return NoOffset;
 			}
+			inline uint32_t find_rec_(const char * key) const
+			{
+				if (numBuckets_ == 0 || maxBucketElements_ == 0)
+					return NoOffset;
+				uint64_t hash = hash_fvn1_(key);
+				uint32_t off_j = (hash % numBuckets_) * maxBucketElements_;
+				uint32_t rec_id = 0;
+				const record_ * recs = ptr_records_();
+				for (; rec_id < maxBucketElements_; rec_id++)
+				{
+					if (!recs[off_j + rec_id].valid())
+						break;
+					const char * name = ptr_names_end_() - recs[off_j + rec_id].name_offset;
+					if (strcmp(name, key) == 0)
+						return off_j + rec_id;
+				}
+				return NoOffset;
+			}
 			inline void clear_()
 			{
 				if (!buffer_.valid())
@@ -355,24 +382,143 @@ namespace zenith
 			template<class O, class U>
 			class iterator_t_
 			{
+				friend class hdict;
 				O * obj_;
 				uint32_t id_;
 				iterator_t_(O * obj, uint32_t rec_id) : obj_(obj), id_(rec_id) {}
-			public:
-				inline iterator_t_<O, U> next()
+				inline bool valid_() const
 				{
-					if(!obj_ || id_ == NoID)
-						return iterator_t_<O, U>(obj_, NoID);
+					if (!obj_ || id_ == NoID)
+						return false;
+					if (id_ >= obj_->numBuckets_ * obj_->maxBucketElements_)
+						return false;
+					return true;
+				}
+				inline void * get_val_() const
+				{
+					if (!valid_())
+						return nullptr;
+					uint32_t off = obj_->ptr_records_()[id_].value_offset;
+					return reinterpret_cast<void *>(const_cast<uint8_t *>(obj_->buffer_.begin() + off));
+				}
+				inline const char * get_key_() const
+				{
+					if (!valid_())
+						return nullptr;
+					uint32_t off = obj_->ptr_records_()[id_].name_offset;
+					return obj_->ptr_names_end_() - off;
+				}
+				inline uint32_t next_id_() const
+				{
 					uint32_t maxId = obj_->numBuckets_ * obj_->maxBucketElements_;
 					auto recs = obj_->ptr_records_();
 					uint32_t newId = id_ + 1;
 					while (newId < maxId && !recs[newId].valid())
 						newId++;
 					if (newId >= maxId)
+						return NoID;
+					return newId;
+				}
+			public:
+				inline iterator_t_() : obj_(nullptr), id_(NoID) {}
+				inline iterator_t_(const iterator_t_ &o) : obj_(o.obj_), id_(o.id_) {}
+				inline iterator_t_(iterator_t_ &&o) : obj_(o.obj_), id_(o.id_) { o.id_ = NoID; o.obj_ = nullptr; }
+
+				inline iterator_t_ &operator=(const iterator_t_ &o)
+				{
+					obj_ = o.obj_; id_ = o.id_;
+					return *this;
+				}
+				inline iterator_t_ &operator=(iterator_t_ &&o)
+				{
+					obj_ = o.obj_; id_ = o.id_;					
+					o.id_ = NoID; o.obj_ = nullptr;
+					return *this;
+				}
+
+				inline iterator_t_<O, U> next()
+				{
+					if(!valid_())
 						return iterator_t_<O, U>(obj_, NoID);
+					return iterator_t_<O, U>(obj_, next_id_());
+				}
+				inline iterator_t_<const O, const U> next() const
+				{
+					if (!valid_())
+						return iterator_t_<const O, const U>(obj_, NoID);
+					return iterator_t_<const O, const U>(obj_, next_id_());
+				}
+				inline U &value()
+				{
+					auto tmp = reinterpret_cast<U *>(get_val_());
+					if (!tmp)
+						throw HDictInvalidIterator("iterator::value(): could not get value of iterator");
+					return *tmp;
+				}
+				inline const U &value() const
+				{
+					auto tmp = reinterpret_cast<const U *>(get_val_());
+					if (!tmp)
+						throw HDictInvalidIterator("iterator::value(): could not get value of iterator");
+					return *tmp;
+				}
+				inline U *ptr()
+				{
+					auto tmp = reinterpret_cast<U *>(get_val_());
+					if (!tmp)
+						throw HDictInvalidIterator("iterator::ptr(): could not get value of iterator");
+					return tmp;
+				}
+				inline const U *ptr() const
+				{
+					auto tmp = reinterpret_cast<const U *>(get_val_());
+					if (!tmp)
+						throw HDictInvalidIterator("iterator::ptr(): could not get value of iterator");
+					return tmp;
+				}
+				inline const char * key() const
+				{
+					auto tmp = get_key_();
+					if(!tmp)
+						throw HDictInvalidIterator("iterator::key(): could not get name of iterator");
+					return tmp;
+				}
+
+				inline U &operator *() { return value(); }
+				inline const U &operator *() const { return value(); }
+
+				inline iterator_t_<O, U> &operator++() { id_ = next_id_(); return *this; }
+				//postfix
+				inline iterator_t_<O, U> operator++(int) { auto p = id_; id_ = next_id_(); return iterator_t_<O, U>(obj_, p); }
+
+				template<class O2, class U2>
+				inline bool operator ==(const iterator_t_<O2, U2> &o) const
+				{
+					if (!o.valid_() || !valid_())
+					{
+						if(!o.valid_() && !valid_())
+							return true;
+						return false;
+					}
+					return (obj_ == o.obj_) && (id_ == o.id_);
+				}
+				template<class O2, class U2>
+				inline bool operator !=(const iterator_t_<O2, U2> &o) const
+				{
+					if (!o.valid_() || !valid_())
+					{
+						if (!o.valid_() && !valid_())
+							return false;
+						return true;
+					}
+					return (obj_ != o.obj_) || (id_ != o.id_);
 				}
 			};
 		public:
+
+			typedef iterator_t_<hdict<T>, T> iterator;
+			typedef iterator_t_<const hdict<T>, const T> const_iterator;
+
 			inline ~hdict()
 			{
 				clear_();
@@ -414,6 +560,14 @@ namespace zenith
 				return *this;
 			}
 
+			inline iterator begin() { return iterator(this, 0); }
+			inline iterator end() { return iterator(this, NoID); }
+			inline const_iterator begin() const { return const_iterator(this, 0); }
+			inline const_iterator end() const { return const_iterator(this, NoID); }
+
+			inline iterator find(const char * name) { return iterator(this, find_rec_(name)); }
+			inline const_iterator find(const char * name) const { return const_iterator(this, find_rec_(name)); }
+
 			inline void add(const char * name, T &&value)
 			{
 				T * val = add_(name);
@@ -426,6 +580,10 @@ namespace zenith
 				new (val) T(value);
 				numElements_++;
 			}
+			inline void insert(const std::pair<const char *, const T &> &p)	{ add(p.first, p.second);}
+			inline void insert(const std::pair<const char *, T> &p) { add(p.first, p.second); }
+			inline void insert(std::pair<const char *, T> &&p) { add(p.first, std::move(p.second)); }
+
 			inline bool exists(const char * name) const
 			{
 				return find_(name) != NoOffset;

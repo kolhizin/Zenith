@@ -1,5 +1,6 @@
 #include "init.h"
 #include <Utils\FileFormat\ff_util_vulkan.h>
+#include <Graphics\Vulkan\vPipelineUtils.h>
 
 std::unique_ptr<zenith::util::Window> wnd;
 zenith::vulkan::vSystem * vSys = nullptr;
@@ -26,6 +27,8 @@ std::unique_ptr<zenith::vulkan::vTextureAutoImpl_> texture, depthMap;
 zenith::vulkan::vSamplerImpl_ * sampler;
 zenith::vulkan::vTextureViewRawImpl_ * textureView;
 
+zenith::gengraphics::ggPipelineLayout pplLayout;
+zenith::gengraphics::ggPipelineProgramFixed pplFixed;
 
 std::vector<Vertex> vertices = {
 	{ { -1.f, -1.f, -1.f, 1.0f },{ 0.0f, 0.0f, 1.0f },{ 0.0f, 0.0f } },
@@ -104,24 +107,7 @@ void createCommandBuffers(VkCommandPool &cp, VkCommandBuffer * cbs, size_t numBu
 
 void createDescriptorPool()
 {
-	VkDescriptorPoolCreateInfo ci = {};
-	ci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	ci.flags = 0;
-	ci.pNext = nullptr;
-
-	VkDescriptorPoolSize psz[2];
-	psz[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	psz[0].descriptorCount = 1;
-	psz[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	psz[1].descriptorCount = 1;
-
-	ci.maxSets = 2;
-	ci.poolSizeCount = 2;
-	ci.pPoolSizes = &psz[0];
-
-	if (vkCreateDescriptorPool(vSys->getDevice("vdevice-main").getDevice(), &ci, nullptr, &descrPool) != VK_SUCCESS)
-		throw std::runtime_error("Failed to create descriptor pool!");
-
+	descrPool = zenith::vulkan::util::createPipelineDescriptorPool(vSys->getDevice("vdevice-main").getDevice(), pplLayout, 1);
 }
 
 void createVertexBuffer()
@@ -273,100 +259,6 @@ void createViewport(VkPipelineViewportStateCreateInfo &pvs, VkViewport &viewport
 	pvs.pViewports = &viewport;
 	pvs.scissorCount = 1;
 	pvs.pScissors = &scissor;
-}
-void createDepthStencilState(VkPipelineDepthStencilStateCreateInfo &ci)
-{
-	ci.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	ci.pNext = nullptr;
-	ci.flags = 0;
-	ci.depthTestEnable = VK_TRUE;
-	ci.depthWriteEnable = VK_TRUE;
-	ci.depthCompareOp = VK_COMPARE_OP_LESS;
-	ci.depthBoundsTestEnable = VK_FALSE;
-	ci.minDepthBounds = 0.0f;
-	ci.maxDepthBounds = 1.0f;
-
-	ci.stencilTestEnable = VK_FALSE;
-	ci.front = {};
-	ci.back = {};
-}
-void createRasterization(VkPipelineRasterizationStateCreateInfo &prs, VkPipelineMultisampleStateCreateInfo &pms)
-{
-	prs.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	prs.flags = 0;
-	prs.pNext = nullptr;
-
-	prs.depthClampEnable = VK_FALSE;
-
-	prs.depthBiasEnable = VK_FALSE;
-	prs.depthBiasClamp = 0.0f;
-	prs.depthBiasSlopeFactor = 0.0f;
-	prs.depthBiasConstantFactor = 0.0f;
-
-	prs.rasterizerDiscardEnable = VK_FALSE;
-
-	prs.cullMode = VK_CULL_MODE_BACK_BIT;
-	prs.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
-	prs.polygonMode = VK_POLYGON_MODE_FILL;
-	prs.lineWidth = 1.0f;
-
-
-	pms.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	pms.flags = 0;
-	pms.pNext = nullptr;
-
-	pms.sampleShadingEnable = VK_FALSE;
-	pms.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-	pms.minSampleShading = 1.0f;
-	pms.pSampleMask = nullptr;
-	pms.alphaToCoverageEnable = VK_FALSE;
-	pms.alphaToOneEnable = VK_FALSE;
-}
-void createPipelineLayout(VkPipelineLayout &pl)
-{
-	VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
-	samplerLayoutBinding.binding = 1;
-	samplerLayoutBinding.descriptorCount = 1;
-	samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	samplerLayoutBinding.pImmutableSamplers = nullptr;
-	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
-
-	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-	uboLayoutBinding.binding = 0;
-	uboLayoutBinding.descriptorCount = 1;
-	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboLayoutBinding.pImmutableSamplers = nullptr;
-	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-
-	VkDescriptorSetLayoutBinding binds[] = { samplerLayoutBinding, uboLayoutBinding };
-
-	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = 2;
-	layoutInfo.pBindings = &binds[0];
-
-
-
-	auto res = vkCreateDescriptorSetLayout(vSys->getDevice("vdevice-main").getDevice(), &layoutInfo, nullptr, &descriptorSetLayout);
-	if (res != VK_SUCCESS)
-		throw std::runtime_error("Failed to create descriptor set layout!");
-
-	VkPipelineLayoutCreateInfo ci = {};
-	ci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	ci.flags = 0;
-	ci.pNext = nullptr;
-
-	ci.setLayoutCount = 1;
-	ci.pSetLayouts = &descriptorSetLayout;
-
-	ci.pushConstantRangeCount = 0;
-	ci.pPushConstantRanges = nullptr;
-
-	res = vkCreatePipelineLayout(vSys->getDevice("vdevice-main").getDevice(), &ci, nullptr, &pl);
-	if (res != VK_SUCCESS)
-		throw std::runtime_error("Failed to create pipeline layout!");
 }
 
 void createColorBlend(VkPipelineColorBlendAttachmentState &pcbas, VkPipelineColorBlendStateCreateInfo &pcbs_ci)
@@ -678,15 +570,18 @@ void init_vulkan()
 
 	VkPipelineRasterizationStateCreateInfo prs_ci;
 	VkPipelineMultisampleStateCreateInfo pms_ci;
-	createRasterization(prs_ci, pms_ci);
+	VkPipelineDepthStencilStateCreateInfo dss_ci;
+
+	zenith::vulkan::util::fillPipelineProgramRasterize(prs_ci, pplFixed.rasterize());
+	zenith::vulkan::util::fillPipelineProgramMultisample(pms_ci, pplFixed.multisample());
+	zenith::vulkan::util::fillPipelineProgramDepthStencil(dss_ci, pplFixed.depth(), pplFixed.stencil());
+
 
 	VkPipelineColorBlendAttachmentState pcbas;
 	VkPipelineColorBlendStateCreateInfo pcbs_ci;
 	createColorBlend(pcbas, pcbs_ci);
 
-	VkPipelineDepthStencilStateCreateInfo dss_ci;
-	createDepthStencilState(dss_ci);
-
+	
 
 	VkDynamicState dynamicStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH };
 	VkPipelineDynamicStateCreateInfo pds_ci;
@@ -696,7 +591,9 @@ void init_vulkan()
 	pds_ci.dynamicStateCount = 2;
 	pds_ci.pDynamicStates = dynamicStates;
 
-	createPipelineLayout(pipelineLayout);
+	descriptorSetLayout = zenith::vulkan::util::createPipelineSetLayout(vSys->getDevice("vdevice-main").getDevice(), pplLayout.at(0), 0);
+	pipelineLayout = zenith::vulkan::util::createPipelineLayout(vSys->getDevice("vdevice-main").getDevice(), &descriptorSetLayout, 1);
+
 	createRenderPass(renderPass);
 
 	VkGraphicsPipelineCreateInfo pci = {};
