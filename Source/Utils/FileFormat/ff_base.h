@@ -19,7 +19,7 @@ namespace zenith
 		{
 			enum class ChunkType : uint8_t {UNDEF = 0,
 					HEADER=1,
-						IMAGE_HEADER, FONT_HEADER,
+						IMAGE_HEADER, FONT_HEADER, ZDS_HEADER, ZDS_ENTRY,
 					RESERVED=128,
 						IMAGE_DATA_HEADER, FONT_DATA,
 					DATA08=253, DATA16=254, DATA48=255};
