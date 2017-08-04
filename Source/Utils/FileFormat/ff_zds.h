@@ -63,12 +63,27 @@ namespace zenith
 			/*
 			delta-depth concept is hard to work, better to use absolute depths
 			*/
+			/*
+			0 - any data type
+			1 - string in form of ANSI-STR
+			2 - string in form of MBC-STR
+			3 - string in form of UNICODE-STR
+			4 - signed integer
+			5 - unsigned integer
+			6 - floating point
+			7 - reserved
+			*/
+
+			enum class ZDSDataBaseType {UNDEF = 0, ANY = 0, ANSI_STR=1, MULTIBYTE_STR=2, UNICODE_STR=3,
+				SIGNED_INT=4, UNSIGNED_INT=5, FLOATING_POINT=6, RESERVED = 7};
+
+
 			class ZChunk16B_ZDSEntry
 			{
 				ChunkType chunkType; /*ZDS_ENTRY*/
 				uint8_t flgAttribute : 1; //if attribute than in xml will be as attribute
 				uint8_t szInplace : 4; //0 for out of place 1-10 for inplace sizes
-				uint8_t flgReserved : 3;
+				uint8_t dataType : 3;
 
 				uint16_t tagId_;
 				uint16_t depth_; 
@@ -99,11 +114,14 @@ namespace zenith
 					if (szInplace == 0)
 						external.offset_.set(off);
 				}
+				inline void reset_attribute(bool res) { flgAttribute = (res ? 1 : 0); }
+				inline void reset_type(ZDSDataBaseType type) { dataType = static_cast<uint32_t>(type); }
 				
 				inline bool isValid() const { return checkChunk_(); }
 				
 				inline uint16_t depth() const { return depth_; }
-				
+				inline bool is_attribute() const { return flgAttribute; }
+				inline ZDSDataBaseType type() const { return static_cast<ZDSDataBaseType>(dataType); }
 				inline uint16_t tagId() const { return tagId_; }
 				inline bool is_internal() const { return szInplace > 0; }
 				inline bool is_external() const { return szInplace == 0; }
@@ -129,28 +147,52 @@ namespace zenith
 					else
 						return external.size_.get();
 				}
-				inline static ZChunk16B_ZDSEntry inplaceEntry(uint64_t size, uint16_t tagId, uint16_t depth, bool flgAttribute=false)
+				inline void reset_inplace(uint64_t size)
+				{
+					if (size == 0)
+						throw ZFileException("ZChunk16B_ZDSEntry: chunks with 0-size are not allowed.");
+					if (size > 10)
+						throw ZFileException("ZChunk16B_ZDSEntry: too large size for inplace data.");
+					szInplace = size;
+				}
+				inline void reset_onheap(uint64_t offset, uint64_t size)
+				{
+					if (size == 0)
+						throw ZFileException("ZChunk16B_ZDSEntry: chunks with 0-size are not allowed.");
+					if (size >= 0x10000000000)
+						throw ZFileException("ZChunk16B_ZDSEntry: too large size for external data.");
+					szInplace = 0;
+					external.offset_.set(offset);
+					external.size_.set(size);
+				}
+				inline static ZChunk16B_ZDSEntry inplaceEntry(uint64_t size, uint16_t tagId, uint16_t depth, bool flgAttribute=false, ZDSDataBaseType type = ZDSDataBaseType::ANY)
 				{
 					ZChunk16B_ZDSEntry res;
+					if(size == 0)
+						throw ZFileException("ZChunk16B_ZDSEntry: chunks with 0-size are not allowed.");
 					if (size > 10)
 						throw ZFileException("ZChunk16B_ZDSEntry: too large size for inplace data.");
 					res.szInplace = size;
-					res.tagId = tagId;
+					res.tagId_ = tagId;
 					res.depth_ = depth;
 					res.flgAttribute = (flgAttribute ? 1 : 0);
+					res.dataType = static_cast<uint32_t>(type);
 					return res;
 				}
-				inline static ZChunk16B_ZDSEntry onheapEntry(uint64_t offset, uint64_t size, uint16_t tagId, uint16_t depth, bool flgAttribute = false)
+				inline static ZChunk16B_ZDSEntry onheapEntry(uint64_t offset, uint64_t size, uint16_t tagId, uint16_t depth, bool flgAttribute = false, ZDSDataBaseType type = ZDSDataBaseType::ANY)
 				{
 					ZChunk16B_ZDSEntry res;
+					if (size == 0)
+						throw ZFileException("ZChunk16B_ZDSEntry: chunks with 0-size are not allowed.");
 					if (size >= 0x10000000000)
 						throw ZFileException("ZChunk16B_ZDSEntry: too large size for external data.");
 					res.szInplace = 0;
-					res.tagId = tagId;
+					res.tagId_ = tagId;
 					res.depth_ = depth;
 					res.flgAttribute = (flgAttribute ? 1 : 0);
 					res.external.offset_.set(offset);
 					res.external.size_.set(size);
+					res.dataType = static_cast<uint32_t>(type);
 					return res;
 				}
 			};
@@ -167,8 +209,8 @@ namespace zenith
 				uint16_t numTags;
 
 				inline uint64_t getChunksSize() const { return uint64_t(numChunks) * sizeof(ZChunk16B_ZDSEntry); }
-				inline uint64_t getTagsSize() const { return zf_data_size(uint64_t(numTags) * 4 + tagHeapSize); }
-				inline uint64_t getDataSize() const { return zf_data_size(dataHeapSize); }
+				inline uint64_t getTagsSize() const { return zf_data_size(tagHeapSize); }
+				inline uint64_t getDataSize() const { return (dataHeapSize > 0 ? zf_data_size(dataHeapSize) : 0); }
 				inline uint64_t getHeaderSize() const { return sizeof(ZChunk16B_Header) + sizeof(ZChunk16B_ZDSHeader); }
 				inline uint64_t getFullSize() const
 				{
@@ -199,24 +241,26 @@ namespace zenith
 				descr.numTags = ih->getNumTags();
 				descr.numChunks = ih->getNumEntries();
 
-				uint64_t rawTagsDataSize = uint64_t(ih->getNumTags()) * 4 + ih->getTagHeapSize();
 				void * rawTagsDataPtr = nullptr;
 				uint64_t rawTagsDataActSize = 0;
-				uint64_t tagsAdv = zf_mem_to_dataptr(ptr, rawTagsDataSize, rawTagsDataPtr, rawTagsDataActSize);
-				if(rawTagsDataActSize != rawTagsDataSize)
+				uint64_t tagsAdv = zf_mem_to_dataptr(ptr, descr.tagHeapSize, rawTagsDataPtr, rawTagsDataActSize);
+				if(rawTagsDataActSize != descr.tagHeapSize)
 					throw ZFileException("zds_from_mem: tags data size mismatch with data chunk.");
 				ptr += tagsAdv;
 				size -= tagsAdv;
 
 				void * heapDataPtr = nullptr;
-				uint64_t heapDataActSize = 0;
-				uint64_t heapAdv = zf_mem_to_dataptr(ptr, ih->getDataHeapSize(), heapDataPtr, heapDataActSize);
-				if (heapDataActSize != ih->getDataHeapSize())
-					throw ZFileException("zds_from_mem: heap data size mismatch with data chunk.");
-				ptr += heapAdv;
-				size -= heapAdv;
+				if (ih->getDataHeapSize() > 0)
+				{
+					uint64_t heapDataActSize = 0;
+					uint64_t heapAdv = zf_mem_to_dataptr(ptr, ih->getDataHeapSize(), heapDataPtr, heapDataActSize);
+					if (heapDataActSize != ih->getDataHeapSize())
+						throw ZFileException("zds_from_mem: heap data size mismatch with data chunk.");
+					ptr += heapAdv;
+					size -= heapAdv;
+				}
 
-				if(size != descr.numTags * sizeof(ZChunk16B_ZDSEntry))
+				if(size != descr.numChunks * sizeof(ZChunk16B_ZDSEntry))
 					throw ZFileException("zds_from_mem: remaining size does not match number of tags.");
 
 				descr.dataHeap = reinterpret_cast<uint8_t *>(heapDataPtr);
@@ -255,9 +299,12 @@ namespace zenith
 					size -= adv;
 				}
 				{
-					uint64_t adv = zf_data_to_mem(ptr, size, descr.dataHeap, descr.dataHeapSize);
-					ptr += adv;
-					size -= adv;
+					if (descr.dataHeapSize > 0)
+					{
+						uint64_t adv = zf_data_to_mem(ptr, size, descr.dataHeap, descr.dataHeapSize);
+						ptr += adv;
+						size -= adv;
+					}
 				}
 				memcpy_s(ptr, size, descr.chunks, uint64_t(descr.numChunks) * sizeof(ZChunk16B_ZDSEntry));
 			}

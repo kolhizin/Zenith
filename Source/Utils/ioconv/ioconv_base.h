@@ -92,6 +92,7 @@ namespace zenith
 				virtual ~OConvInvalidIteratorException() {}
 			};
 
+			enum class InternalType { NONE = 0, STRING, BINARY };
 			enum class NodeType {NONE = 0, VALUE, COMPLEX};
 			enum class NodeValueHint : uint32_t {NONE = 0, ATTRIBUTE};
 			enum class NodeComplexHint : uint32_t {NONE = 0};

@@ -15,7 +15,7 @@ namespace zenith
 			uint16_t width;
 			uint16_t height;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndSize, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::util::WndSize, It, intType>
 		{
 		public:
 			typedef zenith::util::WndSize value_type;
@@ -40,7 +40,7 @@ namespace zenith
 			uint16_t x;
 			uint16_t y;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndPos, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::util::WndPos, It, intType>
 		{
 		public:
 			typedef zenith::util::WndPos value_type;
@@ -69,7 +69,7 @@ namespace zenith
 			std::string title;
 			std::string iconFilename;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::util::WndConfig, It, intType>
 		{
 		public:
 			typedef zenith::util::WndConfig value_type;

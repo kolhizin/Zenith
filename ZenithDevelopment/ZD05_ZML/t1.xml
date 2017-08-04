@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<File>
+	<value_char>TEST-CHAR</value_char>
+	<value_int>-128</value_int>
+	<value_uint>1024</value_uint>
+	<value_double>2.71828</value_double>
+</File>

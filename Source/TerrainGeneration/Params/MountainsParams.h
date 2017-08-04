@@ -16,7 +16,7 @@ namespace zenith
 			std::vector<TerraGenParam_CatDistrString> afterNull;
 			std::vector<TerraGenParam_CatDistrString> afterTop;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainMetaGenerator1_Params, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainMetaGenerator1_Params, It, intType>
 		{
 		public:
 			typedef zenith::terragen::MountainMetaGenerator1_Params value_type;
@@ -33,9 +33,9 @@ namespace zenith
 			{
 				zenith::util::ioconv::output_single(val.uid, it.append_value("uid", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
 				zenith::util::ioconv::output_single(val.type, it.append_value("type", zenith::util::ioconv::NodeValueHint::ATTRIBUTE));
-				zenith::util::ioconv::input_named_multiple(val.general, it, "general");
-				zenith::util::ioconv::input_named_multiple(val.afterNull, it, "afterNull");
-				zenith::util::ioconv::input_named_multiple(val.afterTop, it, "afterTop");
+				zenith::util::ioconv::output_multiple(val.general, it, "general");
+				zenith::util::ioconv::output_multiple(val.afterNull, it, "afterNull");
+				zenith::util::ioconv::output_multiple(val.afterTop, it, "afterTop");
 			}
 		};
 
@@ -52,7 +52,7 @@ namespace zenith
 			double minMountainTopDistance;
 			uint32_t numTries;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainTopGenerator1_Params, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainTopGenerator1_Params, It, intType>
 		{
 		public:
 			typedef zenith::terragen::MountainTopGenerator1_Params value_type;
@@ -81,7 +81,7 @@ namespace zenith
 				zenith::util::ioconv::output_single(val.boundingBox, it.append_complex("boundingBox"));
 				zenith::util::ioconv::output_single(val.heightLambda, it.append_value("heightLambda"));
 				zenith::util::ioconv::output_single(val.sizeLambda, it.append_value("sizeLambda"));
-				zenith::util::ioconv::input_named_multiple(val.numTops, it, "numTops");
+				zenith::util::ioconv::output_multiple(val.numTops, it, "numTops");
 				zenith::util::ioconv::output_single(val.minNodeDistance, it.append_value("minNodeDistance"));
 				zenith::util::ioconv::output_single(val.minMountainTopDistance, it.append_value("minMountainTopDistance"));
 				zenith::util::ioconv::output_single(val.numTries, it.append_value("numTries"));
@@ -102,7 +102,7 @@ namespace zenith
 			double minNodeDistance;
 			uint32_t numTries;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainTopRidgeGenerator1_Params, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainTopRidgeGenerator1_Params, It, intType>
 		{
 		public:
 			typedef zenith::terragen::MountainTopRidgeGenerator1_Params value_type;
@@ -131,7 +131,7 @@ namespace zenith
 				zenith::util::ioconv::output_single(val.betaBox, it.append_complex("betaBox"));
 				zenith::util::ioconv::output_single(val.len, it.append_complex("len"));
 				zenith::util::ioconv::output_single(val.lenBox, it.append_complex("lenBox"));
-				zenith::util::ioconv::input_named_multiple(val.numRidges, it, "numRidges");
+				zenith::util::ioconv::output_multiple(val.numRidges, it, "numRidges");
 				zenith::util::ioconv::output_single(val.minNodeDistance, it.append_value("minNodeDistance"));
 				zenith::util::ioconv::output_single(val.numTries, it.append_value("numTries"));
 			}
@@ -153,7 +153,7 @@ namespace zenith
 			double minNodeDistance;
 			uint32_t numTries;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainContGenerator1_Params, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainContGenerator1_Params, It, intType>
 		{
 		public:
 			typedef zenith::terragen::MountainContGenerator1_Params value_type;
@@ -210,7 +210,7 @@ namespace zenith
 			double minNodeDistance;
 			uint32_t numTries;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainForkGenerator1_Params, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::MountainForkGenerator1_Params, It, intType>
 		{
 		public:
 			typedef zenith::terragen::MountainForkGenerator1_Params value_type;

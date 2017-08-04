@@ -12,7 +12,7 @@ struct WndSize {
 uint16_t width;
 uint16_t height;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndSize, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::util::WndSize, It, intType>{public:
 typedef zenith::util::WndSize value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::util::WndSize &val, const It &it){
@@ -32,7 +32,7 @@ struct WndPos {
 uint16_t x;
 uint16_t y;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndPos, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::util::WndPos, It, intType>{public:
 typedef zenith::util::WndPos value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::util::WndPos &val, const It &it){
@@ -56,7 +56,7 @@ bool showCursor;
 std::string title;
 std::string iconFilename;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::util::WndConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::util::WndConfig, It, intType>{public:
 typedef zenith::util::WndConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::util::WndConfig &val, const It &it){

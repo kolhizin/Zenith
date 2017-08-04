@@ -17,7 +17,7 @@ struct vLayerConfig {
 std::string name;
 std::vector<std::string> requiredExtensions;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vLayerConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vLayerConfig, It, intType>{public:
 typedef zenith::vulkan::vLayerConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vLayerConfig &val, const It &it){
@@ -41,7 +41,7 @@ zenith::version32_t appVersion;
 zenith::version32_t engineVersion;
 zenith::version32_t apiVersion;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vInstanceConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vInstanceConfig, It, intType>{public:
 typedef zenith::vulkan::vInstanceConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vInstanceConfig &val, const It &it){
@@ -73,7 +73,7 @@ vSamplerFilter magFilter;
 vSamplerFilter mipFilter;
 float maxAnisotropy;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerFilteringConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerFilteringConfig, It, intType>{public:
 typedef zenith::vulkan::vSamplerFilteringConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vSamplerFilteringConfig &val, const It &it){
@@ -103,7 +103,7 @@ vSamplerBorderColor borderColor;
 vSamplerBorderType borderType;
 bool normalizedCoord;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerAddressingConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerAddressingConfig, It, intType>{public:
 typedef zenith::vulkan::vSamplerAddressingConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vSamplerAddressingConfig &val, const It &it){
@@ -136,7 +136,7 @@ float minLOD;
 float maxLOD;
 float biasLOD;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerLODConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerLODConfig, It, intType>{public:
 typedef zenith::vulkan::vSamplerLODConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vSamplerLODConfig &val, const It &it){
@@ -166,7 +166,7 @@ bool fPresent;
 float priority;
 std::vector<zenith::util::nameid> aliases;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceQueueReqs, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceQueueReqs, It, intType>{public:
 typedef zenith::vulkan::vDeviceQueueReqs value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vDeviceQueueReqs &val, const It &it){
@@ -209,7 +209,7 @@ std::vector<vDeviceQueueReqs> queues;
 std::vector<vLayerConfig> enabledLayers;
 std::vector<std::string> requiredExtensions;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceReqs, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceReqs, It, intType>{public:
 typedef zenith::vulkan::vDeviceReqs value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vDeviceReqs &val, const It &it){
@@ -237,7 +237,7 @@ zenith::util::nameid uid;
 std::vector<vDeviceReqs> deviceReqs;
 std::vector<std::string> deviceReqOrder;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceConfig, It, intType>{public:
 typedef zenith::vulkan::vDeviceConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vDeviceConfig &val, const It &it){
@@ -257,7 +257,7 @@ struct vQueueFamilyProperties {
 VkQueueFamilyProperties generalProperties;
 zenith::util::nameid_seq supportedSurfaces;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vQueueFamilyProperties, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vQueueFamilyProperties, It, intType>{public:
 typedef zenith::vulkan::vQueueFamilyProperties value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 };
@@ -267,7 +267,7 @@ struct vSharingInfo {
 vSharingMode mode;
 std::vector<std::string> queues;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSharingInfo, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSharingInfo, It, intType>{public:
 typedef zenith::vulkan::vSharingInfo value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vSharingInfo &val, const It &it){
@@ -289,7 +289,7 @@ uint32_t imageCount;
 vImageFormat imageFormat;
 std::vector<vImageUsageBit> imageUsage;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainReqs, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainReqs, It, intType>{public:
 typedef zenith::vulkan::vSwapchainReqs value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vSwapchainReqs &val, const It &it){
@@ -318,7 +318,7 @@ zenith::util::nameid deviceUID;
 std::vector<vSwapchainReqs> swapchainReqs;
 std::vector<std::string> swapchainReqOrder;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainConfig, It, intType>{public:
 typedef zenith::vulkan::vSwapchainConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vSwapchainConfig &val, const It &it){
@@ -342,7 +342,7 @@ struct vSurfaceConfig {
 zenith::util::nameid uid;
 zenith::util::nameid windowUID;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSurfaceConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSurfaceConfig, It, intType>{public:
 typedef zenith::vulkan::vSurfaceConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vSurfaceConfig &val, const It &it){
@@ -363,7 +363,7 @@ size_t defChunkSize;
 size_t minChunkSize;
 size_t align;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPhysicalChunkConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPhysicalChunkConfig, It, intType>{public:
 typedef zenith::vulkan::vMemoryPhysicalChunkConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vMemoryPhysicalChunkConfig &val, const It &it){
@@ -390,7 +390,7 @@ size_t blockSize;
 size_t align;
 uint32_t subTypeMask;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryLogicalChunkConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryLogicalChunkConfig, It, intType>{public:
 typedef zenith::vulkan::vMemoryLogicalChunkConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vMemoryLogicalChunkConfig &val, const It &it){
@@ -415,7 +415,7 @@ zenith::util::nameid uid;
 vMemoryPhysicalChunkConfig physicalChunk;
 std::vector<vMemoryLogicalChunkConfig> logicalChunk;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPoolConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPoolConfig, It, intType>{public:
 typedef zenith::vulkan::vMemoryPoolConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vMemoryPoolConfig &val, const It &it){
@@ -440,7 +440,7 @@ zenith::util::ExtendedBitMask isHostCached;
 zenith::util::ExtendedBitMask isLazy;
 zenith::util::nameid poolUID;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryTypeConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryTypeConfig, It, intType>{public:
 typedef zenith::vulkan::vMemoryTypeConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vMemoryTypeConfig &val, const It &it){
@@ -473,7 +473,7 @@ zenith::util::ioconv::output_single(val.poolUID, it.append_value("poolUID"));
 struct vMemoryUsageOption {
 std::vector<vMemoryPropertyBit> memoryPropertyBit;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageOption, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageOption, It, intType>{public:
 typedef zenith::vulkan::vMemoryUsageOption value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vMemoryUsageOption &val, const It &it){
@@ -489,7 +489,7 @@ struct vMemoryUsageConfig {
 vMemoryUsage usage;
 std::vector<vMemoryUsageOption> memoryUsageOption;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageConfig, It, intType>{public:
 typedef zenith::vulkan::vMemoryUsageConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vMemoryUsageConfig &val, const It &it){
@@ -508,7 +508,7 @@ zenith::util::nameid uid;
 std::vector<vMemoryTypeConfig> memoryType;
 std::vector<vMemoryUsageConfig> memoryUsage;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryManagerConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryManagerConfig, It, intType>{public:
 typedef zenith::vulkan::vMemoryManagerConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vMemoryManagerConfig &val, const It &it){
@@ -531,7 +531,7 @@ std::vector<vMemoryPoolConfig> memoryPool;
 std::vector<vMemoryManagerConfig> memoryManager;
 std::vector<std::string> memoryManagerReqOrder;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryConfig, It, intType>{public:
 typedef zenith::vulkan::vMemoryConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vMemoryConfig &val, const It &it){
@@ -558,7 +558,7 @@ std::vector<vMemoryConfig> memory;
 std::vector<vSurfaceConfig> surface;
 std::vector<vSwapchainConfig> swapchain;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSystemConfig, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSystemConfig, It, intType>{public:
 typedef zenith::vulkan::vSystemConfig value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::vulkan::vSystemConfig &val, const It &it){

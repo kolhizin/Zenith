@@ -14,6 +14,8 @@ namespace zenith
 				pugi::xml_attribute attr_;
 				bool isNode_, isAttr_;
 			public:
+				static const InternalType internal_type = InternalType::STRING;
+
 				output_xml_value(const pugi::xml_node &n) : node_(n), isAttr_(false), isNode_(true) {}
 				output_xml_value(const pugi::xml_attribute &a) : attr_(a), isAttr_(true), isNode_(false) {}
 				inline void set_value(const char * val)
@@ -30,7 +32,7 @@ namespace zenith
 				inline pugi::xml_node &checked_()
 				{
 					if (node_.root().empty())
-						throw OConvInvalidIteratorException("input_xml_unnamed is empty!");
+						throw OConvInvalidIteratorException("output_xml is empty!");
 					return node_;
 				}
 				//output_xml(pugi::xml_node &i) : node_(i) {}
@@ -39,6 +41,7 @@ namespace zenith
 				typedef output_xml named_iterator;
 				static const IteratorType iterator_type = IteratorType::OUTPUT;
 				static const IteratorCategory iterator_cat = IteratorCategory::NONE;
+				static const InternalType internal_type = InternalType::STRING;
 
 				output_xml(){}
 				output_xml(pugi::xml_node &node) : node_(node) {}

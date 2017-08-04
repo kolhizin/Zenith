@@ -101,8 +101,12 @@ namespace zenith
 			enum class _Task{ UNDEF = 0, ADD_ONE, INIT };
 
 			inline uint32_t sizeof_records_() const { return maxBucketElements_ * numBuckets_ * RecordSize; }
-			inline record_ * ptr_records_() { return reinterpret_cast<record_ *>(buffer_.right_end() - sizeof_records_()); }
-			inline const record_ * ptr_records_() const { return reinterpret_cast<const record_ *>(buffer_.right_end() - sizeof_records_()); }
+			inline record_ * ptr_records_() {
+				return reinterpret_cast<record_ *>(buffer_.right_end() - sizeof_records_());
+			}
+			inline const record_ * ptr_records_() const {
+				return reinterpret_cast<const record_ *>(buffer_.right_end() - sizeof_records_());
+			}
 			inline const char * ptr_names_end_() const { return reinterpret_cast<const char *>(buffer_.right_end() - sizeof_records_()); }
 
 
@@ -514,6 +518,17 @@ namespace zenith
 					return (obj_ != o.obj_) || (id_ != o.id_);
 				}
 			};
+			uint32_t begin_id_() const
+			{
+				const record_ * recs = ptr_records_();
+				uint32_t id = 0;
+				while (id < numBuckets_ * maxBucketElements_)
+					if (recs[id].valid())
+						return id;
+					else
+						id++;
+				return NoID;
+			}
 		public:
 
 			typedef iterator_t_<hdict<T>, T> iterator;
@@ -560,9 +575,9 @@ namespace zenith
 				return *this;
 			}
 
-			inline iterator begin() { return iterator(this, 0); }
+			inline iterator begin() { return iterator(this, begin_id_()); }
 			inline iterator end() { return iterator(this, NoID); }
-			inline const_iterator begin() const { return const_iterator(this, 0); }
+			inline const_iterator begin() const { return const_iterator(this, begin_id_()); }
 			inline const_iterator end() const { return const_iterator(this, NoID); }
 
 			inline iterator find(const char * name) { return iterator(this, find_rec_(name)); }

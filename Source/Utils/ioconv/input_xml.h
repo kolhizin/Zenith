@@ -165,6 +165,7 @@ namespace zenith
 				typedef input_xml_named named_iterator;
 				static const IteratorType iterator_type = IteratorType::INPUT;
 				static const IteratorCategory iterator_cat = IteratorCategory::NAMED;
+				static const InternalType internal_type = InternalType::STRING;
 
 				input_xml_named(const pugi::xml_node &n, const char * key)  : impl_(input_xml_wrap_named_::end())
 				{
@@ -228,6 +229,7 @@ namespace zenith
 				typedef input_xml_named named_iterator;
 				static const IteratorType iterator_type = IteratorType::INPUT;
 				static const IteratorCategory iterator_cat = IteratorCategory::UNNAMED;
+				static const InternalType internal_type = InternalType::STRING;
 
 				input_xml_unnamed(const pugi::xml_node &n) : impl_(n.begin(), n.end()) {}
 				input_xml_unnamed(const pugi::xml_attribute &a) : impl_(a) {}
@@ -278,6 +280,7 @@ namespace zenith
 				typedef input_xml_named named_iterator;
 				static const IteratorType iterator_type = IteratorType::INPUT;
 				static const IteratorCategory iterator_cat = IteratorCategory::UNNAMED;
+				static const InternalType internal_type = InternalType::STRING;
 
 				input_xml_root(const pugi::xml_node &n) : impl_(n) {}
 				input_xml_root() {}

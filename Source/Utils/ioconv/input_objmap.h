@@ -28,6 +28,7 @@ namespace zenith
 				typedef input_objmap_named named_iterator;
 				static const IteratorType iterator_type = IteratorType::INPUT;
 				static const IteratorCategory iterator_cat = IteratorCategory::NAMED;
+				static const InternalType internal_type = InternalType::STRING;
 
 				input_objmap_named(const ObjectMap<char, char> &om, const char * key)
 				{
@@ -86,6 +87,7 @@ namespace zenith
 				typedef input_objmap_named named_iterator;
 				static const IteratorType iterator_type = IteratorType::INPUT;
 				static const IteratorCategory iterator_cat = IteratorCategory::UNNAMED;
+				static const InternalType internal_type = InternalType::STRING;
 
 				input_objmap_unnamed(const ObjectMap<char, char> &n) : impl_(n.children().first) {}
 				input_objmap_unnamed() {}
@@ -139,6 +141,7 @@ namespace zenith
 				typedef input_objmap_named named_iterator;
 				static const IteratorType iterator_type = IteratorType::INPUT;
 				static const IteratorCategory iterator_cat = IteratorCategory::UNNAMED;
+				static const InternalType internal_type = InternalType::STRING;
 
 				input_objmap_root(const ObjectMap<char, char> &n) : impl_(&n) {}
 				input_objmap_root() : impl_(nullptr) {}

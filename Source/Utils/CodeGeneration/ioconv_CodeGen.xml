@@ -38,7 +38,7 @@
       <action type="output" require="name" chk_genDef="1" code="};\n"/>
 
       
-      <action type="output" require="name,qual" code="template&lt;class It&gt; class zenith::util::ioconv::io_handler_impl&lt;#qual::#name, It&gt;{public:\n"/>
+      <action type="output" require="name,qual" code="template&lt;class It, zenith::util::ioconv::InternalType intType&gt; class zenith::util::ioconv::io_handler_impl&lt;#qual::#name, It, intType&gt;{public:\n"/>
       <action type="output" require="name,qual" code="typedef #qual::#name value_type;\nstatic const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;\n"/>
 
       <action type="output" chk_genInput="1" require="name,qual" code="inline static void input(#qual::#name &amp;val, const It &amp;it){\n"/>

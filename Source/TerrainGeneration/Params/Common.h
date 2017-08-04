@@ -18,7 +18,7 @@ namespace zenith
 			double y0;
 			double y1;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_Box2D, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_Box2D, It, intType>
 		{
 		public:
 			typedef zenith::terragen::TerraGenParam_Box2D value_type;
@@ -45,7 +45,7 @@ namespace zenith
 			double x0;
 			double x1;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_Box1D, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_Box1D, It, intType>
 		{
 		public:
 			typedef zenith::terragen::TerraGenParam_Box1D value_type;
@@ -68,7 +68,7 @@ namespace zenith
 			double mu;
 			double sigma;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_MuSigma, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_MuSigma, It, intType>
 		{
 		public:
 			typedef zenith::terragen::TerraGenParam_MuSigma value_type;
@@ -93,7 +93,7 @@ namespace zenith
 			double value;
 			double prob;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrDouble, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrDouble, It, intType>
 		{
 		public:
 			typedef zenith::terragen::TerraGenParam_CatDistrDouble value_type;
@@ -116,7 +116,7 @@ namespace zenith
 			int64_t value;
 			double prob;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrInt, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrInt, It, intType>
 		{
 		public:
 			typedef zenith::terragen::TerraGenParam_CatDistrInt value_type;
@@ -139,7 +139,7 @@ namespace zenith
 			std::string value;
 			double prob;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrString, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::terragen::TerraGenParam_CatDistrString, It, intType>
 		{
 		public:
 			typedef zenith::terragen::TerraGenParam_CatDistrString value_type;

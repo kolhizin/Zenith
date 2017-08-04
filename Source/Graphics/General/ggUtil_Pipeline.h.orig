@@ -14,7 +14,7 @@ struct ggPipelineResourceBinding {
 uint32_t group;
 uint32_t location;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineResourceBinding, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineResourceBinding, It, intType>{public:
 typedef zenith::gengraphics::ggPipelineResourceBinding value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::gengraphics::ggPipelineResourceBinding &val, const It &it){
@@ -34,7 +34,7 @@ ggPipelineResourceType type;
 bool dynamic;
 zenith::util::bitenum<ggPipelineStage> stages;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineResourceDescriptor, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineResourceDescriptor, It, intType>{public:
 typedef zenith::gengraphics::ggPipelineResourceDescriptor value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::gengraphics::ggPipelineResourceDescriptor &val, const It &it){
@@ -58,7 +58,7 @@ bool fTest;
 bool fWrite;
 ggCompareOp compareOp;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineDepthProgramDescriptor, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineDepthProgramDescriptor, It, intType>{public:
 typedef zenith::gengraphics::ggPipelineDepthProgramDescriptor value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::gengraphics::ggPipelineDepthProgramDescriptor &val, const It &it){
@@ -80,7 +80,7 @@ zenith::util::ioconv::output_single(val.compareOp, it.append_value("compareOp", 
 struct ggPipelineStencilProgramDescriptor {
 bool fTest;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineStencilProgramDescriptor, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineStencilProgramDescriptor, It, intType>{public:
 typedef zenith::gengraphics::ggPipelineStencilProgramDescriptor value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::gengraphics::ggPipelineStencilProgramDescriptor &val, const It &it){
@@ -98,7 +98,7 @@ bool fDiscard;
 ggCullMode cullMode;
 ggFaceDef faceDef;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineRasterizeProgramDescriptor, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineRasterizeProgramDescriptor, It, intType>{public:
 typedef zenith::gengraphics::ggPipelineRasterizeProgramDescriptor value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::gengraphics::ggPipelineRasterizeProgramDescriptor &val, const It &it){
@@ -120,7 +120,7 @@ zenith::util::ioconv::output_single(val.faceDef, it.append_value("faceDef", zeni
 struct ggPipelineMultisampleProgramDescriptor {
 uint32_t numSamples;
 };
-template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineMultisampleProgramDescriptor, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineMultisampleProgramDescriptor, It, intType>{public:
 typedef zenith::gengraphics::ggPipelineMultisampleProgramDescriptor value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void input(zenith::gengraphics::ggPipelineMultisampleProgramDescriptor &val, const It &it){

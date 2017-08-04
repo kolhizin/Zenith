@@ -17,7 +17,7 @@ namespace zenith
 			uint32_t group;
 			uint32_t location;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineResourceBinding, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineResourceBinding, It, intType>
 		{
 		public:
 			typedef zenith::gengraphics::ggPipelineResourceBinding value_type;
@@ -42,7 +42,7 @@ namespace zenith
 			bool dynamic;
 			zenith::util::bitenum<ggPipelineStage> stages;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineResourceDescriptor, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineResourceDescriptor, It, intType>
 		{
 		public:
 			typedef zenith::gengraphics::ggPipelineResourceDescriptor value_type;
@@ -71,7 +71,7 @@ namespace zenith
 			bool fWrite;
 			ggCompareOp compareOp;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineDepthProgramDescriptor, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineDepthProgramDescriptor, It, intType>
 		{
 		public:
 			typedef zenith::gengraphics::ggPipelineDepthProgramDescriptor value_type;
@@ -98,7 +98,7 @@ namespace zenith
 		{
 			bool fTest;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineStencilProgramDescriptor, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineStencilProgramDescriptor, It, intType>
 		{
 		public:
 			typedef zenith::gengraphics::ggPipelineStencilProgramDescriptor value_type;
@@ -121,7 +121,7 @@ namespace zenith
 			ggCullMode cullMode;
 			ggFaceDef faceDef;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineRasterizeProgramDescriptor, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineRasterizeProgramDescriptor, It, intType>
 		{
 		public:
 			typedef zenith::gengraphics::ggPipelineRasterizeProgramDescriptor value_type;
@@ -148,7 +148,7 @@ namespace zenith
 		{
 			uint32_t numSamples;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineMultisampleProgramDescriptor, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::gengraphics::ggPipelineMultisampleProgramDescriptor, It, intType>
 		{
 		public:
 			typedef zenith::gengraphics::ggPipelineMultisampleProgramDescriptor value_type;

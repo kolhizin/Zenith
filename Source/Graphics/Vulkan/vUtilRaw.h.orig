@@ -12,7 +12,7 @@
     
 namespace zenith {
 namespace vulkan {
-template<class It> class zenith::util::ioconv::io_handler_impl<::VkLayerProperties, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<::VkLayerProperties, It, intType>{public:
 typedef ::VkLayerProperties value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void output(const ::VkLayerProperties &val, It &it){
@@ -24,7 +24,7 @@ zenith::util::ioconv::output_single(val.description, it.append_value("descriptio
 };
 
 
-template<class It> class zenith::util::ioconv::io_handler_impl<::VkExtensionProperties, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<::VkExtensionProperties, It, intType>{public:
 typedef ::VkExtensionProperties value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void output(const ::VkExtensionProperties &val, It &it){
@@ -34,7 +34,7 @@ zenith::util::ioconv::output_single(static_cast<zenith::version32_t>(val.specVer
 };
 
 
-template<class It> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceLimits, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceLimits, It, intType>{public:
 typedef ::VkPhysicalDeviceLimits value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void output(const ::VkPhysicalDeviceLimits &val, It &it){
@@ -156,7 +156,7 @@ zenith::util::ioconv::output_single(val.storageImageSampleCounts, it.append_valu
 };
 
 
-template<class It> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceProperties, It>{public:
+template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceProperties, It, intType>{public:
 typedef ::VkPhysicalDeviceProperties value_type;
 static const zenith::util::ioconv::NodeType node_type = zenith::util::ioconv::NodeType::COMPLEX;
 inline static void output(const ::VkPhysicalDeviceProperties &val, It &it){

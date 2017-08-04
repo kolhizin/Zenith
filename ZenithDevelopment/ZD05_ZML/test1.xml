@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<root>
+	<test1 />
+	<test2>
+		<test1 internal_value="DATA" />
+	</test2>
+</root>

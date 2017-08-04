@@ -12,6 +12,7 @@ namespace zenith
 			{
 				typename ObjectMap<char, char>::val_iterator it_;
 			public:
+				static const InternalType internal_type = InternalType::STRING;
 				inline output_objmap_value(typename ObjectMap<char, char>::val_iterator &it) : it_(it) {}
 				inline void set_value(const char * value)
 				{
@@ -33,6 +34,7 @@ namespace zenith
 				typedef output_objmap named_iterator;
 				static const IteratorType iterator_type = IteratorType::OUTPUT;
 				static const IteratorCategory iterator_cat = IteratorCategory::NONE;
+				static const InternalType internal_type = InternalType::STRING;
 
 				output_objmap() : impl_(nullptr) {}
 				output_objmap(ObjectMap<char, char> &objmap) : impl_(&objmap) {}

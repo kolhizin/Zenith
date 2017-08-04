@@ -20,7 +20,7 @@ namespace zenith
 			std::string name;
 			std::vector<std::string> requiredExtensions;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vLayerConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vLayerConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vLayerConfig value_type;
@@ -49,7 +49,7 @@ namespace zenith
 			zenith::version32_t engineVersion;
 			zenith::version32_t apiVersion;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vInstanceConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vInstanceConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vInstanceConfig value_type;
@@ -86,7 +86,7 @@ namespace zenith
 			vSamplerFilter mipFilter;
 			float maxAnisotropy;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerFilteringConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerFilteringConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vSamplerFilteringConfig value_type;
@@ -121,7 +121,7 @@ namespace zenith
 			vSamplerBorderType borderType;
 			bool normalizedCoord;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerAddressingConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerAddressingConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vSamplerAddressingConfig value_type;
@@ -159,7 +159,7 @@ namespace zenith
 			float maxLOD;
 			float biasLOD;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerLODConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSamplerLODConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vSamplerLODConfig value_type;
@@ -194,7 +194,7 @@ namespace zenith
 			float priority;
 			std::vector<zenith::util::nameid> aliases;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceQueueReqs, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceQueueReqs, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vDeviceQueueReqs value_type;
@@ -242,7 +242,7 @@ namespace zenith
 			std::vector<vLayerConfig> enabledLayers;
 			std::vector<std::string> requiredExtensions;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceReqs, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceReqs, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vDeviceReqs value_type;
@@ -275,7 +275,7 @@ namespace zenith
 			std::vector<vDeviceReqs> deviceReqs;
 			std::vector<std::string> deviceReqOrder;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vDeviceConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vDeviceConfig value_type;
@@ -300,7 +300,7 @@ namespace zenith
 			VkQueueFamilyProperties generalProperties;
 			zenith::util::nameid_seq supportedSurfaces;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vQueueFamilyProperties, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vQueueFamilyProperties, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vQueueFamilyProperties value_type;
@@ -313,7 +313,7 @@ namespace zenith
 			vSharingMode mode;
 			std::vector<std::string> queues;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSharingInfo, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSharingInfo, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vSharingInfo value_type;
@@ -340,7 +340,7 @@ namespace zenith
 			vImageFormat imageFormat;
 			std::vector<vImageUsageBit> imageUsage;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainReqs, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainReqs, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vSwapchainReqs value_type;
@@ -374,7 +374,7 @@ namespace zenith
 			std::vector<vSwapchainReqs> swapchainReqs;
 			std::vector<std::string> swapchainReqOrder;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSwapchainConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vSwapchainConfig value_type;
@@ -403,7 +403,7 @@ namespace zenith
 			zenith::util::nameid uid;
 			zenith::util::nameid windowUID;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSurfaceConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSurfaceConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vSurfaceConfig value_type;
@@ -429,7 +429,7 @@ namespace zenith
 			size_t minChunkSize;
 			size_t align;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPhysicalChunkConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPhysicalChunkConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vMemoryPhysicalChunkConfig value_type;
@@ -461,7 +461,7 @@ namespace zenith
 			size_t align;
 			uint32_t subTypeMask;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryLogicalChunkConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryLogicalChunkConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vMemoryLogicalChunkConfig value_type;
@@ -491,7 +491,7 @@ namespace zenith
 			vMemoryPhysicalChunkConfig physicalChunk;
 			std::vector<vMemoryLogicalChunkConfig> logicalChunk;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPoolConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryPoolConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vMemoryPoolConfig value_type;
@@ -521,7 +521,7 @@ namespace zenith
 			zenith::util::ExtendedBitMask isLazy;
 			zenith::util::nameid poolUID;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryTypeConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryTypeConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vMemoryTypeConfig value_type;
@@ -559,7 +559,7 @@ namespace zenith
 		{
 			std::vector<vMemoryPropertyBit> memoryPropertyBit;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageOption, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageOption, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vMemoryUsageOption value_type;
@@ -580,7 +580,7 @@ namespace zenith
 			vMemoryUsage usage;
 			std::vector<vMemoryUsageOption> memoryUsageOption;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryUsageConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vMemoryUsageConfig value_type;
@@ -604,7 +604,7 @@ namespace zenith
 			std::vector<vMemoryTypeConfig> memoryType;
 			std::vector<vMemoryUsageConfig> memoryUsage;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryManagerConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryManagerConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vMemoryManagerConfig value_type;
@@ -632,7 +632,7 @@ namespace zenith
 			std::vector<vMemoryManagerConfig> memoryManager;
 			std::vector<std::string> memoryManagerReqOrder;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vMemoryConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vMemoryConfig value_type;
@@ -664,7 +664,7 @@ namespace zenith
 			std::vector<vSurfaceConfig> surface;
 			std::vector<vSwapchainConfig> swapchain;
 		};
-		template<class It> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSystemConfig, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<zenith::vulkan::vSystemConfig, It, intType>
 		{
 		public:
 			typedef zenith::vulkan::vSystemConfig value_type;

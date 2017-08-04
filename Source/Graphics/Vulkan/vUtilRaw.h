@@ -14,7 +14,7 @@ namespace zenith
 {
 	namespace vulkan
 	{
-		template<class It> class zenith::util::ioconv::io_handler_impl<::VkLayerProperties, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<::VkLayerProperties, It, intType>
 		{
 		public:
 			typedef ::VkLayerProperties value_type;
@@ -29,7 +29,7 @@ namespace zenith
 		};
 
 
-		template<class It> class zenith::util::ioconv::io_handler_impl<::VkExtensionProperties, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<::VkExtensionProperties, It, intType>
 		{
 		public:
 			typedef ::VkExtensionProperties value_type;
@@ -42,7 +42,7 @@ namespace zenith
 		};
 
 
-		template<class It> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceLimits, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceLimits, It, intType>
 		{
 		public:
 			typedef ::VkPhysicalDeviceLimits value_type;
@@ -167,7 +167,7 @@ namespace zenith
 		};
 
 
-		template<class It> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceProperties, It>
+		template<class It, zenith::util::ioconv::InternalType intType> class zenith::util::ioconv::io_handler_impl<::VkPhysicalDeviceProperties, It, intType>
 		{
 		public:
 			typedef ::VkPhysicalDeviceProperties value_type;

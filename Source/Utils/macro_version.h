@@ -32,8 +32,8 @@ namespace zenith
 		operator uint32_t() const { return version; }
 	};
 
-	template<class It>
-	class zenith::util::ioconv::io_handler_impl<zenith::version32_t, It>
+	template<class It, zenith::util::ioconv::InternalType intType>
+	class zenith::util::ioconv::io_handler_impl<zenith::version32_t, It, intType>
 	{
 	public:
 		inline static void input(zenith::version32_t &val, const It &it)

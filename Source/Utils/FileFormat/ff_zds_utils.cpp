@@ -2,7 +2,46 @@
 #include <algorithm>
 #include <unordered_map>
 
-zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format::zDataStorage::add_chunk_(uint32_t parentIDX, const char * tag, uint64_t data_size, ZChunk16B_ZDSEntry ** chunkPtr, uint32_t * chunkLnk)
+void zenith::util::zfile_format::zDataStorage::resize_chunks_(uint32_t newNumChunks)
+{
+	ZChunk16B_ZDSEntry * newChunks = new ZChunk16B_ZDSEntry[newNumChunks];
+	if (chunks_)
+	{
+		uint32_t copySize = newNumChunks;
+		if (numChunks_ < newNumChunks)
+			copySize = numChunks_;
+		memcpy_s(newChunks, copySize * sizeof(ZChunk16B_ZDSEntry), chunks_, copySize * sizeof(ZChunk16B_ZDSEntry));
+		if (isOwner_)
+			delete[] chunks_;
+	}
+	chunks_ = newChunks;
+	capacityChunks_ = newNumChunks;
+	if (numChunks_ > capacityChunks_)
+		numChunks_ = capacityChunks_;
+	isOwner_ = true;
+}
+
+void zenith::util::zfile_format::zDataStorage::resize_heap_(uint64_t newHeapSize)
+{
+	newHeapSize = ((newHeapSize >> 4) + 1) << 4; //align on 16 bytes
+	uint8_t * tmp = new uint8_t[newHeapSize];
+	if (dataHeap_)
+	{
+		uint64_t copySize = newHeapSize;
+		if (dataHeapSize_ < newHeapSize)
+			copySize = dataHeapSize_;
+		memcpy_s(tmp, copySize, dataHeap_, copySize);
+		if (isOwner_)
+			delete[]dataHeap_;
+	}
+	dataHeap_ = tmp;
+	dataHeapCapacity_ = newHeapSize;
+	if (dataHeapSize_ > dataHeapCapacity_)
+		dataHeapSize_ = dataHeapCapacity_;
+	isOwner_ = true;
+}
+
+zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format::zDataStorage::add_chunk_(uint32_t parentIDX, const char * tag, uint64_t data_size, bool isAttribute, ZDSDataBaseType type, ZChunk16B_ZDSEntry ** chunkPtr, uint32_t * chunkLnk)
 {
 	bool isInplace = false;
 	TaskResult_ res = TaskResult_::UNDEF;
@@ -26,22 +65,22 @@ zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format
 	ZChunk16B_ZDSEntry * ptr = get_free_entry_();
 	if (data_size > 10)
 	{
-		*ptr = ZChunk16B_ZDSEntry::onheapEntry(dataHeapSize_, data_size, tagId, depth, false);
+		*ptr = ZChunk16B_ZDSEntry::onheapEntry(dataHeapSize_, data_size, tagId, depth, isAttribute, type);
 		dataHeapSize_ += data_size;
 	}
 	else
-		*ptr = ZChunk16B_ZDSEntry::inplaceEntry(data_size, tagId, depth, false);
+		*ptr = ZChunk16B_ZDSEntry::inplaceEntry(data_size, tagId, depth, isAttribute, type);
 	if (chunkPtr)
 		*chunkPtr = ptr;
 
 	ChunkLink_ lnk0;
-	lnk0.chunkIdx_ = ptr - chunks_;
+	lnk0.chunkIdx_ = static_cast<uint32_t>(ptr - chunks_);
 	lnk0.parentIdx_ = NoIDX;
 	lnk0.firstChildIdx_ = NoIDX;
 	lnk0.lastChildIdx_ = NoIDX;
 	lnk0.prevIdx_ = NoIDX;
 	lnk0.nextIdx_ = NoIDX;
-	uint32_t curIDX = chunksLinks_.size();
+	uint32_t curIDX = static_cast<uint32_t>(chunksLinks_.size());
 	if (chunkLnk)
 		*chunkLnk = curIDX;
 	chunksLinks_.push_back(lnk0);
@@ -117,6 +156,22 @@ zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format
 	return TaskResult_::SUCCESS;
 }
 
+zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format::zDataStorage::reset_chunk_size_impl_(uint32_t chunkIDX, uint64_t new_size)
+{
+	ZChunk16B_ZDSEntry * p = &chunks_[chunkIDX];
+	if (new_size > 10)
+	{
+		if (new_size + dataHeapSize_ > dataHeapCapacity_)
+			return TaskResult_::OUT_OF_MEM_DATA;
+		uint64_t offset = dataHeapSize_;
+		dataHeapSize_ += new_size;
+		p->reset_onheap(offset, new_size);
+	}
+	else
+		p->reset_inplace(new_size);
+	return TaskResult_::SUCCESS;
+}
+
 void zenith::util::zfile_format::zDataStorage::traverse_links_to_find_used_(uint32_t lnkIDX, std::vector<bool>& uchunks, std::vector<bool>& ulinks)
 {
 	if (lnkIDX == NoIDX)
@@ -124,7 +179,7 @@ void zenith::util::zfile_format::zDataStorage::traverse_links_to_find_used_(uint
 	if (chunksLinks_[lnkIDX].chunkIdx_ == NoIDX)
 		return;
 	ulinks[lnkIDX] = true;
-	ulinks[chunksLinks_[lnkIDX].chunkIdx_] = true;
+	uchunks[chunksLinks_[lnkIDX].chunkIdx_] = true;
 	uint32_t curIDX = chunksLinks_[lnkIDX].firstChildIdx_;
 	uint32_t lstIDX = chunksLinks_[lnkIDX].lastChildIdx_;
 	while (curIDX != lstIDX)
@@ -218,7 +273,7 @@ zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format
 
 																 //1 move links
 	uint32_t numLinks = 0, rootId = NoIDX;
-	for (uint32_t i = 0, j = usedChunkLinks.size() - 1; i < j; i++, numLinks++)
+	for (uint32_t i = 0, j = static_cast<uint32_t>(usedChunkLinks.size() - 1); i <= j; i++, numLinks++)
 	{
 		if (usedChunkLinks[i])
 		{
@@ -245,9 +300,9 @@ zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format
 	{
 		if (numLinks + 1 > chunksLinks_.size())
 			chunksLinks_.push_back(ChunkLink_());
-		move_link_(0, chunksLinks_.size() - 1);
+		move_link_(0, static_cast<uint32_t>(chunksLinks_.size() - 1));
 		move_link_(rootId, 0);
-		move_link_(chunksLinks_.size() - 1, rootId);
+		move_link_(static_cast<uint32_t>(chunksLinks_.size() - 1), rootId);
 	}
 	chunksLinks_.resize(numLinks);
 
@@ -270,6 +325,8 @@ zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format
 		uint64_t size = 0;
 		uint32_t chunkId = NoIDX;
 
+		inline DataMap(uint64_t offset = 0, uint64_t size = 0, uint32_t id = NoIDX) : offset(offset), size(size), chunkId(id) {}
+
 		inline bool operator <(const DataMap & oth) const { return offset < oth.offset; }
 	};
 	if (numChunks_ == 0)
@@ -285,6 +342,8 @@ zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format
 		dataMap.emplace_back(chunks_[i].heap_offset(), chunks_[i].size(), i);
 		fullSize += chunks_[i].size();
 	}
+	if (dataMap.empty())
+		return TaskResult_::SUCCESS;
 	//sort data map
 	std::sort(dataMap.begin(), dataMap.end());
 	//check data map
@@ -324,7 +383,7 @@ zenith::util::zfile_format::zDataStorage::TaskResult_ zenith::util::zfile_format
 	std::unordered_map<uint16_t, uint16_t> usedTags; usedTags.reserve(tags_.size());
 	uint16_t numUsedTags = 0;
 	for (uint32_t i = 0; i < numChunks_; i++)
-		if (usedTags.find(chunks_[i].tagId) == usedTags.end())
+		if (usedTags.find(chunks_[i].tagId()) == usedTags.end())
 			usedTags.insert(std::pair<uint16_t, uint16_t>(chunks_[i].tagId(), numUsedTags++));
 
 	for (auto it = tags_.begin(); it != tags_.end(); ++it)
@@ -384,7 +443,11 @@ void zenith::util::zfile_format::zDataStorage::update_tag_names_() const
 {
 	tagNames_.clear(); tagNames_.resize(tags_.size());
 	for (auto it = tags_.begin(); it != tags_.end(); ++it)
+	{
+		//auto tmp_v = it.value(); //tag-id
+		//auto tmp_k = it.key(); //tag-name
 		tagNames_[it.value()] = it.key();
+	}
 }
 
 void zenith::util::zfile_format::zDataStorage::update_tag_heap_()
@@ -399,7 +462,7 @@ void zenith::util::zfile_format::zDataStorage::update_tag_heap_()
 	std::vector<uint32_t> offsets_(tags_.size(), 0);
 	for (auto it = tags_.begin(); it != tags_.end(); ++it)
 	{
-		sizes_[it.value()] = std::strlen(it.key()) + 1;
+		sizes_[it.value()] = static_cast<uint32_t>(std::strlen(it.key()) + 1);
 		names_[it.value()] = it.key();
 	}
 	for (uint32_t i = 0; i < sizes_.size(); i++)
@@ -407,7 +470,7 @@ void zenith::util::zfile_format::zDataStorage::update_tag_heap_()
 		offsets_[i] = totalLength;
 		totalLength += sizes_[i];
 	}
-	uint32_t tblSize = 4 * sizes_.size();
+	uint32_t tblSize = 4 * static_cast<uint32_t>(sizes_.size());
 
 	tmpTagHeapSize_ = tblSize + totalLength;
 	tmpTagHeap_ = new uint8_t[tmpTagHeapSize_];
@@ -426,8 +489,13 @@ zenith::util::zfile_format::zDataStorage::~zDataStorage()
 	clear_();
 }
 
-zenith::util::zfile_format::zDataStorage::zDataStorage(uint32_t chunksCapacity, uint32_t heapCapacity)
+zenith::util::zfile_format::zDataStorage::zDataStorage(const char * root_tag, uint32_t root_size, uint32_t chunksCapacity, uint64_t heapCapacity)
 {
+	if (root_size > heapCapacity)
+		heapCapacity = root_size;
+	if (chunksCapacity == 0)
+		chunksCapacity = 1;
+
 	tmpTagHeap_ = nullptr;
 	capacityChunks_ = chunksCapacity;
 	numChunks_ = 0;
@@ -439,7 +507,9 @@ zenith::util::zfile_format::zDataStorage::zDataStorage(uint32_t chunksCapacity, 
 	dataHeapSize_ = 0;
 
 	isOwner_ = true;
+	maxTagId_ = 0;
 
+	append_(NoIDX, root_tag, root_size);
 }
 
 zenith::util::zfile_format::zDataStorage::zDataStorage(const zDataStorageDescription & descr, DataOwnership ownership)
@@ -479,11 +549,11 @@ zenith::util::zfile_format::zDataStorage::zDataStorage(const zDataStorageDescrip
 	}
 
 	uint32_t * tagTable = reinterpret_cast<uint32_t *>(descr.tagHeap);
-	char * tagHeap = reinterpret_cast<char *>(descr.tagHeap + 4 * uint32_t(descr.numTags));
+	const char * tagHeap = reinterpret_cast<char *>(descr.tagHeap);// +4 * uint32_t(descr.numTags));
 	for (uint32_t i = 0; i < descr.numTags; i++)
 	{
 		uint32_t off = tagTable[i];
-		char * name = &tagHeap[off];
+		const char * name = &tagHeap[off];
 		tags_.insert(std::pair<const char *, uint32_t>(name, i));
 	}
 	maxTagId_ = descr.numTags;
@@ -588,7 +658,7 @@ zenith::util::zfile_format::zDataStorage & zenith::util::zfile_format::zDataStor
 
 zenith::util::zfile_format::zDataStorage zenith::util::zfile_format::zDataStorage::clone() const
 {
-	zDataStorage res(capacityChunks_, dataHeapCapacity_);
+	zDataStorage res(root().tag_name(), static_cast<uint32_t>(root().size()), capacityChunks_, dataHeapCapacity_);
 
 	res.chunksLinks_ = chunksLinks_;
 	memcpy_s(res.chunks_, res.capacityChunks_ * sizeof(ZChunk16B_ZDSEntry), chunks_, capacityChunks_ * sizeof(ZChunk16B_ZDSEntry));
@@ -632,6 +702,7 @@ zenith::util::zfile_format::zDataStorageDescription zenith::util::zfile_format::
 	res.numChunks = numChunks_;
 	res.tagHeap = tmpTagHeap_;
 	res.tagHeapSize = tmpTagHeapSize_;
+	res.numTags = tags_.size();
 	res.dataHeap = dataHeap_;
 	res.dataHeapSize = dataHeapSize_;
 
